@@ -1,2 +1,8 @@
 # zookeeper test deployment
 zkconf/
+
+# python
+*.pyc
+
+# vim
+# .*.swp
