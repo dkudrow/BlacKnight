@@ -5,4 +5,10 @@ zkconf/
 *.pyc
 
 # vim
-# .*.swp
+.*.swp
+
+# pycharm
+.idea/
+
+# tests
+test/

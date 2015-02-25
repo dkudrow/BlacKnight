@@ -1,6 +1,6 @@
 import logging
 from kazoo.client import KazooClient, KazooState
-from kazoo.protocol.states import EventType
+from kazoo.protocol.states import EventType, WatchedEvent
 from socket import gethostname
 import sys
 
@@ -29,16 +29,16 @@ class ZKClient(object):
     """
 
     def __init__(self, port='2181', ensemble_path='/ensemble',
-            elect_path='/elect'):
+                 elect_path='/elect'):
         self._init_logger()
         # self._local_server = gethostname() + ':' + str(port)
         self._is_leader = False
         self._local_server = 'localhost' + ':' + str(port)
         self._ensemble_path = ensemble_path
         self._elect_path = elect_path
-        self.debug('Local server: \'%s\'' % (self._local_server))
-        self.debug('Ensemble znode: \'%s\'' % (self._ensemble_path))
-        self.debug('Election znode: \'%s\'' % (self._elect_path))
+        self.debug('Local server: \'%s\'' % self._local_server)
+        self.debug('Ensemble znode: \'%s\'' % self._ensemble_path)
+        self.debug('Election znode: \'%s\'' % self._elect_path)
 
         # Start the client
         self._client = KazooClient(self._local_server)
@@ -48,7 +48,7 @@ class ZKClient(object):
         # Add local ZooKeeper server to ensemble
         ensemble_znode = self._ensemble_path + '/' + self._local_server
         self._client.create(ensemble_znode, ephemeral=True, makepath=True)
-        self.debug('\'%s\' added to ensemble' % (self._local_server))
+        self.debug('\'%s\' added to ensemble' % self._local_server)
 
         # Join the election
         self._election = self._client.Election(self._elect_path)
@@ -58,16 +58,17 @@ class ZKClient(object):
         def watch_ensemble(event):
             # Watchers cannot be unregistered so we must ensure that only
             # the watcher created by the leader is triggered
-            #is_connected = self._client.state == KazooState.CONNECTED
+            # is_connected = self._client.state == KazooState.CONNECTED
             if event.type == EventType.CHILD and self._is_leader:
-                ensemble = self._client.get_children(self._ensemble_path,
-                                                    watch=watch_ensemble)
-                self.info('Detected change in ensemble: %s' %
-                        (reduce(lambda a, b: a + ' ' + b, ensemble)))
+                ensemble = self._client.get_children(event.path,
+                                                     watch=watch_ensemble)
+                ensemble = reduce(lambda a, b: a + ',' + b, ensemble)
+                self.info('Detected change in ensemble: %s' % ensemble)
+                self._client.reconfig('', '', ensemble)
 
         self.info('Elected leader')
         self._is_leader = True
-        self._client.get_children(self._ensemble_path, watch=watch_ensemble)
+        watch_ensemble(WatchedEvent(EventType.CHILD, None, self._ensemble_path))
         while True:
             cmd = raw_input('> ')
             if cmd == 'help':
@@ -110,13 +111,14 @@ class ZKClient(object):
         self.debug('Joining election')
         self._is_leader = False
         self._election.run(self._lead)
+        self._client.stop()
 
     # Reset the client connection
     def reset(self):
-        self._client.stop()
         self._client.start()
         ensemble_znode = self._ensemble_path + '/' + self._local_server
         self._client.create(ensemble_znode, ephemeral=True, makepath=True)
+        self.join_election()
 
     # Stop the client connection
     def stop(self):
@@ -124,9 +126,11 @@ class ZKClient(object):
 
 
 if __name__ == '__main__':
+    logging.basicConfig()
+
     if len(sys.argv) < 2:
-        port = 2181
+        port = '2181'
     else:
-        port = int(sys.argv[1])
+        port = sys.argv[1]
 
     zkc = ZKClient(port=port)
