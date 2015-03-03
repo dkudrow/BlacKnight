@@ -50,6 +50,8 @@ class ZKClient(object):
         self._client.create(ensemble_znode, ephemeral=True, makepath=True)
         self.debug('\'%s\' added to ensemble' % self._local_server)
 
+        self._set_roles()
+
         # Join the election
         self._election = self._client.Election(self._elect_path)
         self.join_election()
@@ -64,7 +66,7 @@ class ZKClient(object):
                                                      watch=watch_ensemble)
                 ensemble = reduce(lambda a, b: a + ',' + b, ensemble)
                 self.info('Detected change in ensemble: %s' % ensemble)
-                self._client.reconfig('', '', ensemble)
+                # self._client.reconfig('', '', ensemble)
 
         self.info('Elected leader')
         self._is_leader = True
@@ -72,13 +74,26 @@ class ZKClient(object):
         while True:
             cmd = raw_input('> ')
             if cmd == 'help':
-                print '\thelp -- this message'
-                print '\tfail -- simulate failover'
+                print '\thelp  -- this message'
+                print '\tfail  -- simulate failover'
+                print '\tquery -- print current deployment state'
             elif cmd == 'fail':
                 print 'Simulating failover'
                 return
+            elif cmd == 'query':
+                print 'Current deployment state:'
+                print self.query()
 
-    # Initialize logger
+    def query(self):
+        state = {}
+        ensemble = self._client.get_children(self._ensemble_path)
+        for node in ensemble:
+            state[node] = []
+            roles = self._client.get(self._ensemble_path + '/' + node)[0]
+            for role in roles.split():
+                state[node].append(role)
+        return state
+
     def _init_logger(self, level=logging.DEBUG, logfile=''):
         # Formatter
         formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
@@ -105,6 +120,23 @@ class ZKClient(object):
     ###############
     #   TESTING   #
     ###############
+
+    def _set_roles(self):
+        port = self._local_server[-4:]
+        if port == '2181':
+            value = 'primary_head'
+        elif port == '2182':
+            value = 'secondary_head'
+        elif port == '2183':
+            value = 'nc hadoop hadoop'
+        elif port == '2184':
+            value = 'nc hadoop hadoop'
+        elif port == '2185':
+            value = 'nc hadoop hadoop'
+        else:
+            print 'Bad port!'
+            return
+        self._client.set(self._ensemble_path + '/' + self._local_server, value)
 
     # Join the election
     def join_election(self):

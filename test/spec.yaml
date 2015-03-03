@@ -25,4 +25,4 @@ hadoop:
   start_hook: null
   stop_hook: null
   deps:
-    - nc: 2
+    - [nc, 2]
