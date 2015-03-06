@@ -28,8 +28,13 @@ class ZKClient(object):
 
     """
 
-    def __init__(self, port='2181', ensemble_path='/ensemble',
-                 elect_path='/elect'):
+    def __init__(self, port='2181', ensemble_path='/ensemble', elect_path='/elect'):
+        """
+
+        :param port: ZooKeeper port
+        :param ensemble_path: root znode for group membership
+        :param elect_path: root znode for leader election
+        """
         self._init_logger()
         # self._local_server = gethostname() + ':' + str(port)
         self._is_leader = False
@@ -57,6 +62,10 @@ class ZKClient(object):
         self.join_election()
 
     def _lead(self):
+        """
+
+        :return:
+        """
         def watch_ensemble(event):
             # Watchers cannot be unregistered so we must ensure that only
             # the watcher created by the leader is triggered
@@ -85,6 +94,10 @@ class ZKClient(object):
                 print self.query()
 
     def query(self):
+        """
+
+        :return:
+        """
         state = {}
         ensemble = self._client.get_children(self._ensemble_path)
         for node in ensemble:

@@ -11,6 +11,7 @@ class _Role(namedtuple('_Role', 'name min_nodes max_nodes start_hook stop_hook d
 
     pass
 
+
 class _Dep(namedtuple('_Dep', 'role ratio')):
     """
     A convenience class to keep track of dependencies between roles.
@@ -19,11 +20,11 @@ class _Dep(namedtuple('_Dep', 'role ratio')):
     @staticmethod
     def convert_list(deps):
         """
-        Convert a list of dependencies as they appear in the YAML
-        specification into a a list of _Dep objects.
+        Convert a list of dependencies as they appear in the YAML specification
+        into a list of _Dep instances.
 
         :param deps: list of two element lists containing role dependencies
-        :return:
+        :return: list of _Dep instances
         """
 
         if deps:
@@ -59,12 +60,12 @@ class Spec(object):
         """
         Creates a Spec object from a YAML file.
 
-        The YAML file is converted into a collection of _Role obects. The
-        minimum node counts for each role are automatically adjusted to meet all
-        dependencies.
+        The YAML file is converted into a collection of _Role instances. The
+        minimum node count for each role is automatically adjusted to
+        satisfy all dependencies.
 
-        :param filename:
-        :return:
+        :param str filename: YAML specifcation filename
+        :raises ValueError: if there is a problem with the specification
         """
 
         self._roles = {}
@@ -107,11 +108,13 @@ class Spec(object):
 
     def diff(self, state):
         """
-        :param state:
-        :return:
+        Compare the current deployment state to the specification to produce
+        a list of differences.
+
+        :param state: dict mapping nodes (by hostname) to roles
         """
         diffs = {}
-        for role in iter(self._roles):
+        for role in self._roles:
             diffs[role] = -self._roles[role].min_nodes
         for node in state:
             for role in state[node]:
