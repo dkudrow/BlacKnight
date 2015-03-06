@@ -111,15 +111,39 @@ class Spec(object):
         Compare the current deployment state to the specification to produce
         a list of differences.
 
-        :param state: dict mapping nodes (by hostname) to roles
+        The deployment state is provided as a dict mapping noes to role:
+            { 'hostname:port' : ['role_1', 'role_2', 'role_2'] }
+
+        Note that if a node is fulfilling multiple instances of the same
+        role, that role will repeat itself in the list.
+
+        :param state: dict mapping nodes to roles
         """
-        diffs = {}
+        node_count = {}
+        roles_below_min = []
+        roles_below_max = []
+        roles_above_min = []
+
+        # extract node count for each role
         for role in self._roles:
-            diffs[role] = -self._roles[role].min_nodes
-        for node in state:
-            for role in state[node]:
-                diffs[role] += 1
-        print diffs
+            node_count[role] = 0
+        for node in state.itervalues():
+            for role in node:
+                node_count[role] += 1
+
+        for name, count in node_count.iteritems():
+            role = self._roles[name]
+            if count < role.min_nodes:
+                roles_below_min.append(name)
+            if count < role.max_nodes:
+                roles_below_max.append(name)
+            if count > role.min_nodes:
+                roles_above_min.append(name)
+
+        print node_count
+        print roles_below_min
+        print roles_below_max
+        print roles_above_min
 
     def dump(self):
         for type_name in iter(self._roles):
@@ -132,7 +156,8 @@ if __name__ == '__main__':
     else:
         spec = Spec('spec.yaml')
 
-    state = {u'localhost:2182': ['secondary_head'], u'localhost:2183': ['nc', 'hadoop', 'hadoop'], u'localhost:2181': ['primary_head'], u'localhost:2184': ['nc', 'hadoop', 'hadoop'], u'localhost:2185': ['nc', 'hadoop', 'hadoop']}
+    state = {u'localhost:2183': ['nc', 'hadoop', 'hadoop'], u'localhost:2181': ['primary_head'], u'localhost:2184': ['nc', 'hadoop', 'hadoop'], u'localhost:2185': ['nc', 'hadoop', 'hadoop']}
+    # state = {u'localhost:2182': ['secondary_head'], u'localhost:2183': ['nc', 'hadoop', 'hadoop'], u'localhost:2181': ['primary_head'], u'localhost:2184': ['nc', 'hadoop', 'hadoop'], u'localhost:2185': ['nc', 'hadoop', 'hadoop']}
     spec.diff(state)
 
     spec.dump()
