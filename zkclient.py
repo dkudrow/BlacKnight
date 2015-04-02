@@ -1,7 +1,8 @@
-import logging
 from kazoo.client import KazooClient, KazooState
 from kazoo.protocol.states import EventType, WatchedEvent
+import logging
 from socket import gethostname
+from spec import Spec
 import sys
 
 
@@ -28,7 +29,8 @@ class ZKClient(object):
 
     """
 
-    def __init__(self, port='2181', ensemble_path='/ensemble', elect_path='/elect'):
+    def __init__(self, port='2181', ensemble_path='/ensemble',
+                 elect_path='/elect', spec_path='/spec'):
         """
 
         :param port: ZooKeeper port
@@ -36,24 +38,40 @@ class ZKClient(object):
         :param elect_path: root znode for leader election
         """
         self._init_logger()
-        # self._local_server = gethostname() + ':' + str(port)
         self._is_leader = False
-        self._local_server = 'localhost' + ':' + str(port)
+        # self._local_server = gethostname() + ':' + str(port)
+        self._local_zk = 'localhost' + ':' + str(port)
         self._ensemble_path = ensemble_path
         self._elect_path = elect_path
-        self.debug('Local server: \'%s\'' % self._local_server)
-        self.debug('Ensemble znode: \'%s\'' % self._ensemble_path)
-        self.debug('Election znode: \'%s\'' % self._elect_path)
+        self._spec_path = spec_path
+        self.debug('Local ZK server is \'%s\'' % self._local_zk)
+        self.debug('Ensemble znode is \'%s\'' % self._ensemble_path)
+        self.debug('Election znode is \'%s\'' % self._elect_path)
+        self.debug('Spec znode is \'%s\'' % self._elect_path)
 
-        # Start the client
-        self._client = KazooClient(self._local_server)
+        # Start the ZK client
+        self._client = KazooClient(self._local_zk)
         self._client.start()
         self.debug('Kazoo client started')
 
+        # Load the deployment specification
+        self._specs = []
+        children = sorted(self._client.get_children(self._spec_path))
+        if not children:
+            raise ValueError('could not find specifications in path \'%s\'' % self._spec_path)
+        spec_znodes = [self._spec_path + '/' + z for z in children]
+        for spec_znode in spec_znodes:
+            data, stat = self._client.get(spec_znode)
+            self._specs.append(Spec(data))
+            self.debug('Parsed \'%s\'' % spec_znode)
+
+        for spec in self._specs:
+            spec.dump()
+
         # Add local ZooKeeper server to ensemble
-        ensemble_znode = self._ensemble_path + '/' + self._local_server
+        ensemble_znode = self._ensemble_path + '/' + self._local_zk
         self._client.create(ensemble_znode, ephemeral=True, makepath=True)
-        self.debug('\'%s\' added to ensemble' % self._local_server)
+        self.debug('\'%s\' added to ensemble' % self._local_zk)
 
         self._set_roles()
 
@@ -74,7 +92,7 @@ class ZKClient(object):
                 ensemble = self._client.get_children(event.path,
                                                      watch=watch_ensemble)
                 ensemble = reduce(lambda a, b: a + ',' + b, ensemble)
-                self.info('Detected change in ensemble: %s' % ensemble)
+                self.info('Detected change in ensemble (%s)' % ensemble)
                 # self._client.reconfig('', '', ensemble)
 
         self.info('Elected leader')
@@ -135,7 +153,7 @@ class ZKClient(object):
     ###############
 
     def _set_roles(self):
-        port = self._local_server[-4:]
+        port = self._local_zk[-4:]
         if port == '2181':
             value = 'primary_head'
         elif port == '2182':
@@ -149,7 +167,7 @@ class ZKClient(object):
         else:
             print 'Bad port!'
             return
-        self._client.set(self._ensemble_path + '/' + self._local_server, value)
+        self._client.set(self._ensemble_path + '/' + self._local_zk, value)
 
     # Join the election
     def join_election(self):
@@ -161,7 +179,7 @@ class ZKClient(object):
     # Reset the client connection
     def reset(self):
         self._client.start()
-        ensemble_znode = self._ensemble_path + '/' + self._local_server
+        ensemble_znode = self._ensemble_path + '/' + self._local_zk
         self._client.create(ensemble_znode, ephemeral=True, makepath=True)
         self.join_election()
 
