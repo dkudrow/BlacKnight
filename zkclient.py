@@ -7,7 +7,8 @@ import sys
 
 
 class ZKClient(object):
-    """A ZooKeeper client that monitors the state of a Eucalyptus deployment
+    """
+    A ZooKeeper client that monitors the state of a Eucalyptus deployment
     for failures.
 
     This client participates in an ongoing leader election protocol. Each
@@ -26,13 +27,11 @@ class ZKClient(object):
         * reconfiguring the ZooKeeper ensemble;
         * monitoring the secondary head node, and
         * ceding the election when replacing a failed primary head node.
-
     """
 
     def __init__(self, port='2181', ensemble_path='/ensemble',
                  elect_path='/elect', spec_path='/spec'):
         """
-
         :param port: ZooKeeper port
         :param ensemble_path: root znode for group membership
         :param elect_path: root znode for leader election

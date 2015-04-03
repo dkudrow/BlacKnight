@@ -1,4 +1,5 @@
-from collections import namedtuple
+from action import Action
+from collections import namedtuple, Counter
 from math import ceil
 import sys
 import yaml
@@ -104,7 +105,7 @@ class Spec(object):
             if not isinstance(role.min_nodes, int):
                 raise ValueError('could not infer min_nodes for %s' % role.name)
 
-    def diff(self, current_state):
+    def diff(self, state):
         """
         Compare the current deployment state to the specification to produce
         a list of differences.
@@ -112,53 +113,22 @@ class Spec(object):
         The deployment state is provided as a dict mapping nodes to roles:
             { 'hostname:port' : ['role_1', 'role_2'] }
 
-        :param current_state: dict mapping nodes to roles
+        :param state: dict mapping nodes to roles
         """
 
-        actions = []
+        # get node count for each role
+        cur_roles = reduce(lambda x, y: x+y, state.itervalues())
+        roles = set([role.name for role in self._roles])
+        node_count = {name: cur_roles.count(name) for name in roles}
 
-        node_count = {}
+        # calculate node deficits and surplus
+        deficit = filter(lambda r: node_count[r] < self._roles[r].min_nodes, roles)
+        surplus = filter(lambda r: node_count[r] > self._roles[r].max_nodes, roles)
+        balanced = roles - deficit - surplus
 
-        while True:
-            deficit = surplus = submax = ''
-            node_count.clear()
+        ### TODO ###
 
-            # extract node count for each role
-            for role in self._roles:
-                node_count[role] = -1 * self._roles[role].min_nodes
-            for node in state.itervalues():
-                for role in node:
-                    node_count[role] += 1
-
-            # determine what action to take
-            for name, count in node_count.iteritems():
-                role = self._roles[name]
-
-                # find a pair of nodes that can exchange roles
-                if not deficit and count < role.min_nodes:
-                    deficit = name
-                elif not surplus and count > role.min_nodes:
-                    surplus = name
-
-                # find a role to add in case there is no deficit
-                if not submax and count < role.max_nodes:
-                    submax = name
-
-            ### FIXME TODO FIXME TODO ###
-
-            # there is a role deficit that we must balance
-            if deficit and not surplus:
-                # TODO deployment fails!
-                break
-            elif deficit and surplus:
-                # TODO create action
-                pass
-
-            # there are not role deficits so we must decide which role to add
-            elif not deficit:
-                pass
-
-    def dump(self):
+def dump(self):
         for type_name in iter(self._roles):
             print self._roles[type_name]
 
