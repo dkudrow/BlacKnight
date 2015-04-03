@@ -75,7 +75,7 @@ class Spec(object):
         try:
             spec = yaml.load(yaml_spec)
         except yaml.YAMLError:
-            raise ValueError('error reading spec file: \'%s\'' % filename)
+            raise ValueError('error reading YAML spec')
 
         # populate roles
         for role_name in iter(spec):
@@ -109,40 +109,54 @@ class Spec(object):
         Compare the current deployment state to the specification to produce
         a list of differences.
 
-        The deployment state is provided as a dict mapping noes to role:
-            { 'hostname:port' : ['role_1', 'role_2', 'role_2'] }
-
-        Note that if a node is fulfilling multiple instances of the same
-        role, that role will repeat itself in the list.
+        The deployment state is provided as a dict mapping nodes to roles:
+            { 'hostname:port' : ['role_1', 'role_2'] }
 
         :param current_state: dict mapping nodes to roles
         """
 
+        actions = []
+
         node_count = {}
 
-        def triage(state):
+        while True:
+            deficit = surplus = submax = ''
             node_count.clear()
 
             # extract node count for each role
             for role in self._roles:
-                node_count[role] = 0
+                node_count[role] = -1 * self._roles[role].min_nodes
             for node in state.itervalues():
                 for role in node:
                     node_count[role] += 1
 
-            # triage roles
+            # determine what action to take
             for name, count in node_count.iteritems():
                 role = self._roles[name]
-                if count < role.min_nodes:
-                    return name
 
-            return None
+                # find a pair of nodes that can exchange roles
+                if not deficit and count < role.min_nodes:
+                    deficit = name
+                elif not surplus and count > role.min_nodes:
+                    surplus = name
 
-        next = triage(current_state)
-        while next:
-            break
+                # find a role to add in case there is no deficit
+                if not submax and count < role.max_nodes:
+                    submax = name
 
-        print node_count
+            ### FIXME TODO FIXME TODO ###
+
+            # there is a role deficit that we must balance
+            if deficit and not surplus:
+                # TODO deployment fails!
+                break
+            elif deficit and surplus:
+                # TODO create action
+                pass
+
+            # there are not role deficits so we must decide which role to add
+            elif not deficit:
+                pass
 
     def dump(self):
         for type_name in iter(self._roles):
