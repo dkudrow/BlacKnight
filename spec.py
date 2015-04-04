@@ -118,29 +118,51 @@ class Spec(object):
 
         # get node count for each role
         cur_roles = reduce(lambda x, y: x+y, state.itervalues())
-        roles = set([role.name for role in self._roles])
-        node_count = {name: cur_roles.count(name) for name in roles}
+        node_count = {role: cur_roles.count(role) for role in self._roles}
 
         # calculate node deficits and surplus
-        deficit = filter(lambda r: node_count[r] < self._roles[r].min_nodes, roles)
-        surplus = filter(lambda r: node_count[r] > self._roles[r].max_nodes, roles)
-        balanced = roles - deficit - surplus
+        deficit = []
+        min_surplus = []
+        max_surplus = []
+        for name, role in self._roles.iteritems():
+            if node_count[name] < role.min_nodes:
+                deficit.append(name)
+            elif node_count[name] > role.min_nodes:
+                if role.max_nodes and node_count[name] <= role.max_nodes:
+                    min_surplus.append(name)
+                else:
+                    max_surplus.append(name)
 
-        ### TODO ###
+        print 'deficit: {0}'.format(deficit)
+        print 'min_surplus: {0}'.format(min_surplus)
+        print 'max_surplus: {0}'.format(max_surplus)
 
-def dump(self):
-        for type_name in iter(self._roles):
-            print self._roles[type_name]
+        for start_role in deficit:
+            if max_surplus:
+                stop_role = max_surplus.pop()
+            elif min_surplus:
+                stop_role = min_surplus.pop()
+            else:
+                action = Action.Abort()
+                return [action]
+            #TODO form action from start_role and stop_role
+
+        # FIXME
+        action = Action.NoAction()
+        return [action]
+
+    def dump(self):
+            for type_name in iter(self._roles):
+                print self._roles[type_name]
 
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        spec = Spec(sys.argv[1])
-    else:
-        spec = Spec('10_infrastructure.yaml')
+    spec = Spec(open('config/spec.d/10_infrastructure.yaml', 'r').read())
 
-    state = {u'localhost:2183': ['nc', 'hadoop', 'hadoop'], u'localhost:2181': ['primary_head'], u'localhost:2184': ['nc', 'hadoop', 'hadoop'], u'localhost:2185': ['nc', 'hadoop', 'hadoop']}
-    # state = {u'localhost:2182': ['secondary_head'], u'localhost:2183': ['nc', 'hadoop', 'hadoop'], u'localhost:2181': ['primary_head'], u'localhost:2184': ['nc', 'hadoop', 'hadoop'], u'localhost:2185': ['nc', 'hadoop', 'hadoop']}
+    state = {'localhost:2181': ['primary_head'],
+             'localhost:2182': ['secondary_head']}
+             #'localhost:2183': ['nc']}
+
     spec.diff(state)
 
     spec.dump()
