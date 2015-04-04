@@ -116,6 +116,8 @@ class Spec(object):
         :param state: dict mapping nodes to roles
         """
 
+        actions = []
+
         # get node count for each role
         cur_roles = reduce(lambda x, y: x+y, state.itervalues())
         node_count = {role: cur_roles.count(role) for role in self._roles}
@@ -126,30 +128,28 @@ class Spec(object):
         max_surplus = []
         for name, role in self._roles.iteritems():
             if node_count[name] < role.min_nodes:
-                deficit.append(name)
+                deficit.append(role)
             elif node_count[name] > role.min_nodes:
                 if role.max_nodes and node_count[name] <= role.max_nodes:
-                    min_surplus.append(name)
+                    min_surplus.append(role)
                 else:
-                    max_surplus.append(name)
+                    max_surplus.append(role)
 
-        print 'deficit: {0}'.format(deficit)
-        print 'min_surplus: {0}'.format(min_surplus)
-        print 'max_surplus: {0}'.format(max_surplus)
-
+        # generate a list of actions
         for start_role in deficit:
             if max_surplus:
                 stop_role = max_surplus.pop()
             elif min_surplus:
                 stop_role = min_surplus.pop()
             else:
-                action = Action.Abort()
-                return [action]
-            #TODO form action from start_role and stop_role
+                return [Action.Abort()]
 
-        # FIXME
-        action = Action.NoAction()
-        return [action]
+            # find node to repurpose
+            for node, roles in state.iteritems():
+                if stop_role.name in roles:
+                    actions.append(Action.Exchange(node, start_role, stop_role))
+
+        return actions
 
     def dump(self):
             for type_name in iter(self._roles):
