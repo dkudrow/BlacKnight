@@ -43,7 +43,7 @@ class Spec(object):
     roles a node can assume as well as how the different roles should be
     managed. The format is as follows:
 
-    --- # 10_infrastructure.yaml
+    --- # 10_infrastructure
     role_name:
         min_nodes:  <int>       # min. nodes needed for functional deployment
         max_nodes:  <int>       # max num. useful nodes (null indicates no max.)
@@ -157,12 +157,18 @@ class Spec(object):
 
 
 if __name__ == '__main__':
-    spec = Spec(open('config/spec.d/10_infrastructure.yaml', 'r').read())
+    spec = Spec(open('config/spec.d/10_infrastructure', 'r').read())
 
     state = {'localhost:2181': ['primary_head'],
              'localhost:2182': ['secondary_head']}
              #'localhost:2183': ['nc']}
 
-    spec.diff(state)
-
+    print 'Specification:'
     spec.dump()
+
+    print ''
+
+    print 'Actions:'
+    for a in spec.diff(state):
+        print ' *{0}'.format(a)
+

@@ -4,6 +4,7 @@ import logging
 from socket import gethostname
 from spec import Spec
 import sys
+from time import sleep
 
 
 class ZKClient(object):
@@ -29,7 +30,7 @@ class ZKClient(object):
         * ceding the election when replacing a failed primary head node.
     """
 
-    def __init__(self, port='2181', ensemble_path='/ensemble',
+    def __init__(self, port='2181', roles=None, ensemble_path='/ensemble',
                  elect_path='/elect', spec_path='/spec'):
         """
         :param port: ZooKeeper port
@@ -64,15 +65,15 @@ class ZKClient(object):
             self._specs.append(Spec(data))
             self.debug('Parsed \'%s\'' % spec_znode)
 
-        for spec in self._specs:
-            spec.dump()
-
         # Add local ZooKeeper server to ensemble
         ensemble_znode = self._ensemble_path + '/' + self._local_zk
         self._client.create(ensemble_znode, ephemeral=True, makepath=True)
         self.debug('\'%s\' added to ensemble' % self._local_zk)
 
-        self._set_roles()
+        # set node's IaaS-level role
+        if roles:
+            value = reduce(lambda x, y: x+y, roles)
+            self._client.set(self._ensemble_path + '/' + self._local_zk, value)
 
         # Join the election
         self._election = self._client.Election(self._elect_path)
@@ -80,6 +81,9 @@ class ZKClient(object):
 
     def _lead(self):
         """
+        This function is called by the deployment's newly elected leader. The
+        leader compares the current deployment state to the specification and
+        determines if and what action should be taken.
 
         :return:
         """
@@ -97,6 +101,15 @@ class ZKClient(object):
         self.info('Elected leader')
         self._is_leader = True
         watch_ensemble(WatchedEvent(EventType.CHILD, None, self._ensemble_path))
+        # FIXME wait for ephemeral nodes to vanish...
+        sleep(1)
+        for spec in self._specs:
+            state = self.query()
+            self.debug('State is %s' % state)
+            actions = spec.diff(state)
+            for action in actions:
+                print ' ***{0}'.format(action)
+
         while True:
             cmd = raw_input('> ')
             if cmd == 'help':
@@ -151,23 +164,6 @@ class ZKClient(object):
     #   TESTING   #
     ###############
 
-    def _set_roles(self):
-        port = self._local_zk[-4:]
-        if port == '2181':
-            value = 'primary_head'
-        elif port == '2182':
-            value = 'secondary_head'
-        elif port == '2183':
-            value = 'nc hadoop hadoop'
-        elif port == '2184':
-            value = 'nc hadoop hadoop'
-        elif port == '2185':
-            value = 'nc hadoop hadoop'
-        else:
-            print 'Bad port!'
-            return
-        self._client.set(self._ensemble_path + '/' + self._local_zk, value)
-
     # Join the election
     def join_election(self):
         self.debug('Joining election')
@@ -191,8 +187,11 @@ if __name__ == '__main__':
     logging.basicConfig()
 
     if len(sys.argv) < 2:
-        port = '2181'
+        zkc = ZKClient()
+    elif len(sys.argv) < 3:
+        port = sys.argv[1]
+        zkc = ZKClient(port=port)
     else:
         port = sys.argv[1]
-
-    zkc = ZKClient(port=port)
+        roles = sys.argv[2:]
+        zkc = ZKClient(port=port, roles=roles)

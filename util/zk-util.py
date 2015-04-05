@@ -2,6 +2,7 @@
 
 from kazoo.client import KazooClient
 from kazoo.exceptions import NoNodeError
+import os
 import sys
 
 
@@ -11,21 +12,31 @@ class ZKUtil(object):
         self._client = KazooClient(self._local_zk)
         self._client.start()
 
-    def put_file(self, args):
-        path = args[1]
-        filename = args[2]
+    def load_spec(self, args):
+        try:
+            local_path = args[1]
+        except IndexError:
+            local_path = './config/spec.d'
 
         try:
-            value = open(filename, 'r').read()
-        except IOError:
-            print 'Could not open file %s' % filename
+            zk_path = args[2]
+        except IndexError:
+            zk_path = '/spec'
 
-        try:
-            self._client.set(path, value)
-            print 'put contents of %s in %s' % (filename, path)
-        except NoNodeError:
-            self._client.create(path, value)
-            print 'created %s with contents of %s' % (path, filename)
+        for entry in os.listdir(local_path):
+            filename = local_path + '/' + entry
+            znode = zk_path + '/' + entry
+            try:
+                value = open(filename, 'r').read()
+            except IOError:
+                print 'Could not open file %s' % filename
+
+            try:
+                self._client.set(znode, value)
+                print 'put contents of %s in %s' % (filename, znode)
+            except NoNodeError:
+                self._client.create(znode, value)
+                print 'created %s with contents of %s' % (znode, filename)
 
 
 if __name__ == '__main__':

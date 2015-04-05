@@ -1,0 +1,20 @@
+primary_head:
+  min_nodes: 1
+  max_nodes: 1
+  start_hook: bin/start_primary_head
+  stop_hook: bin/stop_primary_head
+  deps:
+
+secondary_head:
+  min_nodes: 0
+  max_nodes: 1
+  start_hook: bin/start_secondary_head
+  stop_hook: bin/stop_secondary_head
+  deps:
+
+nc:
+  min_nodes: 1
+  max_nodes: ~
+  start_hook: bin/start_nc
+  stop_hook: bin/stop_nc
+  deps:
