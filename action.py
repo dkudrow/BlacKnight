@@ -1,5 +1,17 @@
 class Action(object):
     """
+    An action to be taken by a node in response to a change in deployment state.
+
+    An action has a type which determines how it is carried out by the node.
+    The types are,
+
+        1. AbortType: returned when the minimum specification cannot be
+           sustained by the current deployment state
+
+        2. NoActionType: returned when no change to the deployment is required
+
+        3. ExchangeType: returned when a node must be repurposed to another role
+
     """
 
     AbortType = -1
@@ -8,16 +20,34 @@ class Action(object):
 
     @staticmethod
     def Abort():
+        """
+        Convenience method to create a new AbortType Action.
+
+        :return: AbortType Action
+        """
         action = Action(Action.AbortType)
         return action
 
     @staticmethod
     def NoAction():
+        """
+        Convenience method to create a new NoActionType Action.
+
+        :return: NoActionType Action
+        """
         action = Action(Action.NoActionType)
         return action
 
     @staticmethod
     def Exchange(node, start_role, stop_role):
+        """
+        Convenience method to create a new ExchangeType Action.
+
+        :param node: name of node to be repurposed
+        :param start_role: node will adopt this role
+        :param stop_role: node will abandon this role
+        :return: ExchangeType Action
+        """
         action = Action(Action.ExchangeType)
         action._node = node
         action._start_hook = start_role.start_hook
@@ -25,6 +55,12 @@ class Action(object):
         return action
 
     def __init__(self, type):
+        """
+        Construct a new Action.
+
+        :param type: type of action to construct
+        :return: Action instance
+        """
         self._type = type
 
     def __str__(self):

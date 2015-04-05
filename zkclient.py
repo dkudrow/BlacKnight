@@ -14,7 +14,7 @@ class ZKClient(object):
 
     This client participates in an ongoing leader election protocol. Each
     physical machine of the Eucalyptus deployment runs one Client. The Client
-    roles in are organized as follows:
+    roles are organized as follows:
 
         * Primary head node -- does not participate in election
         * Secondary head node -- leader (winner of last election)
