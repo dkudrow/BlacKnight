@@ -30,7 +30,8 @@ class ZKClient(object):
         * ceding the election when replacing a failed primary head node.
     """
 
-    def __init__(self, port='2181', roles=None, ensemble_path='/ensemble',
+    def __init__(self, port='2181', primary_head=False,
+                 ensemble_path='/ensemble',
                  elect_path='/elect', spec_path='/spec'):
         """
         :param port: ZooKeeper port
@@ -70,10 +71,10 @@ class ZKClient(object):
         self._client.create(ensemble_znode, ephemeral=True, makepath=True)
         self.debug('\'%s\' added to ensemble' % self._local_zk)
 
-        # set node's IaaS-level role
-        if roles:
-            value = reduce(lambda x, y: x+y, roles)
-            self._client.set(self._ensemble_path + '/' + self._local_zk, value)
+        # If this is the primary head node initialize its role
+        if primary_head:
+            self._client.set(self._ensemble_path + '/' + self._local_zk,
+                             'primary_head')
 
         # Join the election
         self._election = self._client.Election(self._elect_path)
@@ -82,33 +83,32 @@ class ZKClient(object):
     def _lead(self):
         """
         This function is called by the deployment's newly elected leader. The
-        leader compares the current deployment state to the specification and
-        determines if and what action should be taken.
+        is responsible for listening for changes in the deployment,
+        determining what actions should be taken and then acting accordingly.
 
         :return:
         """
         def watch_ensemble(event):
             # Watchers cannot be unregistered so we must ensure that only
-            # the watcher created by the leader is triggered
-            # is_connected = self._client.state == KazooState.CONNECTED
+            # the watcher created by the leader is triggered (hence _is_leader)
             if event.type == EventType.CHILD and self._is_leader:
                 ensemble = self._client.get_children(event.path,
                                                      watch=watch_ensemble)
                 ensemble = reduce(lambda a, b: a + ',' + b, ensemble)
                 self.info('Detected change in ensemble (%s)' % ensemble)
                 # self._client.reconfig('', '', ensemble)
+                sleep(1)
+                for spec in self._specs:
+                    state = self.query()
+                    self.debug('State is %s' % state)
+                    actions = spec.diff(state)
+                    for action in actions:
+                        print ' ***{0}'.format(action)
 
         self.info('Elected leader')
         self._is_leader = True
         watch_ensemble(WatchedEvent(EventType.CHILD, None, self._ensemble_path))
         # FIXME wait for ephemeral nodes to vanish...
-        sleep(1)
-        for spec in self._specs:
-            state = self.query()
-            self.debug('State is %s' % state)
-            actions = spec.diff(state)
-            for action in actions:
-                print ' ***{0}'.format(action)
 
         while True:
             cmd = raw_input('> ')
@@ -193,5 +193,5 @@ if __name__ == '__main__':
         zkc = ZKClient(port=port)
     else:
         port = sys.argv[1]
-        roles = sys.argv[2:]
-        zkc = ZKClient(port=port, roles=roles)
+        primary = sys.argv[2] == 'primary'
+        zkc = ZKClient(port=port, primary_head=primary)

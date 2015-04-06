@@ -78,6 +78,14 @@ class Action(object):
         """
         self._type = type
 
+    def run(self):
+        """
+        Perform this action.
+
+        :return:
+        """
+        pass
+
     def __str__(self):
         if self._type == Action.AbortType:
             return 'Action(type=AbortType)'

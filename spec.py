@@ -108,20 +108,25 @@ class Spec(object):
     def diff(self, state):
         """
         Compare the current deployment state to the specification to produce
-        a list of differences.
+        a list of actions.
 
         The deployment state is provided as a dict mapping nodes to roles:
             { 'hostname:port' : ['role_1', 'role_2'] }
 
         :param state: dict mapping nodes to roles
+        :return: list of actions to executed
         """
 
         actions = []
 
         # get node count for each role
         cur_roles = reduce(lambda x, y: x+y, state.itervalues())
-        node_count = {role: cur_roles.count(role) for role in self._roles}
+        node_count = {r: cur_roles.count(r) for r in self._roles}
         empty_nodes = filter(lambda n: state[n] == [], state)
+
+        # Cannot proceed without a primary
+        if not node_count['primary_head']:
+            return [Action.Abort()]
 
         # calculate node deficits and surplus
         deficit = []
