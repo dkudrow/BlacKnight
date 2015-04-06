@@ -16,7 +16,8 @@ class Action(object):
 
     AbortType = -1
     NoActionType = 0
-    ExchangeType = 1
+    StartEmptyType = 1
+    ExchangeType = 2
 
     @staticmethod
     def Abort():
@@ -36,6 +37,20 @@ class Action(object):
         :return: NoActionType Action
         """
         action = Action(Action.NoActionType)
+        return action
+
+    @staticmethod
+    def StartEmpty(node, role):
+        """
+        Convenience method to create a new StartEmptyType Action.
+
+        :param node: name of node on which to start role
+        :param role: role that will be started on node
+        :return: StartEmptyType Action
+        """
+        action = Action(Action.StartEmptyType)
+        action._node = node
+        action._start_hook = role.start_hook
         return action
 
     @staticmethod
@@ -68,6 +83,9 @@ class Action(object):
             return 'Action(type=AbortType)'
         elif self._type == Action.NoAction:
             return 'Action(type=NoActionType)'
+        elif self._type == Action.StartEmptyType:
+            return 'Action(type=StartEmpty, node={0}, start_hook={' \
+                   '1})'.format(self._node, self._start_hook)
         elif self._type == Action.ExchangeType:
             return 'Action(type=Exchangetype, node={0}, start_hook={1}, ' \
                    'stop_hook={2})'.format(self._node, self._start_hook,

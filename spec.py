@@ -121,6 +121,7 @@ class Spec(object):
         # get node count for each role
         cur_roles = reduce(lambda x, y: x+y, state.itervalues())
         node_count = {role: cur_roles.count(role) for role in self._roles}
+        empty_nodes = filter(lambda n: state[n] == [], state)
 
         # calculate node deficits and surplus
         deficit = []
@@ -136,18 +137,25 @@ class Spec(object):
                     max_surplus.append(role)
 
         # generate a list of actions
-        for start_role in deficit:
+        for role in deficit:
+            if empty_nodes:
+                node = empty_nodes.pop()
+                action = Action.StartEmpty(node, role)
+                actions.append(action)
+                continue
+
             if max_surplus:
                 stop_role = max_surplus.pop()
             elif min_surplus:
                 stop_role = min_surplus.pop()
             else:
-                return [Action.Abort()]
+                actions.append(Action.Abort())
+                break
 
             # find node to repurpose
             for node, roles in state.iteritems():
                 if stop_role.name in roles:
-                    actions.append(Action.Exchange(node, start_role, stop_role))
+                    actions.append(Action.Exchange(node, role, stop_role))
 
         return actions
 
