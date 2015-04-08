@@ -65,16 +65,16 @@ class Action(object):
         return Action(Action.ExchangeType, node=node, start_role=start_role,
                       stop_role=stop_role)
 
-    def __init__(self, type, node=None, start_role=None, stop_role=None):
+    def __init__(self, action_type, node=None, start_role=None, stop_role=None):
         """
         Construct a new Action.
 
-        :param type: type of action to construct
+        :param action_type: type of action to construct
         :return: Action instance
         """
 
         log.add_logger(self)
-        self._type = type
+        self._type = action_type
         self._node = node
         self._start_role = start_role
         self._stop_role = stop_role
@@ -105,7 +105,7 @@ class Action(object):
     def __str__(self):
         if self._type == Action.AbortType:
             return 'Action(type=AbortType)'
-        elif self._type == Action.NoAction:
+        elif self._type == Action.NoActionType:
             return 'Action(type=NoActionType)'
         elif self._type == Action.StartEmptyType:
             return 'Action(type=StartEmpty, node={0}, start_hook={' \
@@ -115,3 +115,5 @@ class Action(object):
                    'stop_hook={2})'.format(self._node,
                                            self._start_role.start_hook,
                                            self._stop_role.stop_hook)
+        else:
+            return 'Action(type=InvalidType)'

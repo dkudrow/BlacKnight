@@ -12,8 +12,6 @@ def add_logger(c):
 
 
 def init_logger(name='farmcloud', level=logging.DEBUG, logfile=''):
-    # logging.basicConfig()
-
     formatter = logging.Formatter('%(levelname)s:%(message)s')
 
     handler = logging.FileHandler(logfile) if logfile else \

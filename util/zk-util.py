@@ -30,7 +30,7 @@ class ZKUtil(object):
         cur_roles, stat = self._client.get(path)
         cur_roles = cur_roles.split()
         cur_roles.remove(role)
-        cur_roles = reduce(lambda x, y: x+' '+y, cur_roles)
+        cur_roles = reduce(lambda x, y: x+' '+y, cur_roles, '')
         self._client.set(path, cur_roles)
 
     def load_spec(self, args):

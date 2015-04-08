@@ -139,20 +139,26 @@ class Spec(object):
         for name, role in self._roles.iteritems():
             if node_count[name] < role.min_nodes:
                 deficit.append(role)
-            elif node_count[name] > role.min_nodes:
+            # elif node_count[name] > role.min_nodes:
+            else:
                 if role.max_nodes and node_count[name] <= role.max_nodes:
                     min_surplus.append(role)
                 else:
                     max_surplus.append(role)
 
+        print "deficit:", [r.name for r in deficit]
+        print "min_surplus:", [r.name for r in min_surplus]
+        print "max_surplus:", [r.name for r in max_surplus]
+        print "empty_nodes:", empty_nodes
+
         # Generate a list of actions
+        # TODO multi role deficits
         for role in deficit:
             if empty_nodes:
                 node = empty_nodes.pop()
                 action = Action.StartEmpty(node, role)
                 actions.append(action)
                 continue
-
             if max_surplus:
                 stop_role = max_surplus.pop()
             elif min_surplus:
@@ -166,7 +172,22 @@ class Spec(object):
                 if stop_role.name in roles:
                     actions.append(Action.Exchange(node, role, stop_role))
 
-        # TODO actions for min_surplus roles
+        for role in min_surplus:
+            if empty_nodes:
+                node = empty_nodes.pop()
+                action = Action.StartEmpty(node, role)
+                actions.append(action)
+                continue
+            if max_surplus:
+                stop_role = max_surplus.pop()
+            else:
+                actions.append(Action.NoAction())
+                break
+
+            # Find node to repurpose
+            for node, roles in state.iteritems():
+                if stop_role.name in roles:
+                    actions.append(Action.Exchange(node, role, stop_role))
 
         return actions
 
