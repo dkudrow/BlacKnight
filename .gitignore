@@ -1,11 +1,14 @@
-# zookeeper test deployment
+# ZooKeeper test deployment
 zkconf/
 
-# python
+# Python
 *.pyc
 
-# vim
+# Vim
 .*.swp
 
-# pycharm
+# PyCharm
 .idea/
+
+# Sphinx generated docs
+sphinx-output/

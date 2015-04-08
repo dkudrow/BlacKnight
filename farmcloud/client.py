@@ -1,34 +1,29 @@
-from kazoo.client import KazooClient, KazooState
-from kazoo.protocol.states import EventType, WatchedEvent
-import logging
-import log
-from socket import gethostname
-from spec import Spec
 import sys
 from time import sleep
 
+from kazoo.client import KazooClient
+from kazoo.protocol.states import EventType, WatchedEvent
 
-class ZKClient(object):
+import log
+from farmcloud.spec import Spec
+
+
+class Client(object):
     """
-    A ZooKeeper client that monitors the state of a Eucalyptus deployment
-    for failures.
+    The client is responsible for monitoring the state of the deployment and
+    remediating in the case of failure.
 
-    This client participates in an ongoing leader election protocol. Each
-    physical machine of the Eucalyptus deployment runs one Client. The Client
-    roles are organized as follows:
+    Each client in the deployment participates in an election in which all
+    candidates block except for the current leader. The current leader is
+    tasked with listening for changes in the deployment and, in the event of
+    a change, making any changes necessary to maintain the specification.
 
-        * Primary head node -- does not participate in election
-        * Secondary head node -- leader (winner of last election)
-        * Node controllers -- candidates in current election
-
-    Candidates in the election block until they win an election, at which
-    point their _lead() function is executed. The _lead() function carries out
-    the responsibilities of the current leader including:
-
-        * monitoring group membership in the deployment, and
-        * reconfiguring the ZooKeeper ensemble;
-        * monitoring the secondary head node, and
-        * ceding the election when replacing a failed primary head node.
+    ZooKeeper is used to maintain the deployment state. Each client contains
+    a *KazooClient* to communicate with the ensemble. The default znode layout
+    is:
+        * */spec* - tiered deployment specifications (executed in ASCII order)
+        * */ensemble* - for each node in the deployment there is a znode containing a whitespace separated list of roles that it currently fulfills
+        * */elect* - used for by Kazoo for the leader election
     """
 
     def __init__(self, port='2181', primary_head=False,
@@ -36,6 +31,7 @@ class ZKClient(object):
                  elect_path='/elect', spec_path='/spec'):
         """
         :param port: ZooKeeper port
+        :param primary_head: True if this a the primary head node
         :param ensemble_path: root znode for group membership
         :param elect_path: root znode for leader election
         """
@@ -174,11 +170,11 @@ if __name__ == '__main__':
     log.init_logger()
 
     if len(sys.argv) < 2:
-        zkc = ZKClient()
+        zkc = Client()
     elif len(sys.argv) < 3:
         port = sys.argv[1]
-        zkc = ZKClient(port=port)
+        zkc = Client(port=port)
     else:
         port = sys.argv[1]
         primary = sys.argv[2] == 'primary'
-        zkc = ZKClient(port=port, primary_head=primary)
+        zkc = Client(port=port, primary_head=primary)

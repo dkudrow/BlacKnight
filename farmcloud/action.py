@@ -1,23 +1,26 @@
-import log
 import subprocess
+
+from farmcloud import log
 
 
 class Action(object):
     """
     An action to be taken by a node in response to a change in deployment state.
 
-    An action has a type which determines how it is carried out by the node.
+    Actions have a type which determines how they are carried out by the node.
     The types are,
 
-        1. AbortType: returned when the minimum specification cannot be
-           sustained by the current deployment state
+        1. AbortType: the minimum specification cannot be sustained by the
+           current deployment state
 
-        2. NoActionType: returned when no change to the deployment is required
+        2. NoActionType: no change to the deployment is required
 
-        3. ExchangeType: returned when a node must be repurposed to another role
+        3. StartEmptyType: a role is to be started on an empty node
+
+        4. ExchangeType: a node must be repurposed to another role
 
     """
-
+    # Action types
     AbortType = -1
     NoActionType = 0
     StartEmptyType = 1
@@ -70,9 +73,8 @@ class Action(object):
         Construct a new Action.
 
         :param action_type: type of action to construct
-        :return: Action instance
+        :return: Action
         """
-
         log.add_logger(self)
         self._type = action_type
         self._node = node
@@ -83,24 +85,33 @@ class Action(object):
         """
         Perform this action.
 
-        :return:
+        :return: True on success, False on failure
         """
-
-        # Run stop hooks
+        # Run stop hook
         if self._stop_role:
-            cmd = [self._stop_role.stop_hook, self._node]
+            cmd = self._stop_role.stop_hook
+            if self._node:
+                cmd.append(self._node)
             self.info('Running {0}'.format(cmd))
             try:
                 rc = subprocess.call(cmd)
-            except OSError:
-                self.error('Error running {0}'.format(cmd))
+            except OSError, e:
+                self.error('Error running {0} - {1}'.format(cmd, str(e)))
+                return False
+
+        # Run start hook
         if self._start_role:
-            cmd = [self._start_role.start_hook, self._node]
+            cmd = self._start_role.start_hook
+            if self._node:
+                cmd.append(self._node)
             self.info('Running {0}'.format(cmd))
             try:
                 rc = subprocess.call(cmd)
-            except OSError:
-                self.error('Error running {0}'.format(cmd))
+            except OSError, e:
+                self.error('Error running {0} - {1}'.format(cmd, str(e)))
+                return False
+
+        return True
 
     def __str__(self):
         if self._type == Action.AbortType:

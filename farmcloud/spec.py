@@ -1,9 +1,10 @@
-from action import Action
-from collections import namedtuple, Counter
-import log
+from collections import namedtuple
 from math import ceil
-import sys
+
 import yaml
+
+from action import Action
+from farmcloud import log
 
 
 class _Role(namedtuple('_Role', 'name min_nodes max_nodes start_hook stop_hook deps')):
