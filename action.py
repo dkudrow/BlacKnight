@@ -1,3 +1,7 @@
+import log
+import subprocess
+
+
 class Action(object):
     """
     An action to be taken by a node in response to a change in deployment state.
@@ -26,8 +30,7 @@ class Action(object):
 
         :return: AbortType Action
         """
-        action = Action(Action.AbortType)
-        return action
+        return Action(Action.AbortType)
 
     @staticmethod
     def NoAction():
@@ -36,8 +39,7 @@ class Action(object):
 
         :return: NoActionType Action
         """
-        action = Action(Action.NoActionType)
-        return action
+        return Action(Action.NoActionType)
 
     @staticmethod
     def StartEmpty(node, role):
@@ -48,10 +50,7 @@ class Action(object):
         :param role: role that will be started on node
         :return: StartEmptyType Action
         """
-        action = Action(Action.StartEmptyType)
-        action._node = node
-        action._start_hook = role.start_hook
-        return action
+        return Action(Action.StartEmptyType, node=node, start_role=role)
 
     @staticmethod
     def Exchange(node, start_role, stop_role):
@@ -63,20 +62,22 @@ class Action(object):
         :param stop_role: node will abandon this role
         :return: ExchangeType Action
         """
-        action = Action(Action.ExchangeType)
-        action._node = node
-        action._start_hook = start_role.start_hook
-        action._stop_hook = stop_role.stop_hook
-        return action
+        return Action(Action.ExchangeType, node=node, start_role=start_role,
+                      stop_role=stop_role)
 
-    def __init__(self, type):
+    def __init__(self, type, node=None, start_role=None, stop_role=None):
         """
         Construct a new Action.
 
         :param type: type of action to construct
         :return: Action instance
         """
+
+        log.add_logger(self)
         self._type = type
+        self._node = node
+        self._start_role = start_role
+        self._stop_role = stop_role
 
     def run(self):
         """
@@ -84,7 +85,22 @@ class Action(object):
 
         :return:
         """
-        pass
+
+        # Run stop hooks
+        if self._stop_role:
+            cmd = [self._stop_role.stop_hook, self._node]
+            self.info('Running {0}'.format(cmd))
+            try:
+                rc = subprocess.call(cmd)
+            except OSError:
+                self.error('Error running {0}'.format(cmd))
+        if self._start_role:
+            cmd = [self._start_role.start_hook, self._node]
+            self.info('Running {0}'.format(cmd))
+            try:
+                rc = subprocess.call(cmd)
+            except OSError:
+                self.error('Error running {0}'.format(cmd))
 
     def __str__(self):
         if self._type == Action.AbortType:
@@ -93,8 +109,9 @@ class Action(object):
             return 'Action(type=NoActionType)'
         elif self._type == Action.StartEmptyType:
             return 'Action(type=StartEmpty, node={0}, start_hook={' \
-                   '1})'.format(self._node, self._start_hook)
+                   '1})'.format(self._node, self._start_role.start_hook)
         elif self._type == Action.ExchangeType:
             return 'Action(type=Exchangetype, node={0}, start_hook={1}, ' \
-                   'stop_hook={2})'.format(self._node, self._start_hook,
-                                           self._stop_hook)
+                   'stop_hook={2})'.format(self._node,
+                                           self._start_role.start_hook,
+                                           self._stop_role.stop_hook)

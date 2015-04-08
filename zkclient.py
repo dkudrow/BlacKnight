@@ -1,6 +1,7 @@
 from kazoo.client import KazooClient, KazooState
 from kazoo.protocol.states import EventType, WatchedEvent
 import logging
+import log
 from socket import gethostname
 from spec import Spec
 import sys
@@ -38,7 +39,7 @@ class ZKClient(object):
         :param ensemble_path: root znode for group membership
         :param elect_path: root znode for leader election
         """
-        self._init_logger()
+        log.add_logger(self)
         self._is_leader = False
         # self._local_server = gethostname() + ':' + str(port)
         self._local_zk = 'localhost' + ':' + str(port)
@@ -88,27 +89,36 @@ class ZKClient(object):
 
         :return:
         """
+
+        # This method is called whenever a change is detected in the ensemble
         def watch_ensemble(event):
             # Watchers cannot be unregistered so we must ensure that only
             # the watcher created by the leader is triggered (hence _is_leader)
             if event.type == EventType.CHILD and self._is_leader:
-                ensemble = self._client.get_children(event.path,
-                                                     watch=watch_ensemble)
+                sleep(3) # FIXME wait for ephemeral nodes to vanish...
+                # reconfigure ZK
+                ensemble = self._client.get_children(event.path)
                 ensemble = reduce(lambda a, b: a + ',' + b, ensemble)
                 self.info('Detected change in ensemble (%s)' % ensemble)
                 # self._client.reconfig('', '', ensemble)
-                sleep(1)
+
+                # Query deployment state and generate list of actions
+                actions = []
+                state = self.query()
+                self.debug('Current state is %s' % state)
                 for spec in self._specs:
-                    state = self.query()
-                    self.debug('State is %s' % state)
-                    actions = spec.diff(state)
-                    for action in actions:
-                        print ' ***{0}'.format(action)
+                    actions += spec.diff(state)
+
+                # Perform actions generated from spec
+                for action in actions:
+                    action.run()
+
+                # Re-instate watcher
+                self._client.get_children(event.path, watch=watch_ensemble)
 
         self.info('Elected leader')
         self._is_leader = True
         watch_ensemble(WatchedEvent(EventType.CHILD, None, self._ensemble_path))
-        # FIXME wait for ephemeral nodes to vanish...
 
         while True:
             cmd = raw_input('> ')
@@ -137,29 +147,6 @@ class ZKClient(object):
                 state[node].append(role)
         return state
 
-    def _init_logger(self, level=logging.DEBUG, logfile=''):
-        # Formatter
-        formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
-
-        # Handler
-        if logfile == '':
-            handler = logging.StreamHandler()
-        else:
-            handler = logging.FileHandler(logfile)
-        handler.setFormatter(formatter)
-
-        # Logger
-        self._logger = logging.getLogger(__name__)
-        self._logger.setLevel(level)
-        self._logger.addHandler(handler)
-
-        # Shortcuts
-        self.debug = self._logger.debug
-        self.info = self._logger.info
-        self.warn = self._logger.warn
-        self.error = self._logger.error
-        self.critical = self._logger.critical
-
     ###############
     #   TESTING   #
     ###############
@@ -184,7 +171,7 @@ class ZKClient(object):
 
 
 if __name__ == '__main__':
-    logging.basicConfig()
+    log.init_logger()
 
     if len(sys.argv) < 2:
         zkc = ZKClient()

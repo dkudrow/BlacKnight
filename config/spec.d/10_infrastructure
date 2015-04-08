@@ -1,20 +1,20 @@
 primary_head:
   min_nodes: 1
   max_nodes: 1
-  start_hook: bin/start_primary_head
-  stop_hook: bin/stop_primary_head
+  start_hook:
+  stop_hook:
   deps:
 
 secondary_head:
   min_nodes: 0
   max_nodes: 1
-  start_hook: bin/start_secondary_head
-  stop_hook: bin/stop_secondary_head
+  start_hook: config/hooks/start_secondary.sh
+  stop_hook: config/hooks/stop_secondary.sh
   deps:
 
 nc:
   min_nodes: 1
   max_nodes: ~
-  start_hook: bin/start_nc
-  stop_hook: bin/stop_nc
+  start_hook: config/hooks/start_nc.sh
+  stop_hook: config/hooks/stop_nc.sh
   deps:

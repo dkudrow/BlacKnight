@@ -1,5 +1,6 @@
 from action import Action
 from collections import namedtuple, Counter
+import log
 from math import ceil
 import sys
 import yaml
@@ -70,15 +71,17 @@ class Spec(object):
         :raises ValueError: if there is a problem with the specification
         """
 
-        self._roles = {}
+        log.add_logger(self)
 
-        # open spec file
+        # Parse YAML
         try:
             spec = yaml.load(yaml_spec)
         except yaml.YAMLError:
             raise ValueError('error reading YAML spec')
 
-        # populate roles
+        # Extract roles
+        # FIXME why not just use result of yaml.load()?
+        self._roles = {}
         for role_name in iter(spec):
             try:
                 role = _Role(name=role_name,
@@ -92,7 +95,7 @@ class Spec(object):
                 raise ValueError('node type \'%s\' missing required field %s' %
                                  (role_name, key))
 
-        # infer min_node values based on dependencies
+        # Infer min_node values based on dependencies
         for depender in self._roles.itervalues():
             for dep in depender.deps:
                 dependee = self._roles[dep.role]
@@ -100,7 +103,7 @@ class Spec(object):
                 if not dependee.min_nodes or new_min > dependee.min_nodes:
                     self._roles[dep.role] = dependee._replace(min_nodes=new_min)
 
-        # check that all roles have min_nodes
+        # Check that all roles have min_nodes
         for role in self._roles.itervalues():
             if not isinstance(role.min_nodes, int):
                 raise ValueError('could not infer min_nodes for %s' % role.name)
@@ -119,16 +122,17 @@ class Spec(object):
 
         actions = []
 
-        # get node count for each role
+        # Get node count for each role
         cur_roles = reduce(lambda x, y: x+y, state.itervalues())
         node_count = {r: cur_roles.count(r) for r in self._roles}
         empty_nodes = filter(lambda n: state[n] == [], state)
 
         # Cannot proceed without a primary
+        # FIXME bootstrapping
         if not node_count['primary_head']:
             return [Action.Abort()]
 
-        # calculate node deficits and surplus
+        # Calculate node deficits and surplus
         deficit = []
         min_surplus = []
         max_surplus = []
@@ -141,7 +145,7 @@ class Spec(object):
                 else:
                     max_surplus.append(role)
 
-        # generate a list of actions
+        # Generate a list of actions
         for role in deficit:
             if empty_nodes:
                 node = empty_nodes.pop()
@@ -157,10 +161,12 @@ class Spec(object):
                 actions.append(Action.Abort())
                 break
 
-            # find node to repurpose
+            # Find node to repurpose
             for node, roles in state.iteritems():
                 if stop_role.name in roles:
                     actions.append(Action.Exchange(node, role, stop_role))
+
+        # TODO actions for min_surplus roles
 
         return actions
 
@@ -170,6 +176,8 @@ class Spec(object):
 
 
 if __name__ == '__main__':
+    log.init_logger()
+
     spec = Spec(open('config/spec.d/10_infrastructure', 'r').read())
 
     state = {'localhost:2181': ['primary_head'],
