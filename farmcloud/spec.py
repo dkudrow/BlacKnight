@@ -1,3 +1,6 @@
+"""
+Deployment Specification
+"""
 from collections import namedtuple
 from math import ceil
 

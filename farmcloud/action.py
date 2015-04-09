@@ -1,3 +1,6 @@
+"""
+Remediation Actions
+"""
 import subprocess
 
 from farmcloud import log
@@ -83,7 +86,7 @@ class Action(object):
 
     def run(self):
         """
-        Perform this action.
+        Perform action by running relevant hooks.
 
         :return: True on success, False on failure
         """
