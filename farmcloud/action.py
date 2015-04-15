@@ -18,16 +18,16 @@ class Action(object):
 
         2. NoActionType: no change to the deployment is required
 
-        3. StartEmptyType: a role is to be started on an empty node
+        3. EmptyNodeType: a role is to be started on an empty node
 
-        4. ExchangeType: a node must be repurposed to another role
+        4. ExchangeNodeType: a node must be repurposed to another role
 
     """
     # Action types
     AbortType = -1
     NoActionType = 0
-    StartEmptyType = 1
-    ExchangeType = 2
+    EmptyNodeType = 1
+    ExchangeNodeType = 2
 
     @staticmethod
     def Abort():
@@ -48,32 +48,36 @@ class Action(object):
         return Action(Action.NoActionType)
 
     @staticmethod
-    def StartEmpty(node, role):
+    def EmptyNode(node, role):
         """
-        Convenience method to create a new StartEmptyType Action.
+        Convenience method to create a new EmptyNodeType Action.
 
         :param node: name of node on which to start role
         :param role: role that will be started on node
-        :return: StartEmptyType Action
+        :return: EmptyNodeType Action
         """
-        return Action(Action.StartEmptyType, node=node, start_role=role)
+        return Action(Action.EmptyNodeType, node=node, start_role=role)
 
     @staticmethod
-    def Exchange(node, start_role, stop_role):
+    def ExchangeNode(node, start_role, stop_role):
         """
-        Convenience method to create a new ExchangeType Action.
+        Convenience method to create a new ExchangeNodeType Action.
 
         :param node: name of node to be repurposed
         :param start_role: node will adopt this role
         :param stop_role: node will abandon this role
-        :return: ExchangeType Action
+        :return: ExchangeNodeType Action
         """
-        return Action(Action.ExchangeType, node=node, start_role=start_role,
+        return Action(Action.ExchangeNodeType, node=node, start_role=start_role,
                       stop_role=stop_role)
 
-    def __init__(self, action_type, node=None, start_role=None, stop_role=None):
+    def __init__(self, action_type, node=None, start_role=None,
+                 stop_role=None):
         """
-        Construct a new Action.
+        Construct a new Action. If the action is node aware (i.e. needs to be
+        run on a specific node) then specify the ``node`` keywords argument.
+        If it is left blank, it will be assumed that the start  hook does not
+        take a node as an argument.
 
         :param action_type: type of action to construct
         :return: Action
@@ -84,10 +88,12 @@ class Action(object):
         self._start_role = start_role
         self._stop_role = stop_role
 
-    def run(self):
+    def run(self, primary, cloud):
         """
         Perform action by running relevant hooks.
 
+        :param primary: hostname of primary node
+        :param cloud: hostname of cloud
         :return: True on success, False on failure
         """
         # Run stop hook
@@ -95,6 +101,9 @@ class Action(object):
             cmd = self._stop_role.stop_hook
             if self._node:
                 cmd.append(self._node)
+                cmd.append(primary)
+            else:
+                cmd.append(cloud)
             self.info('Running {0}'.format(cmd))
             try:
                 rc = subprocess.call(cmd)
@@ -107,6 +116,9 @@ class Action(object):
             cmd = self._start_role.start_hook
             if self._node:
                 cmd.append(self._node)
+                cmd.append(primary)
+            else:
+                cmd.append(cloud)
             self.info('Running {0}'.format(cmd))
             try:
                 rc = subprocess.call(cmd)
@@ -117,17 +129,23 @@ class Action(object):
         return True
 
     def __str__(self):
+        str = 'Action('
         if self._type == Action.AbortType:
-            return 'Action(type=AbortType)'
+            str += 'type=AbortType'
         elif self._type == Action.NoActionType:
-            return 'Action(type=NoActionType)'
-        elif self._type == Action.StartEmptyType:
-            return 'Action(type=StartEmpty, node={0}, start_hook={' \
-                   '1})'.format(self._node, self._start_role.start_hook)
-        elif self._type == Action.ExchangeType:
-            return 'Action(type=Exchangetype, node={0}, start_hook={1}, ' \
-                   'stop_hook={2})'.format(self._node,
-                                           self._start_role.start_hook,
-                                           self._stop_role.stop_hook)
+            str += 'type=NoActionType'
+        elif self._type == Action.EmptyNodeType:
+            str += 'StartEmpty'
+        elif self._type == Action.ExchangeNodeType:
+            str += 'ExchangeNodeType'
         else:
-            return 'Action(type=InvalidType)'
+            str += 'InvalidType'
+        if self._node:
+            str += ', node={0}'.format(self._node)
+        if self._start_role:
+            str += ', start_role={0}'.format(self._start_role.name)
+        if self._stop_role:
+            str += ', stop_role={0}'.format(self._stop_role.name)
+        str += ')'
+
+        return str

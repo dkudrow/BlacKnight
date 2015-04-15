@@ -25,6 +25,7 @@ class Client(object):
     ZooKeeper is used to maintain the deployment state. Each client
     contains a *KazooClient* ZooKeeper client to communicate with the
     ensemble. The default znode layout is:
+
         * */spec* - tiered deployment specifications (executed in ASCII order)
         * */ensemble* - for each node in the deployment there is a znode containing a whitespace separated list of roles that it currently fulfills
         * */elect* - used for by Kazoo for the leader election
@@ -94,7 +95,7 @@ class Client(object):
             # Watchers cannot be unregistered so we must ensure that only
             # the watcher created by the leader is triggered (hence _is_leader)
             if event.type == EventType.CHILD and self._is_leader:
-                sleep(3) # FIXME wait for ephemeral nodes to vanish...
+                sleep(2) # FIXME wait for ephemeral nodes to vanish...
                 # reconfigure ZK
                 ensemble = self._client.get_children(event.path)
                 ensemble = reduce(lambda a, b: a + ',' + b, ensemble)
@@ -106,11 +107,19 @@ class Client(object):
                 state = self.query()
                 self.debug('Current state is %s' % state)
                 for spec in self._specs:
-                    actions += spec.diff(state)
+                    #FIXME this is ugly
+                    # Node-aware specification (IaaS level)
+                    if int(spec.split('_')[0]) <= 10:
+                        actions += spec.infrastructure_diff(state)
+                    # Node-agnostic specification (PaaS level)
+                    else:
+                        pass
 
                 # Perform actions generated from spec
+                cur_primary = self.primary()
+                cur_cloud = self.cloud()
                 for action in actions:
-                    action.run()
+                    action.run(cur_primary, cur_cloud)
 
                 # Re-instate watcher
                 self._client.get_children(event.path, watch=watch_ensemble)
@@ -132,6 +141,24 @@ class Client(object):
                 print 'Current deployment state:'
                 print self.query()
 
+    # TODO
+    def primary(self):
+        """
+        Return the hostname of the current primary head node.
+
+        :return:
+        """
+        return 'primary.deployment.net'
+
+    # TODO
+    def cloud(self):
+        """
+        Return the hostname of the current cloud controller.
+
+        :return:
+        """
+        return 'clc.deployment.net'
+
     def query(self):
         """
         Extracts the current deployment state from the ensemble membership
@@ -139,6 +166,7 @@ class Client(object):
 
         The state is returned as a dict with the nodes as keys and a list
         of roles fulfilled by each node as values:
+
             { 'hostname:port' : ['role_1', 'role_2'] }
 
         :return: deployment state 

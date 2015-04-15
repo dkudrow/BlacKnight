@@ -44,18 +44,17 @@ class Spec(object):
 
     The specification is loaded from a YAML file that defines the different
     roles a node can assume as well as how the different roles should be
-    managed. The format is as follows:
+    managed. The format is as follows::
 
-    --- # 10_infrastructure
-    role_name:
-        min_nodes:  <int>       # min. nodes needed for functional deployment
-        max_nodes:  <int>       # max num. useful nodes (null indicates no max.)
-        start_hook: <string>    # command to start node (abs. path)
-        stop_hook:  <string>    # command to stop node (abs. path)
-        deps:                   # list of dependencies on other roles
-            - [<string>, <int>] # name of dependee role
-                                # max. ratio of dependers to dependees
-    ...
+        --- # 10_infrastructure
+        role_name:
+            min_nodes:  <int>       # min. nodes for functional deployment
+            max_nodes:  <int>       # max useful nodes (null indicates no max.)
+            start_hook: <string>    # command to start node (abs. path)
+            stop_hook:  <string>    # command to stop node (abs. path)
+            deps:                   # list of dependencies on other roles
+                - [<string>, <int>] # dependee, ratio of dependers to  dependees
+        ...
 
     The current state of the deployment can be polled from the ZooKeeper
     client and compared to the spec to determine if any changes should be made.
@@ -108,7 +107,7 @@ class Spec(object):
             if not isinstance(role.min_nodes, int):
                 raise ValueError('could not infer min_nodes for %s' % role.name)
 
-    def diff(self, state):
+    def infrastructure_diff(self, state):
         """
         Compare the current deployment state to the specification to produce
         a list of actions.
@@ -150,7 +149,7 @@ class Spec(object):
         for role in deficit:
             if empty_nodes:
                 node = empty_nodes.pop()
-                action = Action.StartEmpty(node, role)
+                action = Action.EmptyNode(node, role)
                 actions.append(action)
                 continue
             if max_surplus:
@@ -164,12 +163,12 @@ class Spec(object):
             # Find node to repurpose
             for node, roles in state.iteritems():
                 if stop_role.name in roles:
-                    actions.append(Action.Exchange(node, role, stop_role))
+                    actions.append(Action.ExchangeNode(node, role, stop_role))
 
         for role in min_surplus:
             if empty_nodes:
                 node = empty_nodes.pop()
-                action = Action.StartEmpty(node, role)
+                action = Action.EmptyNode(node, role)
                 actions.append(action)
                 continue
             if max_surplus:
@@ -181,7 +180,7 @@ class Spec(object):
             # Find node to repurpose
             for node, roles in state.iteritems():
                 if stop_role.name in roles:
-                    actions.append(Action.Exchange(node, role, stop_role))
+                    actions.append(Action.ExchangeNode(node, role, stop_role))
 
         return actions
 
@@ -205,6 +204,6 @@ if __name__ == '__main__':
     print ''
 
     print 'Actions:'
-    for a in spec.diff(state):
+    for a in spec.infrastructure_diff(state):
         print ' *{0}'.format(a)
 
