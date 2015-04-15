@@ -1,3 +1,6 @@
+"""
+FarmCloud Client
+"""
 import sys
 from time import sleep
 
@@ -10,34 +13,33 @@ from farmcloud.spec import Spec
 
 class Client(object):
     """
-    The client is responsible for monitoring the state of the deployment and
-    remediating in the case of failure.
+    The clients are responsible for monitoring the state of the deployment
+    and remediating in the case of failure.
 
-    Each client in the deployment participates in an election in which all
-    candidates block except for the current leader. The current leader is
-    tasked with listening for changes in the deployment and, in the event of
-    a change, making any changes necessary to maintain the specification.
+    One client runs on each physical node of the deployment. All clients
+    participate in an election in which all candidates block except for the
+    current leader. The leader is tasked with listening for changes in the
+    deployment and, in the event of a change, making any adjustments
+    necessary to maintain the specification.
 
-    ZooKeeper is used to maintain the deployment state. Each client contains
-    a *KazooClient* to communicate with the ensemble. The default znode layout
-    is:
+    ZooKeeper is used to maintain the deployment state. Each client
+    contains a *KazooClient* ZooKeeper client to communicate with the
+    ensemble. The default znode layout is:
         * */spec* - tiered deployment specifications (executed in ASCII order)
         * */ensemble* - for each node in the deployment there is a znode containing a whitespace separated list of roles that it currently fulfills
         * */elect* - used for by Kazoo for the leader election
     """
-
     def __init__(self, port='2181', primary_head=False,
                  ensemble_path='/ensemble',
                  elect_path='/elect', spec_path='/spec'):
         """
-        :param port: ZooKeeper port
+        :param port: ZooKeeper server port
         :param primary_head: True if this a the primary head node
         :param ensemble_path: root znode for group membership
         :param elect_path: root znode for leader election
         """
         log.add_logger(self)
         self._is_leader = False
-        # self._local_server = gethostname() + ':' + str(port)
         self._local_zk = 'localhost' + ':' + str(port)
         self._ensemble_path = ensemble_path
         self._elect_path = elect_path
@@ -79,13 +81,14 @@ class Client(object):
 
     def _lead(self):
         """
-        This function is called by the deployment's newly elected leader. The
-        is responsible for listening for changes in the deployment,
-        determining what actions should be taken and then acting accordingly.
+        Called by the deployment's newly elected leader. It registers a
+        watcher with the ensemble membership path in ZooKeeper and listens
+        for changes. When a change is detected, the deployment state is
+        queried from ZooKeeper and diff'ed against the specification to
+        produce a list of remediating actions. These actions are then
+        performed one at a time.
 
-        :return:
         """
-
         # This method is called whenever a change is detected in the ensemble
         def watch_ensemble(event):
             # Watchers cannot be unregistered so we must ensure that only
@@ -131,8 +134,14 @@ class Client(object):
 
     def query(self):
         """
+        Extracts the current deployment state from the ensemble membership
+        path.
 
-        :return:
+        The state is returned as a dict with the nodes as keys and a list
+        of roles fulfilled by each node as values:
+            { 'hostname:port' : ['role_1', 'role_2'] }
+
+        :return: deployment state 
         """
         state = {}
         ensemble = self._client.get_children(self._ensemble_path)

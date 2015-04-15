@@ -14,7 +14,6 @@ class _Role(namedtuple('_Role', 'name min_nodes max_nodes start_hook stop_hook d
     """
     A convenience class to keep track of node roles in a deployment.
     """
-
     pass
 
 
@@ -22,7 +21,6 @@ class _Dep(namedtuple('_Dep', 'role ratio')):
     """
     A convenience class to keep track of dependencies between roles.
     """
-
     @staticmethod
     def convert_list(deps):
         """
@@ -62,7 +60,6 @@ class Spec(object):
     The current state of the deployment can be polled from the ZooKeeper
     client and compared to the spec to determine if any changes should be made.
     """
-
     def __init__(self, yaml_spec):
         """
         Creates a Spec object from a YAML file.
@@ -74,7 +71,6 @@ class Spec(object):
         :param str yaml_spec: YAML deployment specification
         :raises ValueError: if there is a problem with the specification
         """
-
         log.add_logger(self)
 
         # Parse YAML
@@ -123,7 +119,6 @@ class Spec(object):
         :param state: dict mapping nodes to roles
         :return: list of actions to executed
         """
-
         actions = []
 
         # Get node count for each role
@@ -149,11 +144,6 @@ class Spec(object):
                     min_surplus.append(role)
                 else:
                     max_surplus.append(role)
-
-        print "deficit:", [r.name for r in deficit]
-        print "min_surplus:", [r.name for r in min_surplus]
-        print "max_surplus:", [r.name for r in max_surplus]
-        print "empty_nodes:", empty_nodes
 
         # Generate a list of actions
         # TODO multi role deficits
