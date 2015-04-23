@@ -1,0 +1,10 @@
+#!/bin/bash
+
+######################################################################
+#
+# scripts/head_stop -- Stop Eucalyptus on the head node
+#
+######################################################################
+
+$EUCALYPTUS/etc/init.d/eucalyptus-cloud stop
+$EUCALYPTUS/etc/init.d/eucalyptus-cc stop

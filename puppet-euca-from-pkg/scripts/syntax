@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for f in $(find ${1:-.} -name *.pp); do
+	echo ">> $f"
+	puppet parser validate $f
+	echo "--"
+        puppet-lint $f
+done

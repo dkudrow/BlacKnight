@@ -1,0 +1,75 @@
+#!/bin/bash
+
+######################################################################
+#
+# scripts/head_start -- Start Eucalyptus on the head node
+#
+######################################################################
+
+IP_HEAD=${1:-128.111.55.51}
+shift
+IP_NODE=${@:-10.50.10.50}
+
+echo "=================================================="
+echo "= Starting Eucalyptus Cloud"
+echo "== Head: $IP_HEAD"
+echo "== Nodes: $IP_NODE"
+
+echo "= Starting cloud controller"
+$EUCALYPTUS/etc/init.d/eucalyptus-cloud start
+
+tail -F $EUCALYPTUS/var/log/eucalyptus/cloud-output.log | awk '/Detected Interfaces/ {exit}'
+
+echo "= Starting cluster controller"
+$EUCALYPTUS/etc/init.d/eucalyptus-cc start
+
+echo "= Register user API"
+euca_conf --register-service -T user-api -H $IP_HEAD -N api40
+
+#echo "= Register Walrus"
+#euca_conf --register-walrus --partition walrus --host $IP_HEAD --component walrus40
+
+# register cluster controller
+echo "= Register cluster controller"
+euca_conf --register-cluster --partition cluster0 --host $IP_HEAD --component cc40
+
+# register storage controller
+echo "= Register storage controller"
+euca_conf --register-sc --partition cluster0 --host $IP_HEAD --component sc40
+
+for node in $IP_NODE; do
+	echo "= Register node controller at $node"
+	euca_conf --register-nodes $node
+done
+
+# setup credentials
+get_cred() {
+	start_dir=$PWD
+	cd /root
+	rm -rf cred
+	mkdir cred
+	cd cred
+	euca_conf --get-credentials=admin.zip
+	unzip admin.zip
+	source eucarc
+	cd $start_dir
+}
+
+echo "= Fetch credentials"
+get_cred
+
+#echo "= Set Walrus as provider"
+#euca-modify-property -p  objectstorage.providerclient=walrus
+
+echo "= Set S3 as provider"
+euca-modify-property -p  objectstorage.providerclient=s3
+euca-modify-property -p  objectstorage.s3provider.s3endpoint=$IPHEAD:9090
+euca-modify-property -p  objectstorage.s3provider.s3accesskey="97GNXUHY8B2T-_ZCSK1V"
+euca-modify-property -p  objectstorage.s3provider.s3secretkey="8DkVHQZ3ZypbwJNDJtxu-6GqU1Kyscdso3MtiA=="
+
+echo "= Re-fetch credentials"
+get_cred
+
+echo "= Configure SC to use OverlayManager"
+euca-modify-property -p cluster0.storage.blockstoragemanager=overlay
+

@@ -1,0 +1,20 @@
+#!/bin/bash
+
+MODULE=$1
+
+if [[ ${PWD##*/} != "modules" ]]; then
+	echo "Error. Must run from modules/ directory"
+	exit 1
+fi
+
+mkdir -p $MODULE/manifests
+mkdir -p $MODULE/templates
+mkdir -p $MODULE/files
+
+cat >$MODULE/manifests/init.pp <<EOF
+# modules/$MODULE/manifests/init.pp
+
+class $MODULE {
+
+}
+EOF

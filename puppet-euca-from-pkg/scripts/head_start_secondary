@@ -1,0 +1,93 @@
+#!/bin/bash
+
+######################################################################
+#
+# scripts/head_start_secondary -- Start Eucalyptus slave
+# Note: do no run 'euca_conf --initialize' before starting the slave
+#
+######################################################################
+
+if [[ $# = 0 || $1 = '-h' || $1 = '--help' ]]; then
+	echo 'Usage: ./head_start_secondary <head_hostname> [node_ip ...]'
+	exit 1
+fi
+
+HEAD_HOST=$1
+shift
+NODE_IP=${@:-10.50.10.50}
+
+HEAD_IP=$(host $HEAD_HOST | grep address | cut -d ' ' -f 4)
+if [[ -z $HEAD_IP ]]; then
+	echo "Error: could not resolve hostname '$HEAD_HOST'"
+	exit 1
+fi
+
+echo "=================================================="
+echo "= Starting Eucalyptus Cloud"
+echo "== Slave: $HEAD_IP ($HEAD_HOST)"
+echo "== Nodes: $NODE_IP"
+
+echo "= Starting cloud controller"
+$EUCALYPTUS/etc/init.d/eucalyptus-cloud start
+
+# Warning: this will take a long time!
+tail -F $EUCALYPTUS/var/log/eucalyptus/cloud-output.log | awk '/Detected Interfaces/ {exit}'
+
+echo "= Starting cluster controller"
+$EUCALYPTUS/etc/init.d/eucalyptus-cc start
+
+echo "= Registering user API (api-$HEAD_HOST)"
+euca_conf --register-service -T user-api -H $HEAD_IP -N api-$HEAD_HOST
+
+echo "= Registering Walrus (walrus-$HEAD_HOST)"
+euca_conf --register-walrus --partition walrus --host $HEAD_IP --component walrus-$HEAD_HOST
+
+echo "= Registering cluster controller (cc-$HEAD_HOST)"
+euca_conf --register-cluster --partition cluster0 --host $HEAD_IP --component cc-$HEAD_HOST
+
+echo "= Registering storage controller (sc-$HEAD_HOST)"
+euca_conf --register-sc --partition cluster0 --host $HEAD_IP --component sc-$HEAD_HOST
+
+echo "= Registering arbitrator (arb-$HEAD_HOST-1)"
+euca_conf --register-arbitrator --partition arb-$HEAD_HOST-1 --component arb-$HEAD_HOST-1 --host $HEAD_IP
+
+
+for node in $NODE_IP; do
+	echo "= Registering node controller at $node"
+	euca_conf --register-nodes $node
+done
+
+# setup credentials
+get_cred() {
+	start_dir=$PWD
+	cd /root
+	rm -rf cred
+	mkdir cred
+	cd cred
+	euca_conf --get-credentials=admin.zip
+	unzip admin.zip
+	source eucarc
+	cd $start_dir
+}
+
+echo "= Fetch credentials"
+get_cred
+
+echo "= Configure SC to use OverlayManager"
+euca-modify-property -p cluster0.storage.blockstoragemanager=overlay
+
+echo "= Set Walrus as provider"
+euca-modify-property -p  objectstorage.providerclient=walrus
+
+echo "= Re-fetch credentials"
+get_cred
+
+echo "= Setting arbitrator gateway"
+euca-modify-property -p arb-$HEAD_HOST-1.arbitrator.gatewayhost=google.com
+
+echo "= Adding arbitrators to config"
+sed -i '/CC_ARBITRATORS=.*/d' $EUCALYPTUS/etc/eucalyptus/eucalyptus.conf
+echo "CC_ARBITRATORS=$HEAD_IP" >> $EUCALYPTUS/etc/eucalyptus/eucalyptus.conf
+
+echo "= Restarting cluster controller"
+$EUCALYPTUS/etc/init.d/eucalyptus-cc restart
