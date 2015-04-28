@@ -33,7 +33,7 @@ node 'php.cs.ucsb.edu' {
   $PUBLIC_IP = '128.111.55.39'
   $IPADDR = '10.50.10.39'
 
-  #include riak
+  include riak
   include network
   include repo
   include packages
@@ -47,6 +47,10 @@ node 'oz.cs.ucsb.edu' {
   $IPADDR = '10.50.10.51'
 
   include riak
+  include network
+  include repo
+  include packages
+  include config
 }
 
 node 'objc.cs.ucsb.edu' {
@@ -56,6 +60,10 @@ node 'objc.cs.ucsb.edu' {
   $IPADDR = '10.50.10.50'
 
   include riak
+  include network
+  include repo
+  include packages
+  include config
 }
 
 node 'scala.cs.ucsb.edu' {
@@ -65,4 +73,8 @@ node 'scala.cs.ucsb.edu' {
   $IPADDR = '10.50.10.25'
 
   include riak
+  include network
+  include repo
+  include packages
+  include config
 }
