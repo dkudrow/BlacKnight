@@ -4,7 +4,7 @@
 ## 
 ## Acceptable values:
 ##   - an IP/port pair, e.g. 127.0.0.1:10011
-listener = <%= @PUBLIC_IP %>:<%= @STANCHION_PORT %>
+listener = <%= @PUBLIC_IP %>:8085
 
 ## Default cert location for https can be overridden
 ## with the ssl config variable, for example:
@@ -26,7 +26,7 @@ listener = <%= @PUBLIC_IP %>:<%= @STANCHION_PORT %>
 ## 
 ## Acceptable values:
 ##   - an IP/port pair, e.g. 127.0.0.1:10011
-riak_host = 127.0.0.1:<%= @RIAK_LISTEN_PORT %>
+riak_host = 127.0.0.1:8087
 
 ## Admin user credentials. The credentials specified here must
 ## match the admin credentials specified in the riak-cs app.config
@@ -36,14 +36,14 @@ riak_host = 127.0.0.1:<%= @RIAK_LISTEN_PORT %>
 ## 
 ## Acceptable values:
 ##   - text
-admin.key = admin-key
+admin.key = <%= @RIAK_ADMIN_KEY %>
 
 ## 
 ## Default: admin-secret
 ## 
 ## Acceptable values:
 ##   - text
-admin.secret = admin-secret
+admin.secret = <%= @RIAK_ADMIN_SECRET %>
 
 ## Platform-specific installation paths
 ## 

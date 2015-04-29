@@ -38,7 +38,8 @@ class riak {
     require => Package['riak-cs']
   }
 
-  if $IPADDR == $STANCHION_HOST {
+  if $IPADDR == $STANCHION_HOST or $PUBLIC_IP == $STANCHION_HOST {
+
     # Stanchion 2.0 hasn't made it to packagecloud yet...
     #package { 'stanchion' :
     #ensure  => $STANCHION_VERSION,
@@ -52,8 +53,11 @@ class riak {
       source   => 'http://s3.amazonaws.com/downloads.basho.com/stanchion/2.0/2.0.0/rhel/6/stanchion-2.0.0-1.el6.x86_64.rpm'
     }
 
-    file { '' :
-
+    file { '/etc/stanchion/stanchion.conf' :
+      content => template('riak/stanchion.conf.erb'),
+      owner   => 'stanchion',
+      group   => 'riak',
+      require => Package['stanchion']
     }
   }
 

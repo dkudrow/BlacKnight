@@ -5,7 +5,7 @@
 ## 
 ## Acceptable values:
 ##   - an IP/port pair, e.g. 127.0.0.1:10011
-listener = <%= @PUBLIC_IP %>:<%= @RIAK_LISTEN_PORT %>
+listener = <%= @PUBLIC_IP %>:<%= @RIAKCS_PORT %>
 
 ## Riak node to which Riak CS accesses
 ## 
@@ -13,7 +13,7 @@ listener = <%= @PUBLIC_IP %>:<%= @RIAK_LISTEN_PORT %>
 ## 
 ## Acceptable values:
 ##   - an IP/port pair, e.g. 127.0.0.1:10011
-riak_host = 127.0.0.1:<%= @RIAK_HOST_PORT %>
+riak_host = 127.0.0.1:8087
 
 ## Configuration for access to request
 ## serialization service
@@ -22,7 +22,7 @@ riak_host = 127.0.0.1:<%= @RIAK_HOST_PORT %>
 ## 
 ## Acceptable values:
 ##   - an IP/port pair, e.g. 127.0.0.1:10011
-stanchion_host = <%= @STANCHION_HOST %>:<%= @STANCHION_PORT %>
+stanchion_host = <%= @STANCHION_HOST %>:8085
 
 ## SSL configuration for access to request serialization
 ## service. With `on`, Riak CS connects to Stanchion with SSL.
@@ -74,14 +74,14 @@ anonymous_user_creation = off
 ## 
 ## Acceptable values:
 ##   - text
-admin.key = admin-key
+admin.key = <%= @RIAK_ADMIN_KEY %>
 
 ## 
 ## Default: admin-secret
 ## 
 ## Acceptable values:
 ##   - text
-admin.secret = admin-secret
+admin.secret = <%= @RIAK_ADMIN_SECRET %>
 
 ## Root host name which Riak CS accepts.
 ## Your CS bucket at s3.example.com will be accessible
