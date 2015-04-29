@@ -13,7 +13,7 @@ listener = <%= @PUBLIC_IP %>:<%= @RIAKCS_PORT %>
 ## 
 ## Acceptable values:
 ##   - an IP/port pair, e.g. 127.0.0.1:10011
-riak_host = 127.0.0.1:8087
+riak_host = <%= @PUBLIC_IP %>:8087
 
 ## Configuration for access to request
 ## serialization service

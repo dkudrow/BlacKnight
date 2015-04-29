@@ -26,7 +26,7 @@ listener = <%= @PUBLIC_IP %>:8085
 ## 
 ## Acceptable values:
 ##   - an IP/port pair, e.g. 127.0.0.1:10011
-riak_host = 127.0.0.1:8087
+riak_host = <%= @PUBLIC_IP %>:8087
 
 ## Admin user credentials. The credentials specified here must
 ## match the admin credentials specified in the riak-cs app.config
