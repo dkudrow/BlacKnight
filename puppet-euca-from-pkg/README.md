@@ -3,10 +3,6 @@
 Install puppet with
  
 	yum -y install puppet
- 
-Install the vcsrepo module with
-
-	puppet module install puppetlabs-vcsrepo
 
 Install the packagecloud module (needed for Riak) with
 
@@ -78,6 +74,22 @@ To start a worker node
 	./scripts/node_config
 	./scripts/node_start
 
-##RiakCS
+##Riak CS
+
+### Starting Riak CS
+As root, run the following on the first node
+
+	riak start
+	stanchion start
+	riak-cs start
+	
+On each other node that is to be part of the Riak cluster run
+
+	riak start
+	riak-cs start
+	riak-admin cluster join <nodename_of_first_node>
+	riak-admin plan
+	riak-admin comit
+
 ### Notes
 * If Riak fails to start with 'node XXX not responding to pings' try deleting the ring with `sudo rm -rf /var/lib/riak/ring/*`
