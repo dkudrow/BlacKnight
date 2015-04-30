@@ -46,35 +46,8 @@ Run puppet from the _puppet/_ directory with
 	./scripts/run
 
 ## Eucalyptus
-### Build/install Eucalyptus
-If you are building Eucalyptus from scratch, you must do this by hand. In
-the EUCALYPTUS_SRC directory:
 
-	./configure '--with-axis2=/usr/share/axis2-*' \
-	--with-axis2c=/usr/lib64/axis2c --prefix=$EUCALYPTUS \
-	--with-apache2-module-dir=/usr/lib64/httpd/modules \
-	--with-db-home=/usr/pgsql-9.1 \
-	--with-wsdl2c-sh=/opt/euca-WSDL2C.sh
-
-	make clean; make; make install
-
-### Configure Eucalyptus
-Run puppet again to update the newly created configuration files.
-
-	./scripts/run
-
-### Start Eucalyptus
-To start the head node
-
-	./scripts/head_config
-	./scripts/head_start
-
-To start a worker node
-
-	./scripts/node_config
-	./scripts/node_start
-
-##Riak CS
+## Riak CS
 
 ### Starting Riak CS
 As root, run the following on the first node
@@ -90,6 +63,8 @@ On each other node that is to be part of the Riak cluster run
 	riak-admin cluster join <nodename_of_first_node>
 	riak-admin plan
 	riak-admin comit
+	
+### Generating user credentials
 
 ### Notes
 * If Riak fails to start with 'node XXX not responding to pings' try deleting the ring with `sudo rm -rf /var/lib/riak/ring/*`
