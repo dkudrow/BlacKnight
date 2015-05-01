@@ -1,0 +1,86 @@
+#!/bin/bash
+#
+# Start a new secondary head node
+#
+
+source util.sh
+
+NODENAME="$(hostname -f)"
+PUBLIC_IP="$(get_inet_addr eth0)"
+PRIVATE_IP="$(get_inet_addr br0)"
+CC_PART="cluster01"
+#TODO: Standardize arguments
+EUCA_NODES="$@"
+
+######################################################################
+# Start Eucalyptus services
+# Globals:
+#	none
+# Arguments:
+#	none
+# Returns:
+#	none
+######################################################################
+
+start_eucalyptus_head() {
+	service eucalyptus-cloud start
+	#TODO: Do we need to wait?
+	tail -F /var/log/eucalyptus/cloud-output.log | awk '/Detected Interfaces/ {exit}'
+	service eucalyptus-cc start
+}
+
+######################################################################
+# Register Eucalyptus components
+# Globals:
+#	PUBLIC_IP
+#	NODENAME
+#	EUCA_NODES
+# Arguments:
+#	none
+# Returns:
+#	none
+######################################################################
+
+register_eucalyptus_head() {
+	euca_conf --register-service -T user-api -H "$PUBLIC_IP" -N "api-$NODENAME"
+	euca_conf --register-cluster --partition cluster0 --host "$PUBLIC_IP" --component "cc-$NODENAME"
+	euca_conf --register-sc --partition cluster0 --host "$PUBLIC_IP" --component "sc-$NODENAME"
+	for euca_node in ${EUCA_NODES[@]}; do
+		euca_conf --register-nodes $euca_node
+	done
+}
+
+######################################################################
+# Configure the Eucalyptus Object Storage Gateway to use Riak CS
+# Globals:
+#	none
+# Arguments:
+#	none
+# Returns:
+#	none
+######################################################################
+
+config_euca_osg() {
+	euca-modify-property -p  objectstorage.providerclient=s3
+	euca-modify-property -p  objectstorage.s3provider.s3endpoint=$IPHEAD:9090
+	euca-modify-property -p  objectstorage.s3provider.s3accesskey="97GNXUHY8B2T-_ZCSK1V"
+	euca-modify-property -p  objectstorage.s3provider.s3secretkey="8DkVHQZ3ZypbwJNDJtxu-6GqU1Kyscdso3MtiA=="
+}
+
+get_euca_cred
+
+#echo "= Set Walrus as provider"
+#euca-modify-property -p  objectstorage.providerclient=walrus
+
+echo "= Set S3 as provider"
+euca-modify-property -p  objectstorage.providerclient=s3
+euca-modify-property -p  objectstorage.s3provider.s3endpoint=$IPHEAD:9090
+euca-modify-property -p  objectstorage.s3provider.s3accesskey="97GNXUHY8B2T-_ZCSK1V"
+euca-modify-property -p  objectstorage.s3provider.s3secretkey="8DkVHQZ3ZypbwJNDJtxu-6GqU1Kyscdso3MtiA=="
+
+echo "= Re-fetch credentials"
+get_cred
+
+echo "= Configure SC to use OverlayManager"
+euca-modify-property -p cluster0.storage.blockstoragemanager=overlay
+
