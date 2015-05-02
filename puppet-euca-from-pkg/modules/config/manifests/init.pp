@@ -2,8 +2,18 @@
 
 class config {
 
-  file { "$EUCALYPTUS/etc/eucalyptus/eucalyptus.conf" :
-    content => template('config/eucalyptus.conf.erb'),
+  file { '/etc/eucalyptus/eucalyptus.conf' :
+    ensure  => file,
+    content => template('config/eucalyptus.conf.erb')
+  }
+
+  file { '/etc/selinux/config' :
+    ensure => file,
+    source => 'puppet:///modules/config/selinux.config.original'
+  }
+
+  exec { '/usr/sbin/setenforce 0' :
+    onlyif => '/usr/sbin/test `/usr/sbin/getenforce` == Enabled'
   }
 
 }
