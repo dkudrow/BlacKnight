@@ -1,9 +1,0 @@
-#!/bin/bash
-
-######################################################################
-#
-# scripts/node_stop -- Stop Eucalyptus on the node node
-#
-######################################################################
-
-$EUCALYPTUS/etc/init.d/eucalyptus-nc stop

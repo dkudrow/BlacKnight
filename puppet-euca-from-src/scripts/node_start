@@ -1,9 +1,0 @@
-#!/bin/bash
-
-######################################################################
-#
-# scripts/node_start -- Start Eucalyptus node controller
-#
-######################################################################
-
-$EUCALYPTUS/etc/init.d/eucalyptus-nc start
