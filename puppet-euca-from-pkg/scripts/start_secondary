@@ -1,24 +1,25 @@
 #!/bin/bash
 #
 # scripts/start_secondary
-#	Start a new secondary head node
+#	Start and register a new secondary head node
 #
 
 ######################################################################
-# TODO:
-# de-register old secondary on current primary
-# standardize arguments
+# TODO
+# If we are starting a secondary after failover, we must deregister
+# the old secondary from the primer...
 ######################################################################
 
 source util.sh
 
-NODENAME="$(hostname -f)"
-PUBLIC_IP="$(get_inet_addr eth0)"
-PRIVATE_IP="$(get_inet_addr br0)"
-CC_PART="cluster01"
-EUCA_NODES="$@"
-RIAKCS_KEY=""
-RIAKCS_SECRET=""
+main() {
+	parse_args
+	start_secondary_head
+	register_secondary_head
+	register_eucalyptus_components
+	get_eucalytpus_credentials
+	configure_eucalyptus
+}
 
 ######################################################################
 # Start Eucalyptus services
@@ -30,17 +31,30 @@ RIAKCS_SECRET=""
 #	none
 ######################################################################
 
-start_eucalyptus_head() {
+start_secondary_head() {
 	service eucalyptus-cloud start
 	#TODO: Do we need to wait?
 	tail -F /var/log/eucalyptus/cloud-output.log | awk '/Detected Interfaces/ {exit}'
 	service eucalyptus-cc start
 }
 
+#######################################################################
+# Register secondary head with primary
+# Globals:
+# Arguments:
+# Returns:
 ######################################################################
+
+register_secondary_head() {
+    ssh "$PRIMARY_HEAD"<<EOF
+euca_conf --register-cloud -P eucalyptus -H "$PUBLIC_IP" -C "clc-$NODENAME"
+EOF
+}
+
+#####################################################################
 # Register Eucalyptus components
 # Globals:
-#	CCPART
+#	CC_PART
 #	EUCA_NODES
 #	NODENAME
 #	PUBLIC_IP
@@ -50,7 +64,7 @@ start_eucalyptus_head() {
 #	none
 ######################################################################
 
-register_eucalyptus_head() {
+register_eucalyptus_components() {
 	euca_conf --register-service -T user-api -H "$PUBLIC_IP" -N "api-$NODENAME"
 	euca_conf --register-cluster -P $CC_PART -H "$PUBLIC_IP" -C "cc-$NODENAME"
 	euca_conf --register-sc -P $CC_PART -H "$PUBLIC_IP" -C "sc-$NODENAME"
@@ -72,7 +86,7 @@ register_eucalyptus_head() {
 #	none
 ######################################################################
 
-config_euca() {
+configure_eucalyptus() {
 	euca-modify-property -p objectstorage.providerclient=s3
 	euca-modify-property -p objectstorage.s3provider.s3endpoint="$PUBLIC_IP:9090"
 	euca-modify-property -p objectstorage.s3provider.s3accesskey="$RIAKCS_KEY"
@@ -80,8 +94,5 @@ config_euca() {
 	euca-modify-property -p $CC_PART.storage.blockstoragemanager=overlay
 }
 
-start_eucalyptus_head
-register_eucalyptus_head
-get_euca_cred
-config_euca
+main
 

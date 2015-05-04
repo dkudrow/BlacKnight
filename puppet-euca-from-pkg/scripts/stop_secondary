@@ -1,24 +1,35 @@
 #!/bin/bash
 #
 # scripts/stop_secondary
-#	Stop an running secondary head node
+#	Stop a running secondary head node
 #
-
-######################################################################
-# TODO:
-# de-register old secondary on current primary
-# standardize arguments
-######################################################################
 
 source util.sh
 
-NODENAME="$(hostname -f)"
-PUBLIC_IP="$(get_inet_addr eth0)"
-PRIVATE_IP="$(get_inet_addr br0)"
-CC_PART="cluster01"
-EUCA_NODES="$@"
-RIAKCS_KEY=""
-RIAKCS_SECRET=""
+main() {
+	parse_args
+	deregister_eucalyptus_components
+	deregister_secondary
+	stop_secondary
+}
+
+#####################################################################
+# De-register Eucalyptus components
+# Globals:
+#	CC_PART
+#	NODENAME
+#	PUBLIC_IP
+# Arguments:
+#	none
+# Returns:
+#	none
+######################################################################
+
+deregister_eucalyptus_components() {
+	euca_conf --deregister-sc -P $CC_PART -H "$PUBLIC_IP" -C "sc-$NODENAME"
+	euca_conf --deregister-cluster -P $CC_PART -H "$PUBLIC_IP" -C "cc-$NODENAME"
+	euca_conf --deregister-service -T user-api -H "$PUBLIC_IP" -N "api-$NODENAME"
+}
 
 ######################################################################
 # De-register component from head nodes
@@ -29,15 +40,13 @@ RIAKCS_SECRET=""
 ######################################################################
 
 deregister_secondary() {
-	ssh PRIMARY_HEAD <<EOF
+	ssh "$PRIMARY_HEAD"<<EOF
 euca_conf --deregister-cloud -P eucalyptus -H "$PUBLIC_IP" --C "api-$NODENAME"
-euca_conf --deregister-cloud -P eucalyptus -H "$PUBLIC_IP" --C "api-$NODENAME"
-
 EOF
 }
 
 ######################################################################
-# Start Eucalyptus services
+# Stop Eucalyptus services
 # Globals:
 #	none
 # Arguments:
@@ -46,58 +55,9 @@ EOF
 #	none
 ######################################################################
 
-start_eucalyptus_head() {
-	service eucalyptus-cloud start
-	#TODO: Do we need to wait?
-	tail -F /var/log/eucalyptus/cloud-output.log | awk '/Detected Interfaces/ {exit}'
-	service eucalyptus-cc start
+stop_secondary_head() {
+	service eucalyptus-cloud stop
+	service eucalyptus-cc stop
 }
 
-######################################################################
-# Register Eucalyptus components
-# Globals:
-#	CCPART
-#	EUCA_NODES
-#	NODENAME
-#	PUBLIC_IP
-# Arguments:
-#	none
-# Returns:
-#	none
-######################################################################
-
-register_eucalyptus_head() {
-	euca_conf --register-service -T user-api -H "$PUBLIC_IP" -N "api-$NODENAME"
-	euca_conf --register-cluster --partition $CC_PART --host "$PUBLIC_IP" --component "cc-$NODENAME"
-	euca_conf --register-sc --partition $CC_PART --host "$PUBLIC_IP" --component "sc-$NODENAME"
-	for euca_node in ${EUCA_NODES[@]}; do
-		euca_conf --register-nodes $euca_node
-	done
-}
-
-######################################################################
-# Configure the Eucalyptus Object Storage Gateway to use Riak CS
-# Globals:
-#	CCPART
-#	PUBLIC_IP
-#	RIAKCS_KEY
-#	RIAKCS_SECRET
-# Arguments:
-#	none
-# Returns:
-#	none
-######################################################################
-
-config_euca() {
-	euca-modify-property -p objectstorage.providerclient=s3
-	euca-modify-property -p objectstorage.s3provider.s3endpoint="$PUBLIC_IP:9090"
-	euca-modify-property -p objectstorage.s3provider.s3accesskey="$RIAKCS_KEY"
-	euca-modify-property -p objectstorage.s3provider.s3secretkey="$RIAKCS_SECRET"
-	euca-modify-property -p $CC_PART.storage.blockstoragemanager=overlay
-}
-
-start_eucalyptus_head
-register_eucalyptus_head
-get_euca_cred
-config_euca
-
+main

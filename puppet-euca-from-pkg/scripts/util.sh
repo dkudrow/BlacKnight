@@ -3,6 +3,54 @@
 #
 
 ######################################################################
+# Parse command line options
+# Globals:
+#	CC_PART
+#	RIAKCS_KEY
+#	RIAKCS_SECRET
+#	PRIMARY_HEAD
+#	SECONDARY_HEAD
+# Arguments:
+#	none
+# Returns:
+#	none
+######################################################################
+
+#TODO: EUCA_NODES
+
+parse_args() {
+	while getopts ":cnkspq" opt; do
+		case $opt in
+			n)
+				if [[ ! -v "$EUCA_NODES" ]]; then
+					EUCA_NODES=()
+				fi
+				EUCA_NODES+=("$OPTARG")
+				;;
+			c)
+				CC_PART="$OPTARG"
+				;;
+			k)
+				RIAKCS_KEY="$OPTARG"
+				;;
+			s)
+				RIAKCS_SECRET="$OPTARG"
+				;;
+			p)
+				PRIMARY_HEAD="$OPTARG"
+				;;
+			q)
+				SECONDARY_HEAD="$OPTARG"
+				;;
+		esac
+	done
+
+	NODENAME="$(hostname -f)"
+	PUBLIC_IP="$(get_inet_addr eth0)"
+	PRIVATE_IP="$(get_inet_addr br0)"
+}
+
+######################################################################
 # Print a message to stderr
 # Globals:
 #	none
@@ -45,7 +93,7 @@ get_inet_addr() {
 #	none
 ######################################################################
 
-get_euca_cred() {
+get_eucalytpus_credentials() {
 	local start_dir
 	start_dir="$PWD"
 	rm -rf /root/cred/*
