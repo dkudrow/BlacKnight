@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# scripts/start_secondary
-#	Start a new secondary head node
+# scripts/stop_secondary
+#	Stop an running secondary head node
 #
 
 ######################################################################
@@ -19,6 +19,22 @@ CC_PART="cluster01"
 EUCA_NODES="$@"
 RIAKCS_KEY=""
 RIAKCS_SECRET=""
+
+######################################################################
+# De-register component from head nodes
+# Globals:
+# Arguments:
+#	PRIMARY_HEAD
+# Returns:
+######################################################################
+
+deregister_secondary() {
+	ssh PRIMARY_HEAD <<EOF
+euca_conf --deregister-cloud -P eucalyptus -H "$PUBLIC_IP" --C "api-$NODENAME"
+euca_conf --deregister-cloud -P eucalyptus -H "$PUBLIC_IP" --C "api-$NODENAME"
+
+EOF
+}
 
 ######################################################################
 # Start Eucalyptus services
@@ -52,8 +68,8 @@ start_eucalyptus_head() {
 
 register_eucalyptus_head() {
 	euca_conf --register-service -T user-api -H "$PUBLIC_IP" -N "api-$NODENAME"
-	euca_conf --register-cluster -P $CC_PART -H "$PUBLIC_IP" -C "cc-$NODENAME"
-	euca_conf --register-sc -P $CC_PART -H "$PUBLIC_IP" -C "sc-$NODENAME"
+	euca_conf --register-cluster --partition $CC_PART --host "$PUBLIC_IP" --component "cc-$NODENAME"
+	euca_conf --register-sc --partition $CC_PART --host "$PUBLIC_IP" --component "sc-$NODENAME"
 	for euca_node in ${EUCA_NODES[@]}; do
 		euca_conf --register-nodes $euca_node
 	done
