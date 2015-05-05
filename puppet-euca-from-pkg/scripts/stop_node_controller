@@ -1,0 +1,53 @@
+#!/bin/bash
+#
+# scripts/stop_node_controller
+#	Stop and de-register a new node controller
+#
+
+source util.sh
+
+main() {
+	parse_args
+	stop_node_controller
+	deregister_node_controller
+}
+
+######################################################################
+# Stop node controller
+# Globals:
+#	none
+# Arguments:
+#	none
+# Returns:
+#	none
+######################################################################
+
+stop_node_controller() {
+	service eucalyptus-nc start
+}
+
+######################################################################
+# De-register node controller from head nodes
+# Globals:
+#	PRIMARY_HEAD
+#	PRIVATE_IP
+#	SECONDARY_HEAD
+# Arguments:
+#	none
+# Returns:
+#	none
+######################################################################
+
+deregister_node_controller() {
+    ssh "$PRIMARY_HEAD"<<EOF
+euca_conf --deregister-nodes "$PRIVATE_IP"
+EOF
+
+	if [[ -n $SECONDARY_HEAD ]]; then
+		ssh "$SECONDARY_HEAD"<<EOF
+euca_conf --deregister-nodes "$PRIVATE_IP"
+EOF
+	fi
+}
+
+main

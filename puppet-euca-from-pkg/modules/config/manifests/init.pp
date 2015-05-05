@@ -2,6 +2,8 @@
 
 class config {
 
+  # TODO: chkconfig eucalyptus-* off
+
   file { '/etc/eucalyptus/eucalyptus.conf' :
     ensure  => file,
     content => template('config/eucalyptus.conf.erb')

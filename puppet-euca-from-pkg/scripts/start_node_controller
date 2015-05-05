@@ -1,0 +1,53 @@
+#!/bin/bash
+#
+# scripts/start_node
+#	Start and register a new node controller
+#
+
+source util.sh
+
+main() {
+	parse_args
+	start_node_controller
+	register_node_controller
+}
+
+######################################################################
+# Start node controller
+# Globals:
+#	none
+# Arguments:
+#	none
+# Returns:
+#	none
+######################################################################
+
+start_node_controller() {
+	service eucalyptus-nc start
+}
+
+######################################################################
+# Register node controller with head nodes
+# Globals:
+#	PRIMARY_HEAD
+#	PRIVATE_IP
+#	SECONDARY_HEAD
+# Arguments:
+#	none
+# Returns:
+#	none
+######################################################################
+
+register_node_controller() {
+    ssh "$PRIMARY_HEAD"<<EOF
+euca_conf --register-nodes "$PRIVATE_IP"
+EOF
+
+	if [[ -n $SECONDARY_HEAD ]]; then
+		ssh "$SECONDARY_HEAD"<<EOF
+euca_conf --register-nodes "$PRIVATE_IP"
+EOF
+	fi
+}
+
+main

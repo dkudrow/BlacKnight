@@ -34,9 +34,12 @@ deregister_eucalyptus_components() {
 ######################################################################
 # De-register component from head nodes
 # Globals:
-# Arguments:
+#	NODENAME
 #	PRIMARY_HEAD
+# Arguments:
+#	none
 # Returns:
+#	none
 ######################################################################
 
 deregister_secondary() {

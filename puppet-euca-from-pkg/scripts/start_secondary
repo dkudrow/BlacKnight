@@ -41,8 +41,11 @@ start_secondary_head() {
 #######################################################################
 # Register secondary head with primary
 # Globals:
+#	none
 # Arguments:
+#	none
 # Returns:
+#	none
 ######################################################################
 
 register_secondary_head() {
@@ -95,4 +98,3 @@ configure_eucalyptus() {
 }
 
 main
-
