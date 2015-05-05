@@ -7,7 +7,11 @@
 source util.sh
 
 main() {
-	parse_args
+	parse_args $@
+	if [[ -z "$PRIMARY_HEAD" || -z "$CC_PART" || -z "$RIAKCS_KEY" || -z "$RIAKCS_SECRET" ]]; then
+		echo "Usage: -p <primary> -c <partition> -k <riak_key> -s <riak_sercret>"
+		exit 1
+	fi
 	deregister_eucalyptus_components
 	deregister_secondary
 	stop_secondary
@@ -69,4 +73,4 @@ stop_secondary_head() {
 	service eucalyptus-cc stop
 }
 
-main
+main $@

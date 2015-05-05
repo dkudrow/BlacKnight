@@ -13,7 +13,11 @@
 source util.sh
 
 main() {
-	parse_args
+	parse_args $@
+	if [[ -z "$PRIMARY_HEAD" || -z "$CC_PART" || -z "$RIAKCS_KEY" || -z "$RIAKCS_SECRET" ]]; then
+		echo "Usage: -p <primary> -c <partition> -k <riak_key> -s <riak_sercret>"
+		exit 1
+	fi
 	start_secondary_head
 	register_secondary_head
 	register_eucalyptus_components
@@ -43,7 +47,9 @@ start_secondary_head() {
 #######################################################################
 # Register secondary head with primary
 # Globals:
-#	none
+#	NODENAME
+#	PRIMARY_HEAD
+#	PUBLIC_IP
 # Arguments:
 #	none
 # Returns:
@@ -105,4 +111,4 @@ configure_eucalyptus() {
 	euca-modify-property -p $CC_PART.storage.blockstoragemanager=overlay
 }
 
-main
+main $@

@@ -19,8 +19,8 @@
 #TODO: EUCA_NODES
 
 parse_args() {
-	while getopts ":cnkspq" opt; do
-		case $opt in
+	while getopts ":c:n:k:s:p:q:d" opt; do
+		case "$opt" in
 			n)
 				if [[ ! -v "$EUCA_NODES" ]]; then
 					EUCA_NODES=()
