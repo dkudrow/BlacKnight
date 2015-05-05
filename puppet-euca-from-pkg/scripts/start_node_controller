@@ -23,6 +23,7 @@ main() {
 ######################################################################
 
 start_node_controller() {
+	pdebug "Starting node controller"
 	service eucalyptus-nc start
 }
 
@@ -39,11 +40,13 @@ start_node_controller() {
 ######################################################################
 
 register_node_controller() {
-    ssh "$PRIMARY_HEAD"<<EOF
+	pdebug "Registering node controller on primary head ($PRIMARY_HEAD)"
+	ssh "$PRIMARY_HEAD"<<EOF
 euca_conf --register-nodes "$PRIVATE_IP"
 EOF
 
 	if [[ -n $SECONDARY_HEAD ]]; then
+		pdebug "Registering node controller on primary head ($SECONDARY_HEAD)"
 		ssh "$SECONDARY_HEAD"<<EOF
 euca_conf --register-nodes "$PRIVATE_IP"
 EOF

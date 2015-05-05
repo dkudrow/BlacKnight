@@ -26,8 +26,11 @@ main() {
 ######################################################################
 
 deregister_eucalyptus_components() {
+	pdebug "Deregistering SC"
 	euca_conf --deregister-sc -P $CC_PART -H "$PUBLIC_IP" -C "sc-$NODENAME"
+	pdebug "Deregistering CC"
 	euca_conf --deregister-cluster -P $CC_PART -H "$PUBLIC_IP" -C "cc-$NODENAME"
+	pdebug "Deregistering Services"
 	euca_conf --deregister-service -T user-api -H "$PUBLIC_IP" -N "api-$NODENAME"
 }
 
@@ -43,8 +46,9 @@ deregister_eucalyptus_components() {
 ######################################################################
 
 deregister_secondary() {
+	pdebug "Deregistering Secondary CLC"
 	ssh "$PRIMARY_HEAD"<<EOF
-euca_conf --deregister-cloud -P eucalyptus -H "$PUBLIC_IP" --C "api-$NODENAME"
+euca_conf --deregister-cloud -P eucalyptus -H "$PUBLIC_IP" --C "clc-$NODENAME"
 EOF
 }
 
@@ -59,7 +63,9 @@ EOF
 ######################################################################
 
 stop_secondary_head() {
+	pdebug "Stopping Secondary CLC"
 	service eucalyptus-cloud stop
+	pdebug "Stopping CC"
 	service eucalyptus-cc stop
 }
 

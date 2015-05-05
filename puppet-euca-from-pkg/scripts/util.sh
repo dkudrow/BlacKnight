@@ -29,29 +29,56 @@ parse_args() {
 				;;
 			c)
 				CC_PART="$OPTARG"
+				pdebug "CC_PART=$CC_PART"
 				;;
 			k)
 				RIAKCS_KEY="$OPTARG"
+				pdebug "RIAKCS_KEY=$RIAKCS_KEY"
 				;;
 			s)
 				RIAKCS_SECRET="$OPTARG"
+				pdebug "RIAKCS_SECRET=$RIAKCS_SECRET"
 				;;
 			p)
 				PRIMARY_HEAD="$OPTARG"
+				pdebug "PRIMARY_HEAD=$PRIMARY_HEAD"
 				;;
 			q)
 				SECONDARY_HEAD="$OPTARG"
+				pdebug "SECONDARY_HEAD=$SECONDARY_HEAD"
+				;;
+			d)
+				DEBUG="TRUE"
 				;;
 		esac
 	done
 
 	NODENAME="$(hostname -f)"
+	pdebug "NODENAME=$NODENAME"
 	PUBLIC_IP="$(get_inet_addr eth0)"
+	pdebug "PUBLIC_IP=$PUBLIC_IP"
 	PRIVATE_IP="$(get_inet_addr br0)"
+	pdebug "PRIVATE_IP=$PRIVATE_IP"
 }
 
 ######################################################################
-# Print a message to stderr
+# Print a debug message to stderr
+# Globals:
+#	none
+# Arguments:
+#	text to print
+# Returns:
+#	none
+######################################################################
+
+pdebug() {
+	if [[ "$DEBUG" == "TRUE" ]]; then
+		echo "DEBUG: $@" >&2
+	fi
+}
+
+######################################################################
+# Print an error message to stderr
 # Globals:
 #	none
 # Arguments:
@@ -61,7 +88,7 @@ parse_args() {
 ######################################################################
 
 perror() {
-	echo "$@" >&2
+	echo "ERROR: $@" >&2
 }
 
 ######################################################################
