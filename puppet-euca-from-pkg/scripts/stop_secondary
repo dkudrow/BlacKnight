@@ -14,7 +14,7 @@ main() {
 	fi
 	deregister_eucalyptus_components
 	deregister_secondary
-	stop_secondary
+	#stop_secondary_head
 }
 
 #####################################################################
@@ -41,6 +41,7 @@ deregister_eucalyptus_components() {
 ######################################################################
 # De-register component from head nodes
 # Globals:
+#	CC_PART
 #	NODENAME
 #	PRIMARY_HEAD
 # Arguments:
@@ -50,9 +51,11 @@ deregister_eucalyptus_components() {
 ######################################################################
 
 deregister_secondary() {
-	pdebug "Deregistering Secondary CLC"
+	pdebug "Deregistering Eucalyptus services on primary head"
 	ssh "$PRIMARY_HEAD"<<EOF
-euca_conf --deregister-cloud -P eucalyptus -H "$PUBLIC_IP" --C "clc-$NODENAME"
+euca_conf --deregister-sc -P $CC_PART -H "$PUBLIC_IP" -C "sc-$NODENAME"
+euca_conf --deregister-cluster -P $CC_PART -H "$PUBLIC_IP" -C "cc-$NODENAME"
+euca_conf --deregister-cloud -P eucalyptus -H "$PUBLIC_IP" -C "$PUBLIC_IP"
 EOF
 }
 

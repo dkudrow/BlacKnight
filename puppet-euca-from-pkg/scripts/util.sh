@@ -19,12 +19,10 @@
 #TODO: EUCA_NODES
 
 parse_args() {
+	EUCA_NODES=()
 	while getopts ":c:n:k:s:p:q:d" opt; do
 		case "$opt" in
 			n)
-				if [[ ! -v "$EUCA_NODES" ]]; then
-					EUCA_NODES=()
-				fi
 				EUCA_NODES+=("$OPTARG")
 				;;
 			c)
@@ -53,7 +51,9 @@ parse_args() {
 		esac
 	done
 
-	NODENAME="$(hostname -f)"
+	HOSTNAME="$(hostname -f)"
+	pdebug "HOSTNAME=$HOSTNAME"
+	NODENAME="${HOSTNAME%%.*}"
 	pdebug "NODENAME=$NODENAME"
 	PUBLIC_IP="$(get_inet_addr eth0)"
 	pdebug "PUBLIC_IP=$PUBLIC_IP"
