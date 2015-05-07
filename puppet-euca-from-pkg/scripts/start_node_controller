@@ -8,8 +8,8 @@ source util.sh
 
 main() {
 	parse_args $@
-	if [[ -z "$PRIMARY_HEAD" || -z "$SECONDARY_HEAD" ]]; then
-		echo "Usage: -p <primary> -q <secondary>"
+	if [[ -z "$PRIMARY_HEAD" ]]; then
+		echo "Usage: -p <primary> [-q <secondary>]"
 		exit 1
 	fi
 	start_node_controller

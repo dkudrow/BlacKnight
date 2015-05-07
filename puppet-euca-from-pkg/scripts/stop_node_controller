@@ -8,12 +8,12 @@ source util.sh
 
 main() {
 	parse_args $@
-	if [[ -z "$PRIMARY_HEAD" || -z "$SECONDARY_HEAD" ]]; then
-		echo "Usage: -p <primary> -q <secondary>"
+	if [[ -z "$PRIMARY_HEAD" ]]; then
+		echo "Usage: -p <primary> [-q <secondary>]"
 		exit 1
 	fi
-	stop_node_controller
 	deregister_node_controller
+	stop_node_controller
 }
 
 ######################################################################
@@ -28,7 +28,7 @@ main() {
 
 stop_node_controller() {
 	pdebug "Stopping node controller"
-	service eucalyptus-nc start
+	service eucalyptus-nc stop
 }
 
 ######################################################################

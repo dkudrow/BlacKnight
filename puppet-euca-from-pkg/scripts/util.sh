@@ -121,14 +121,15 @@ get_inet_addr() {
 ######################################################################
 
 get_eucalytpus_credentials() {
-	local start_dir
-	start_dir="$PWD"
-	rm -rf /root/cred/*
-	cd /root/cred/
-	euca_conf --get-credentials=admin.zip
-	unzip admin.zip
-	source eucarc
-	cd $start_dir
+	if [[ ! -f /root/cred/eucarc ]]; then
+		mkdir -p /root/cred/
+		rm -rf /root/cred/*
+		cd /root/cred/
+		euca_conf --get-credentials=admin.zip
+		unzip admin.zip
+		cd -
+	fi
+	source /root/cred/eucarc
 }
 
 

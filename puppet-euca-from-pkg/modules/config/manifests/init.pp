@@ -18,4 +18,21 @@ class config {
     onlyif => '/usr/sbin/test `/usr/sbin/getenforce` == Enabled'
   }
 
+  service { 'eucalyptus-cloud' :
+    enable  => false,
+  }
+
+  service { 'eucalyptus-cc' :
+    enable  => false,
+  }
+
+  service { 'eucalyptus-nc' :
+    enable  => false,
+  }
+
+  service { 'eucanetd' :
+    enable  => false,
+  }
+
 }
+
