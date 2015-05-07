@@ -37,9 +37,11 @@ main() {
 
 start_secondary_head() {
 	pdebug "Starting CLC"
-	service eucalyptus-cloud start
-	#TODO: Do we need to wait?
-	#tail -F /var/log/eucalyptus/cloud-output.log | awk '/Detected Interfaces/ {exit}'
+	service eucalyptus-cloud status
+	if [[ "$?" != "0" ]]; then
+		service eucalyptus-cloud start
+		tail -F /var/log/eucalyptus/cloud-output.log | awk '/Detected Interfaces/ {exit}'
+	fi
 	pdebug "Starting CC"
 	service eucalyptus-cc start
 }
