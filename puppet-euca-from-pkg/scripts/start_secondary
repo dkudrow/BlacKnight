@@ -105,7 +105,7 @@ register_eucalyptus_components() {
 
 configure_eucalyptus() {
 	pdebug "Configuring object storage"
-	euca-modify-property -p objectstorage.providerclient=s3
+	euca-modify-property -p objectstorage.providerclient=riakcs
 	euca-modify-property -p objectstorage.s3provider.s3endpoint="$PUBLIC_IP:9090"
 	euca-modify-property -p objectstorage.s3provider.s3accesskey="$RIAKCS_KEY"
 	euca-modify-property -p objectstorage.s3provider.s3secretkey="$RIAKCS_SECRET"
