@@ -1,34 +1,6 @@
 # manifests/site.pp
 
-# network
-$NETWORK = '10.50.10.0'
-$NETMASK = '255.255.255.0'
-
-# config
-$EUCALYPTUS = '/'
-$EUCA_BASE = '/var/lib/eucalyptus'
-$CLOUD_OPTS = '--db-home=/usr/pgsql-9.1/ --java-home=/usr/lib/jvm/java-1.7.0'
-$LOGLEVEL = 'DEBUG'
-$HYPERVISOR = 'kvm'
-$VNET_MODE = 'MANAGED-NOVLAN'
-$VNET_PRIVINTERFACE = 'br0'
-$VNET_PUBLICIPS = '128.111.55.41-128.111.55.46 128.111.55.48-128.111.55.49'
-$VNET_DNS = '128.111.41.10'
-
-# riak
-# Note: consult docs.basho.com/riakcs/latest/cookbooks/Version-Compatibility/
-# for riak-cs version compatibility
-$RIAKCS_VERSION = '2.0.0-1.el6'
-$RIAK_VERSION = '2.0.5-1.el6'
-$STANCHION_VERSION = '2.0.0'
-
-$RIAKCS_PORT = 9090
-$STANCHION_HOST = '128.111.55.39'
-
-# yikes!
-$RIAK_ADMIN_KEY = 'GE-NBCXO9KMHB5FX6_LE'
-$RIAK_ADMIN_SECRET = 'poijG0ZVojshvgLrkR1CzLmqcHDdekjhoTT5uQ=='
-
+# Puppet
 File {
   owner => 'root',
   group => 'root'
@@ -38,6 +10,35 @@ Exec {
   path => "$path"
 }
 
+# Eucalyptus
+$CLOUD_OPTS = '--db-home=/usr/pgsql-9.1/ --java-home=/usr/lib/jvm/java-1.7.0'
+$EUCALYPTUS = '/'
+$EUCA_BASE = '/var/lib/eucalyptus'
+$HYPERVISOR = 'kvm'
+$LOGLEVEL = 'DEBUG'
+$VNET_DNS = '128.111.41.10'
+$VNET_MODE = 'MANAGED-NOVLAN'
+$VNET_NETMASK = '255.255.255.0'
+$VNET_PRIVINTERFACE = 'br0'
+$VNET_PUBLICIPS = '128.111.55.41-128.111.55.46 128.111.55.48-128.111.55.49'
+$VNET_SUBNET = '10.50.10.0'
+
+# Riak CS
+# Note: consult docs.basho.com/riakcs/latest/cookbooks/Version-Compatibility/
+# for riak-cs version compatibility
+$RIAKCS_VERSION = '2.0.0-1.el6'
+$RIAK_VERSION = '2.0.5-1.el6'
+$STANCHION_VERSION = '2.0.0'
+
+$RIAKCS_PORT = 9090
+$STANCHION_HOST = '128.111.55.39'
+$RIAK_ADMIN_KEY = 'GE-NBCXO9KMHB5FX6_LE'
+$RIAK_ADMIN_SECRET = 'poijG0ZVojshvgLrkR1CzLmqcHDdekjhoTT5uQ=='
+
+# Define a full installation
+$all = ['riak', 'network', 'repo', 'packages', 'config']
+
+# Physical nodes
 node 'php.cs.ucsb.edu' {
   $HWADDR ='00:24:E8:6B:7C:E8'
   $UUID ='6f12231d-22c7-47a4-9cf2-b494b60d1f23'
@@ -45,11 +46,7 @@ node 'php.cs.ucsb.edu' {
   $IPADDR = '10.50.10.39'
   $HOSTNAME = 'php.cs.ucsb.edu'
 
-  include riak
-  include network
-  include repo
-  include packages
-  include config
+  include $all
 }
 
 node 'oz.cs.ucsb.edu' {
@@ -59,11 +56,7 @@ node 'oz.cs.ucsb.edu' {
   $IPADDR = '10.50.10.51'
   $HOSTNAME = 'oz.cs.ucsb.edu'
 
-  include riak
-  include network
-  include repo
-  include packages
-  include config
+  include $all
 }
 
 node 'objc.cs.ucsb.edu' {
@@ -73,11 +66,7 @@ node 'objc.cs.ucsb.edu' {
   $IPADDR = '10.50.10.50'
   $HOSTNAME = 'objc.cs.ucsb.edu'
 
-  include riak
-  include network
-  include repo
-  include packages
-  include config
+  include $all
 }
 
 node 'scala.cs.ucsb.edu' {
@@ -87,9 +76,5 @@ node 'scala.cs.ucsb.edu' {
   $IPADDR = '10.50.10.25'
   $HOSTNAME = 'scala.cs.ucsb.edu'
 
-  include riak
-  include network
-  include repo
-  include packages
-  include config
+  include $all
 }
