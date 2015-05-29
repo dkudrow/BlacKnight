@@ -2,7 +2,7 @@ import logging
 
 
 def add_logger(c):
-    c._logger= logging.getLogger('farmcloud')
+    c._logger= logging.getLogger('blacknight')
 
     c.debug = c._logger.debug
     c.info = c._logger.info
@@ -11,7 +11,7 @@ def add_logger(c):
     c.critical = c._logger.critical
 
 
-def init_logger(name='farmcloud', level=logging.DEBUG, logfile=''):
+def init_logger(name='blacknight', level=logging.DEBUG, logfile=''):
     formatter = logging.Formatter('%(levelname)s:%(message)s')
 
     handler = logging.FileHandler(logfile) if logfile else \

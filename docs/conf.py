@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# farmcloud documentation build configuration file, created by
+# blacknight documentation build configuration file, created by
 # sphinx-quickstart on Wed Apr  8 13:53:52 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -52,7 +52,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'farmcloud'
+project = u'blacknight'
 copyright = u'2015, Daniel Kudrow'
 author = u'Daniel Kudrow'
 
@@ -228,7 +228,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'farmcloud.tex', u'farmcloud Documentation',
+  (master_doc, 'blacknight.tex', u'blacknight Documentation',
    u'Daniel Kudrow', 'manual'),
 ]
 
@@ -258,7 +258,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'farmcloud', u'farmcloud Documentation',
+    (master_doc, 'blacknight', u'blacknight Documentation',
      [author], 1)
 ]
 
@@ -272,8 +272,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'farmcloud', u'farmcloud Documentation',
-   author, 'farmcloud', 'One line description of project.',
+  (master_doc, 'blacknight', u'blacknight Documentation',
+   author, 'blacknight', 'One line description of project.',
    'Miscellaneous'),
 ]
 

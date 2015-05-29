@@ -1,5 +1,5 @@
 """
-Deployment Specification
+Appliance Specification
 """
 from collections import namedtuple
 from math import ceil
@@ -7,12 +7,12 @@ from math import ceil
 import yaml
 
 from action import Action
-from farmcloud import log
+from blacknight import log
 
 
 class _Role(namedtuple('_Role', 'name min_nodes max_nodes start_hook stop_hook deps')):
     """
-    A convenience class to keep track of node roles in a deployment.
+    A convenience class to keep track of node roles in an appliance.
     """
     pass
 
@@ -39,16 +39,15 @@ class _Dep(namedtuple('_Dep', 'role ratio')):
 
 class Spec(object):
     """
-    A specification that describes the desired configuration of a cloud
-    deployment.
+    A specification that describes the desired configuration of an appliance.
 
     The specification is loaded from a YAML file that defines the different
-    roles a node can assume as well as how the different roles should be
+    roles a service can fulfill as well as how the different roles should be
     managed. The format is as follows::
 
         --- # 10_infrastructure
         role_name:
-            min_nodes:  <int>       # min. nodes for functional deployment
+            min_nodes:  <int>       # min. nodes for functional appliance
             max_nodes:  <int>       # max useful nodes (null indicates no max.)
             start_hook: <string>    # command to start node (abs. path)
             stop_hook:  <string>    # command to stop node (abs. path)
@@ -56,7 +55,7 @@ class Spec(object):
                 - [<string>, <int>] # dependee, ratio of dependers to  dependees
         ...
 
-    The current state of the deployment can be polled from the ZooKeeper
+    The current state of the appliance can be polled from the ZooKeeper
     client and compared to the spec to determine if any changes should be made.
     """
     def __init__(self, yaml_spec):
@@ -67,7 +66,7 @@ class Spec(object):
         minimum node count for each role is automatically adjusted to
         satisfy all dependencies.
 
-        :param str yaml_spec: YAML deployment specification
+        :param str yaml_spec: YAML appliance specification
         :raises ValueError: if there is a problem with the specification
         """
         log.add_logger(self)
@@ -109,10 +108,10 @@ class Spec(object):
 
     def infrastructure_diff(self, state):
         """
-        Compare the current deployment state to the specification to produce
+        Compare the current appliance state to the specification to produce
         a list of actions.
 
-        The deployment state is provided as a dict mapping nodes to roles:
+        The appliance state is provided as a dict mapping nodes to roles:
             { 'hostname:port' : ['role_1', 'role_2'] }
 
         :param state: dict mapping nodes to roles

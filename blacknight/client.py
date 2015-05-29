@@ -8,26 +8,26 @@ from kazoo.client import KazooClient
 from kazoo.protocol.states import EventType, WatchedEvent
 
 import log
-from farmcloud.spec import Spec
+from blacknight.spec import Spec
 
 
 class Client(object):
     """
-    The clients are responsible for monitoring the state of the deployment
-    and remediating in the case of failure.
+    The clients are responsible for monitoring the state of the appliance and
+    remediating in the case of failure.
 
-    One client runs on each physical node of the deployment. All clients
-    participate in an election in which all candidates block except for the
+    One client runs on each physical node in the appliance. All clients
+    participate in an election on which all candidates block except for the
     current leader. The leader is tasked with listening for changes in the
-    deployment and, in the event of a change, making any adjustments
+    appliance and, in the event of a change, making any adjustments
     necessary to maintain the specification.
 
-    ZooKeeper is used to maintain the deployment state. Each client
-    contains a *KazooClient* ZooKeeper client to communicate with the
-    ensemble. The default znode layout is:
+    ZooKeeper is used to maintain the appliance state. Each client contains a
+    *KazooClient* ZooKeeper client to communicate with the ensemble. The default
+    znode layout is:
 
-        * */spec* - tiered deployment specifications (executed in ASCII order)
-        * */ensemble* - for each node in the deployment there is a znode containing a whitespace separated list of roles that it currently fulfills
+        * */spec* - tiered appliance specifications (executed in ASCII order)
+        * */ensemble* - for each node in the appliance there is a znode containing a whitespace separated list of roles that it currently fulfills
         * */elect* - used for by Kazoo for the leader election
     """
     def __init__(self, port='2181', primary_head=False,
@@ -55,7 +55,7 @@ class Client(object):
         self._client.start()
         self.debug('Kazoo client started')
 
-        # Load the deployment specification
+        # Load the appliance specification
         self._specs = []
         children = sorted(self._client.get_children(self._spec_path))
         if not children:
@@ -82,9 +82,9 @@ class Client(object):
 
     def _lead(self):
         """
-        Called by the deployment's newly elected leader. It registers a
+        Called by the appliance's newly elected leader. It registers a
         watcher with the ensemble membership path in ZooKeeper and listens
-        for changes. When a change is detected, the deployment state is
+        for changes. When a change is detected, the appliance state is
         queried from ZooKeeper and diff'ed against the specification to
         produce a list of remediating actions. These actions are then
         performed one at a time.
@@ -102,7 +102,7 @@ class Client(object):
                 self.info('Detected change in ensemble (%s)' % ensemble)
                 # self._client.reconfig('', '', ensemble)
 
-                # Query deployment state and generate list of actions
+                # Query appliance state and generate list of actions
                 actions = []
                 state = self.query()
                 self.debug('Current state is %s' % state)
@@ -133,12 +133,12 @@ class Client(object):
             if cmd == 'help':
                 print '\thelp  -- this message'
                 print '\tfail  -- simulate failover'
-                print '\tquery -- print current deployment state'
+                print '\tquery -- print current appliance state'
             elif cmd == 'fail':
                 print 'Simulating failover'
                 return
             elif cmd == 'query':
-                print 'Current deployment state:'
+                print 'Current appliance state:'
                 print self.query()
 
     # TODO
@@ -148,7 +148,7 @@ class Client(object):
 
         :return:
         """
-        return 'primary.deployment.net'
+        return 'primary.appliance.net'
 
     # TODO
     def cloud(self):
@@ -157,11 +157,11 @@ class Client(object):
 
         :return:
         """
-        return 'clc.deployment.net'
+        return 'clc.appliance.net'
 
     def query(self):
         """
-        Extracts the current deployment state from the ensemble membership
+        Extracts the current appliance state from the ensemble membership
         path.
 
         The state is returned as a dict with the nodes as keys and a list
@@ -169,7 +169,7 @@ class Client(object):
 
             { 'hostname:port' : ['role_1', 'role_2'] }
 
-        :return: deployment state 
+        :return: appliance state
         """
         state = {}
         ensemble = self._client.get_children(self._ensemble_path)

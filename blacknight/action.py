@@ -3,20 +3,20 @@ Remediation Actions
 """
 import subprocess
 
-from farmcloud import log
+from blacknight import log
 
 
 class Action(object):
     """
-    An action to be taken by a node in response to a change in deployment state.
+    An action to be taken by a node in response to a change in appliance state.
 
     Actions have a type which determines how they are carried out by the node.
     The types are,
 
         1. AbortType: the minimum specification cannot be sustained by the
-           current deployment state
+           current appliance state
 
-        2. NoActionType: no change to the deployment is required
+        2. NoActionType: no change to the appliance is required
 
         3. EmptyNodeType: a role is to be started on an empty node
 
