@@ -2,6 +2,7 @@
 Appliance Specification
 """
 from collections import namedtuple
+from pprint import PrettyPrinter
 from math import ceil
 
 import yaml
@@ -9,15 +10,25 @@ import yaml
 from action import Action
 from blacknight import log
 
+##>
+pp = PrettyPrinter()
+##<
 
-class _Role(namedtuple('_Role', 'name min_nodes max_nodes start_hook stop_hook deps')):
+
+class Role(object):
     """
-    A convenience class to keep track of node roles in an appliance.
+    A convenience class to keep track of service roles in an appliance.
     """
-    pass
+    def __init__(self, name, role):
+        self.name = name
+        self.min_instances = role['min_instances']
+        self.max_instances = role['max_instances']
+        self.start_hook = role['start_hook']
+        self.stop_hook = role['stop_hook']
+        self.deps = Dependency.convert_list(role['deps'])
 
 
-class _Dep(namedtuple('_Dep', 'role ratio')):
+class Dependency(namedtuple('Dependency', 'role ratio')):
     """
     A convenience class to keep track of dependencies between roles.
     """
@@ -25,14 +36,14 @@ class _Dep(namedtuple('_Dep', 'role ratio')):
     def convert_list(deps):
         """
         Convert a list of dependencies as they appear in the YAML specification
-        into a list of _Dep instances.
+        into a list of _Dep objects.
 
         :param deps: list of two-element-lists containing role dependencies
         :return: list of corresponding _Dep instances
         """
 
         if deps:
-            return [_Dep(d[0], d[1]) for d in deps]
+            return [Dependency(d[0], d[1]) for d in deps]
         else:
             return []
 
@@ -47,10 +58,10 @@ class Spec(object):
 
         --- # 10_infrastructure
         role_name:
-            min_nodes:  <int>       # min. nodes for functional appliance
-            max_nodes:  <int>       # max useful nodes (null indicates no max.)
-            start_hook: <string>    # command to start node (abs. path)
-            stop_hook:  <string>    # command to stop node (abs. path)
+            min_instances:  <int>   # min. instances of role for functional appliance
+            max_instances:  <int>   # max useful instances of role (null indicates no max.)
+            start_hook: <string>    # command to start service (abs. path)
+            stop_hook:  <string>    # command to stop service (abs. path)
             deps:                   # list of dependencies on other roles
                 - [<string>, <int>] # dependee, ratio of dependers to  dependees
         ...
@@ -63,7 +74,7 @@ class Spec(object):
         Creates a Spec object from a YAML file.
 
         The YAML file is converted into a collection of _Role instances. The
-        minimum node count for each role is automatically adjusted to
+        minimum service count for each role is automatically adjusted to
         satisfy all dependencies.
 
         :param str yaml_spec: YAML appliance specification
@@ -78,33 +89,27 @@ class Spec(object):
             raise ValueError('error reading YAML spec')
 
         # Extract roles
-        # FIXME why not just use result of yaml.load()?
         self._roles = {}
         for role_name in iter(spec):
             try:
-                role = _Role(name=role_name,
-                             min_nodes=spec[role_name]['min_nodes'],
-                             max_nodes=spec[role_name]['max_nodes'],
-                             start_hook=spec[role_name]['start_hook'],
-                             stop_hook=spec[role_name]['stop_hook'],
-                             deps=_Dep.convert_list(spec[role_name]['deps']))
-                self._roles[role_name] = role
+                self._roles[role_name] = Role(role_name, spec[role_name])
             except KeyError, key:
-                raise ValueError('node type \'%s\' missing required field %s' %
-                                 (role_name, key))
+                raise ValueError('role \'%s\' missing required field %s' % (role_name, key))
 
-        # Infer min_node values based on dependencies
+        # Infer min_instances values based on dependencies
         for depender in self._roles.itervalues():
             for dep in depender.deps:
                 dependee = self._roles[dep.role]
-                new_min = int(ceil(float(depender.min_nodes) / dep.ratio))
-                if not dependee.min_nodes or new_min > dependee.min_nodes:
-                    self._roles[dep.role] = dependee._replace(min_nodes=new_min)
+                new_min = int(ceil(float(depender.min_instances) / dep.ratio))
+                if not dependee.min_instances or new_min > \
+                        dependee.min_instances:
+                    dependee = dependee._replace(min_instances=new_min)
 
-        # Check that all roles have min_nodes
+        # Check that all roles have min_instances
         for role in self._roles.itervalues():
-            if not isinstance(role.min_nodes, int):
-                raise ValueError('could not infer min_nodes for %s' % role.name)
+            if not isinstance(role.min_instances, int):
+                raise ValueError('could not infer min_instances for %s' %
+                                 role.name)
 
     def infrastructure_diff(self, state):
         """
@@ -119,29 +124,27 @@ class Spec(object):
         """
         actions = []
 
-        # Get node count for each role
-        cur_roles = reduce(lambda x, y: x+y, state.itervalues())
-        node_count = {r: cur_roles.count(r) for r in self._roles}
+        # Get instance count for each role
+        all_instances = reduce(lambda x, y: x+y, state.itervalues())
+        instance_count = {r: all_instances.count(r) for r in self._roles}
         empty_nodes = filter(lambda n: state[n] == [], state)
 
         # Cannot proceed without a primary
         # FIXME bootstrapping
-        if not node_count['primary_head']:
-            return [Action.Abort()]
+        # if not instance_count['primary_head']:
+        #     return [Action.Abort()]
 
         # Calculate node deficits and surplus
         deficit = []
         min_surplus = []
         max_surplus = []
         for name, role in self._roles.iteritems():
-            if node_count[name] < role.min_nodes:
+            if instance_count[name] < role.min_instances:
                 deficit.append(role)
-            # elif node_count[name] > role.min_nodes:
+            elif role.max_instances and instance_count[name] > role.max_instances:
+                max_surplus.append(role)
             else:
-                if role.max_nodes and node_count[name] <= role.max_nodes:
-                    min_surplus.append(role)
-                else:
-                    max_surplus.append(role)
+                min_surplus.append(role)
 
         # Generate a list of actions
         # TODO multi role deficits
