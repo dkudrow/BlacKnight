@@ -24,7 +24,10 @@ class Role(object):
         self.min_instances = role['min_instances']
         self.max_instances = role['max_instances']
         self.start_hook = role['start_hook']
+        self.start_args = role['start_args']
         self.stop_hook = role['stop_hook']
+        self.stop_args = role['stop_args']
+        self.needs_node = 'node' in self.start_args
         self.deps = Dependency.convert_list(role['deps'])
 
 
@@ -128,11 +131,6 @@ class Spec(object):
         all_instances = reduce(lambda x, y: x+y, state.itervalues())
         instance_count = {r: all_instances.count(r) for r in self._roles}
         empty_nodes = filter(lambda n: state[n] == [], state)
-
-        # Cannot proceed without a primary
-        # FIXME bootstrapping
-        # if not instance_count['primary_head']:
-        #     return [Action.Abort()]
 
         # Calculate node deficits and surplus
         deficit = []
