@@ -1,7 +1,6 @@
 """
 Appliance Specification
 """
-from collections import namedtuple
 from math import ceil
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -10,30 +9,22 @@ from action import Action
 from blacknight import log
 
 
-# Use these to differentiate parallel edges in the dependency graph
-CURRENT = 0
-ATTEMPT = 1
-
-
 class Role(object):
     """
     A convenience class to keep track of service roles in an appliance.
     """
     def __init__(self, name, role):
         self.name = name
-        self.min_instances = role['min_instances']
-        self.max_instances = role['max_instances']
+        self.min_inst = role['min_instances']
+        self.max_inst = role['max_instances']
         self.start_hook = role['start_hook']
         self.start_args = role['start_args'] if role['start_args'] else []
         self.stop_hook = role['stop_hook']
         self.stop_args = role['stop_args'] if role['stop_args'] else []
-        self.needs_node = 'node' in self.start_args
-        self.cur_instances = None
-        self.physical_nodes = None
-        if role['dependencies']:
-            self.dependencies = {name: float(ratio) for name, ratio in role['dependencies'].iteritems()}
-        else:
-            self.dependencies = {}
+        self.cur_inst = None
+        self.deps = role['dependencies'] if role['dependencies'] else {}
+        for value in self.deps.itervalues():
+            value = float(value)
 
 
 class Spec(object):
@@ -84,28 +75,28 @@ class Spec(object):
         self._dep_graph = nx.DiGraph()
         self._dep_graph.add_nodes_from(self._roles.iterkeys())
         for name, role in self._roles.iteritems():
-            for dependency, ratio in role.dependencies.iteritems():
+            for dependency, ratio in role.deps.iteritems():
                 self._dep_graph.add_edge(name, dependency)
 
 
         # Find roots of dependency graph (top level services in appliance)
-        self._roots = [node for node, degree in self._dep_graph.in_degree_iter() if degree == 0]
+        self._roots = [node for node, deg in self._dep_graph.in_degree_iter() if deg == 0]
 
         # Find leaves of dependency graph (services that run on physical nodes)
-        self._leaves = [node for node, degree in self._dep_graph.out_degree_iter() if degree == 0]
+        self._leaves = [node for node, deg in self._dep_graph.out_degree_iter() if deg == 0]
 
-        # Infer min_instances values based on dependencies
+        # Infer min_inst values based on dependencies
         for role in self._roles.itervalues():
             if role.name not in self._roots:
-                role.min_instances = 0
+                role.min_inst = 0
         for root in self._roots:
             for edge in self.dfs_traverse(root):
                 predecessor = self._roles[edge[0]]
                 successor = self._roles[edge[1]]
-                ratio = predecessor.dependencies[successor.name]
-                successor.min_instances += ceil(predecessor.min_instances) / ratio
+                ratio = predecessor.deps[successor.name]
+                successor.min_inst += ceil(predecessor.min_inst) / ratio
         for role in self._roles.itervalues():
-            role.min_instances = ceil(role.min_instances)
+            role.min_inst = ceil(role.min_inst)
 
         # TODO: max instances?
         # TODO: validate dependency graph/roles
@@ -119,9 +110,6 @@ class Spec(object):
 
     def diff(self, state):
 
-        #
-        transaction = []
-
         # Get current instance count for each role
         all_instances = reduce(lambda x, y: x+y, state.itervalues())
         instance_count = {r: all_instances.count(r) for r in self._dep_graph}
@@ -134,104 +122,34 @@ class Spec(object):
                 self._dep_graph.add_edges_from([edge], cur_weight=cur_weight)
 
     def add_role(self, root):
-        for edge in self._dep_graph.out_edges(root):
+        out_edges = self._dep_graph.out_edges(root)
+        if not out_edges:
+            for leaf in self._leaves:
+                if leaf == root:
+                    continue
+                # FIXME cur_weight or new_weight?
+                in_degree = self._dep_graph.in_degree(leaf, weight='cur_weight')
+                cur_instances = self._roles[leaf]
+                if cur_instances > in_degree:
+                    # TODO remove role
+                    # TODO add role
+                    print 'Removing {}, Adding {}'.format(leaf, root)
+                    return
+            # TODO failed to add role! Abort!
+            print 'Failed to add {}, aborting!'.format(root)
+            return
+
+        for edge in out_edges:
             successor = edge[1]
             cur_weight = self._dep_graph.get_edge_data(*edge)['cur_weight']
-            ratio = self._roles[root].dependencies[successor]
+            ratio = self._roles[root].deps[successor]
             new_weight = cur_weight + 1 / ratio
             self._dep_graph.add_edges_from([edge], new_weight=new_weight)
 
             cur_instances = self._roles[successor].cur_instances
             needed_instances = self._dep_graph.in_degree([successor], weight='new_weight')
             if cur_instances < needed_instances:
-                add_role(edge[1])
-
-    def make_role_dict(self, name, spec):
-        role = {}
-        self.name = name
-        self.min_instances = spec['min_instances']
-        self.max_instances = spec['max_instances']
-        self.start_hook = spec['start_hook']
-        self.start_args = spec['start_args'] if spec['start_args'] else []
-        self.stop_hook = spec['stop_hook']
-        self.stop_args = spec['stop_args'] if spec['stop_args'] else []
-        self.needs_node = 'node' in self.start_args
-        self.cur_instances = None
-        self.physical_nodes = None
-        if spec['dependencies']:
-            self.dependencies = {name: float(ratio) for name, ratio in spec['dependencies'].iteritems()}
-        else:
-            self.dependencies = {}
-
-    def infrastructure_diff(self, state):
-        """
-        Compare the current appliance state to the specification to produce
-        a list of actions.
-
-        The appliance state is provided as a dict mapping nodes to roles:
-            { 'hostname:port' : ['role_1', 'role_2'] }
-
-        :param state: dict mapping nodes to roles
-        :return: list of actions to executed
-        """
-        actions = []
-
-        # Get instance count for each role
-        all_instances = reduce(lambda x, y: x+y, state.itervalues())
-        instance_count = {r: all_instances.count(r) for r in self._dep_graph}
-        empty_nodes = filter(lambda n: state[n] == [], state)
-
-        # Calculate node deficits and surplus
-        deficit = []
-        min_surplus = []
-        max_surplus = []
-        for name, role in self._dep_graph.iteritems():
-            if instance_count[name] < role.min_instances:
-                deficit.append(role)
-            elif role.max_instances and instance_count[name] > role.max_instances:
-                max_surplus.append(role)
-            else:
-                min_surplus.append(role)
-
-        # Generate a list of actions
-        # TODO multi role deficits
-        for role in deficit:
-            if empty_nodes:
-                node = empty_nodes.pop()
-                action = Action.EmptyNode(node, role)
-                actions.append(action)
-                continue
-            if max_surplus:
-                stop_role = max_surplus.pop()
-            elif min_surplus:
-                stop_role = min_surplus.pop()
-            else:
-                actions.append(Action.Abort())
-                break
-
-            # Find node to repurpose
-            for node, roles in state.iteritems():
-                if stop_role.name in roles:
-                    actions.append(Action.ExchangeNode(node, role, stop_role))
-
-        for role in min_surplus:
-            if empty_nodes:
-                node = empty_nodes.pop()
-                action = Action.EmptyNode(node, role)
-                actions.append(action)
-                continue
-            if max_surplus:
-                stop_role = max_surplus.pop()
-            else:
-                actions.append(Action.NoAction())
-                break
-
-            # Find node to repurpose
-            for node, roles in state.iteritems():
-                if stop_role.name in roles:
-                    actions.append(Action.ExchangeNode(node, role, stop_role))
-
-        return actions
+                self.add_role(edge[1])
 
     def dump(self, label=None):
         if label:
@@ -253,8 +171,8 @@ if __name__ == '__main__':
              #'localhost:2183': ['nc']}
 
     print 'Specification:'
-    spec.dump(label='min_instances')
-    spec.dump(label='max_instances')
+    spec.dump(label='min_inst')
+    spec.dump(label='max_inst')
 
     print ''
 
