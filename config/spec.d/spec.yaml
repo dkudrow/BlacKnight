@@ -1,0 +1,49 @@
+secondary_head:
+  min_instances: 0
+  max_instances: 1
+  start_hook: config/hooks/start_secondary.sh
+  start_args: [node, primary, partition, riak_key, riak_secret]
+  stop_hook: config/hooks/stop_secondary.sh
+  stop_args: [node, primary, partition]
+  dependencies:
+
+nc:
+  min_instances: 1
+  max_instances: ~
+  start_hook: config/hooks/start_nc.sh
+  start_args: [node, primary, secondary]
+  stop_hook: config/hooks/stop_nc.sh
+  stop_args: [node, primary, secondary]
+  dependencies:
+
+app:
+  min_instances: 3
+  max_instances: ~
+  start_hook: config/hooks/start_app.sh
+  start_args:
+  stop_hook: config/hooks/stop_app.sh
+  stop_args:
+  dependencies:
+    nc: 2
+    db: 10
+    hadoop: 10
+
+db:
+  min_instances: 0
+  max_instances: ~
+  start_hook: config/hooks/start_db.sh
+  start_args:
+  stop_hook: config/hooks/stop_db.sh
+  stop_args:
+  dependencies:
+    nc: 2
+
+hadoop:
+  min_instances: 0
+  max_instances: ~
+  start_hook: config/hooks/start_hadoop.sh
+  start_args:
+  stop_hook: config/hooks/stop_hadoop.sh
+  stop_args:
+  dependencies:
+    nc: 2
