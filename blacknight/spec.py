@@ -5,7 +5,7 @@ from math import ceil
 import networkx as nx
 import matplotlib.pyplot as plt
 import yaml
-from action import Action
+from action import HostAction, Action
 from blacknight import log
 
 
@@ -21,10 +21,15 @@ class Role(object):
         self.start_args = role['start_args'] if role['start_args'] else []
         self.stop_hook = role['stop_hook']
         self.stop_args = role['stop_args'] if role['stop_args'] else []
-        self.cur_inst = None
         self.deps = role['dependencies'] if role['dependencies'] else {}
         for value in self.deps.itervalues():
             value = float(value)
+
+        # These attributes are used in diff()
+        self.cur_inst = None    # current instance count of role
+        self.new_inst = None    # Uncommitted change in instances count
+        self.cur_hosts = None       # Hosts on which this role runs (leaves only)
+        self.new_hosts = None       # Hosts on which this role runs (leaves only)
 
 
 class Spec(object):
@@ -108,48 +113,77 @@ class Spec(object):
             stack += self._dep_graph.out_edges(edge[1])
             yield edge
 
-    def diff(self, state):
+    def diff(self, hosts, services):
 
         # Get current instance count for each role
-        all_instances = reduce(lambda x, y: x+y, state.itervalues())
-        instance_count = {r: all_instances.count(r) for r in self._dep_graph}
+        all_inst = hosts.values() + services
+        inst_count = {r: all_inst.count(r) for r in self._dep_graph}
 
-        # Update the edge weights for the current appliance state
+        # Update the graph for the current appliance state
         for node in self._dep_graph.nodes_iter():
-            self._roles[node].cur_instances = instance_count[node]
+            role = self._roles[node]
+            role.cur_inst = role.new_inst = inst_count[node]
+            role.cur_hosts, role.new_hosts = [], []
             for edge in self._dep_graph.out_edges(node):
-                cur_weight = instance_count[node] / ratio
-                self._dep_graph.add_edges_from([edge], cur_weight=cur_weight)
+                ratio = self._roles[node].deps[edge[1]]
+                cur_weight = inst_count[node] / ratio
+                self._dep_graph.add_edge(*edge, cur_weight=cur_weight, new_weight=cur_weight)
 
-    def add_role(self, root):
+        # Determine which roles are on which hosts
+        unused_hosts = hosts.keys()
+        for host, role in hosts.iteritems():
+            if role:
+                self._roles[role].cur_hosts.append(host)
+                self._roles[role].new_hosts.append(host)
+                unused_hosts.remove(host)
+
+        for root in self._roots:
+            deficit = self._roles[root].min_inst - self._roles[root].cur_inst
+            if deficit > 0:
+                transaction = []
+                if self.add_role_attempt(root, transaction, deficit):
+                    self.commit(transaction)
+                else:
+                    print 'Insufficient hosts, aborting!'
+
+    def add_role_attempt(self, root, transaction, count=1):
         out_edges = self._dep_graph.out_edges(root)
+
+        # We need to re-purpose a host for this role
         if not out_edges:
-            for leaf in self._leaves:
-                if leaf == root:
-                    continue
-                # FIXME cur_weight or new_weight?
-                in_degree = self._dep_graph.in_degree(leaf, weight='cur_weight')
-                cur_instances = self._roles[leaf]
-                if cur_instances > in_degree:
-                    # TODO remove role
-                    # TODO add role
-                    print 'Removing {}, Adding {}'.format(leaf, root)
-                    return
-            # TODO failed to add role! Abort!
-            print 'Failed to add {}, aborting!'.format(root)
-            return
+            for leaf in [leaf for leaf in self._leaves if leaf != root]:
+                in_degree = self._dep_graph.in_degree(leaf, weight='new_weight')
+                if self._roles[leaf].new_inst >= ceil(in_degree) + count:
+                    action = self.swap_roles_on_host(leaf, root, count)
+                    transaction.append(action)
+                    return True
+            return False
 
+        # Update edge weights and recurse if necessary
+        self._roles[root].new_inst += count
+        self.update_new_weights(root)
+        transaction.append(Action(start=root))
         for edge in out_edges:
-            successor = edge[1]
-            cur_weight = self._dep_graph.get_edge_data(*edge)['cur_weight']
-            ratio = self._roles[root].deps[successor]
-            new_weight = cur_weight + 1 / ratio
-            self._dep_graph.add_edges_from([edge], new_weight=new_weight)
+            new_inst = self._roles[edge[1]].new_inst
+            in_degree = self._dep_graph.in_degree(edge[1], weight = 'new_weight')
+            deficit = ceil(in_degree) - new_inst
+            if deficit > 0 and not self.add_role_attempt(edge[1], transaction, deficit):
+                return False
+        return True
 
-            cur_instances = self._roles[successor].cur_instances
-            needed_instances = self._dep_graph.in_degree([successor], weight='new_weight')
-            if cur_instances < needed_instances:
-                self.add_role(edge[1])
+    def swap_roles_on_host(self, stop, start, count):
+        host = self._roles[stop].new_hosts.pop()
+        self._roles[stop].new_inst -= count
+        self.update_new_weights(stop)
+        self._roles[start].new_inst += count
+        self.update_new_weights(start)
+        return HostAction(host, stop=stop, start=start)
+
+    def update_new_weights(self, node):
+        for edge in self._dep_graph.out_edges(node):
+            ratio = self._roles[edge[0]].deps[edge[1]]
+            new_weight = self._roles[node].new_inst / ratio
+            self._dep_graph.add_edge(*edge, new_weight=new_weight)
 
     def dump(self, label=None):
         if label:
@@ -161,22 +195,20 @@ class Spec(object):
         plt.savefig('spec.png')
         plt.show()
 
+    def commit(self, transaction):
+        print transaction
+        pass
+
 if __name__ == '__main__':
     log.init_logger()
 
     spec = Spec(open('config/spec.d/spec.yaml', 'r').read())
 
-    state = {'localhost:2181': ['primary_head'],
-             'localhost:2182': ['secondary_head']}
-             #'localhost:2183': ['nc']}
+    hosts = {'localhost:2181': 'secondary_head',
+             'localhost:2182': 'node_controller',
+             'localhost:2183': 'node_controller',
+             'localhost:2184': 'node_controller'}
 
-    print 'Specification:'
-    spec.dump(label='min_inst')
-    spec.dump(label='max_inst')
+    services = ['app', 'app', 'db']
 
-    print ''
-
-    # print 'Actions:'
-    # for a in spec.infrastructure_diff(state):
-    #     print ' *{0}'.format(a)
-
+    spec.diff(hosts, services)

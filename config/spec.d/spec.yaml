@@ -7,7 +7,7 @@ secondary_head:
   stop_args: [node, primary, partition]
   dependencies:
 
-nc:
+node_controller:
   min_instances: 1
   max_instances: ~
   start_hook: config/hooks/start_nc.sh
@@ -24,7 +24,7 @@ app:
   stop_hook: config/hooks/stop_app.sh
   stop_args:
   dependencies:
-    nc: 2
+    node_controller: 2
     db: 10
     hadoop: 10
 
@@ -36,7 +36,7 @@ db:
   stop_hook: config/hooks/stop_db.sh
   stop_args:
   dependencies:
-    nc: 2
+    node_controller: 2
 
 hadoop:
   min_instances: 0
@@ -46,4 +46,4 @@ hadoop:
   stop_hook: config/hooks/stop_hadoop.sh
   stop_args:
   dependencies:
-    nc: 2
+    node_controller: 2

@@ -5,7 +5,18 @@ import subprocess
 
 from blacknight import log
 
+class Action(object):
+    def __init__(self, start=None, stop=None):
+        self.start = start
+        self.stop = stop
 
+class HostAction(Action):
+    def __init__(self, host, start=None, stop=None):
+        self.host = host
+        self.start = start
+        self.stop = stop
+
+'''
 class Action(object):
     """
     An action to be taken by a node in response to a change in appliance state.
@@ -149,3 +160,4 @@ class Action(object):
         str += ')'
 
         return str
+'''
