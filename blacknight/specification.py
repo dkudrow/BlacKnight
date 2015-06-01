@@ -29,7 +29,7 @@ class Role(object):
         self.cur_inst = None    # current instance count of role
         self.new_inst = None    # Uncommitted change in instances count
         self.cur_hosts = None   # Hosts on which this role runs (leaves only)
-        self.new_hosts = None   # Hosts on which this role runs (leaves only)
+        self.new_hosts = None   # Uncmomited changes to hosts (leaves only)
 
 
 class Specification(object):
@@ -109,6 +109,8 @@ class Specification(object):
 
     def diff(self, hosts, services):
 
+        committed_transactions = []
+
         # Get current instance count for each role
         all_inst = hosts.values() + services
         inst_count = {r: all_inst.count(r) for r in self._dep_graph}
@@ -131,14 +133,20 @@ class Specification(object):
                 self._roles[role].new_hosts.append(host)
                 unused_hosts.remove(host)
 
+        # Attempt to satisfy min_inst for all top-level roles
         for root in self._roots:
             deficit = int(self._roles[root].min_inst - self._roles[root].cur_inst)
             if deficit > 0:
                 transaction = []
                 if self.add_role_attempt(root, transaction, deficit):
-                    self.commit(transaction)
+                    transaction.reverse()
+                    committed_transactions += transaction
+                    self.commit()
                 else:
-                    print 'Insufficient hosts, aborting!'
+                    # Could not fulfill min_inst for root, abort
+                    self.error('cannot start {}, aborting.'.format(root))
+                    return [Action()]
+        return committed_transactions
 
     def add_role_attempt(self, root, transaction, count=1):
         out_edges = self._dep_graph.out_edges(root)
@@ -220,6 +228,18 @@ class Specification(object):
             stack += self._dep_graph.out_edges(edge[1])
             yield edge
 
+    def commit(self):
+        """
+        Commit the most recent transaction to the dependency graph.
+        """
+        for node in self._dep_graph.nodes_iter():
+            role = self._roles[node]
+            role.cur_inst = role.new_inst
+            role.cur_hosts = list(role.new_hosts)
+        for edge in self._dep_graph.edges_iter():
+            edge_data = self._dep_graph.get_edge_data(*edge)
+            edge_data['cur_weight'] = edge_data['new_weight']
+
     def dump(self, label=None):
         if label:
             labels = {role.name: role.__getattribute__(label) for role in self._roles.itervalues()}
@@ -230,10 +250,6 @@ class Specification(object):
         plt.savefig('spec.png')
         plt.show()
 
-    def commit(self, transaction):
-        print transaction
-        pass
-
 if __name__ == '__main__':
     log.init_logger()
 
@@ -243,6 +259,6 @@ if __name__ == '__main__':
              'localhost:2182': 'node_controller',
              'localhost:2183': 'node_controller'}
 
-    services = ['app', 'db', 'hadoop']
+    services = ['app', 'app', 'hadoop']
 
-    spec.diff(hosts, services)
+    print spec.diff(hosts, services)
