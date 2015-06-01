@@ -105,8 +105,6 @@ class Specification(object):
         for role in self._roles.itervalues():
             role.min_inst = ceil(role.min_inst)
 
-        # TODO: max instances?
-
     def diff(self, hosts, services):
 
         committed_transactions = []
@@ -143,9 +141,27 @@ class Specification(object):
                     committed_transactions += transaction
                     self.commit()
                 else:
-                    # Could not fulfill min_inst for root, abort
                     self.error('cannot start {}, aborting.'.format(root))
                     return [Action()]
+
+        # Fill roles until we're out of room
+        # TODO add surplus role priority to spec
+        # TODO avoid loops -- granted hosts should be non-revocable!
+        attempt_succeeded = list(self._roots)
+        while attempt_succeeded:
+            for root in attempt_succeeded:
+                if self._roles[root].cur_inst >= self._roles[root].max_inst:
+                    attempt_succeeded.remove(root)
+                    continue
+                transaction = []
+                if self.add_role_attempt(root, transaction):
+                    transaction.reverse()
+                    committed_transactions += transaction
+                    self.commit()
+                else:
+                    attempt_succeeded.remove(root)
+                    self.abort()
+
         return committed_transactions
 
     def add_role_attempt(self, root, transaction, count=1):
@@ -240,6 +256,18 @@ class Specification(object):
             edge_data = self._dep_graph.get_edge_data(*edge)
             edge_data['cur_weight'] = edge_data['new_weight']
 
+    def abort(self):
+        """
+        Abort the most recent transaction.
+        """
+        for node in self._dep_graph.nodes_iter():
+            role = self._roles[node]
+            role.new_inst = role.cur_inst
+            role.new_hosts = list(role.cur_hosts)
+        for edge in self._dep_graph.edges_iter():
+            edge_data = self._dep_graph.get_edge_data(*edge)
+            edge_data['new_weight'] = edge_data['cur_weight']
+
     def dump(self, label=None):
         if label:
             labels = {role.name: role.__getattribute__(label) for role in self._roles.itervalues()}
@@ -256,6 +284,9 @@ if __name__ == '__main__':
     spec = Specification(open('config/spec.d/spec.yaml', 'r').read())
 
     hosts = {'localhost:2181': 'secondary_head',
+             'localhost:2182': 'node_controller',
+             'localhost:2182': 'node_controller',
+             'localhost:2182': 'node_controller',
              'localhost:2182': 'node_controller',
              'localhost:2183': 'node_controller'}
 
