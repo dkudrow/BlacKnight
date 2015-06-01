@@ -5,7 +5,7 @@ from math import ceil
 import networkx as nx
 import matplotlib.pyplot as plt
 import yaml
-from action import HostAction, Action
+from action import Action
 from blacknight import log
 
 
@@ -22,8 +22,8 @@ class Role(object):
         self.stop_hook = role['stop_hook']
         self.stop_args = role['stop_args'] if role['stop_args'] else []
         self.deps = role['dependencies'] if role['dependencies'] else {}
-        for value in self.deps.itervalues():
-            value = float(value)
+        for role, ratio in self.deps.iteritems():
+            self.deps[role] = float(ratio)
 
         # These attributes are used in diff()
         self.cur_inst = None    # current instance count of role
@@ -138,7 +138,7 @@ class Spec(object):
                 unused_hosts.remove(host)
 
         for root in self._roots:
-            deficit = self._roles[root].min_inst - self._roles[root].cur_inst
+            deficit = int(self._roles[root].min_inst - self._roles[root].cur_inst)
             if deficit > 0:
                 transaction = []
                 if self.add_role_attempt(root, transaction, deficit):
@@ -162,11 +162,11 @@ class Spec(object):
         # Update edge weights and recurse if necessary
         self._roles[root].new_inst += count
         self.update_new_weights(root)
-        transaction.append(Action(start=root))
+        transaction += [Action(start=root) for i in range(count)]
         for edge in out_edges:
             new_inst = self._roles[edge[1]].new_inst
             in_degree = self._dep_graph.in_degree(edge[1], weight = 'new_weight')
-            deficit = ceil(in_degree) - new_inst
+            deficit = int(ceil(in_degree) - new_inst)
             if deficit > 0 and not self.add_role_attempt(edge[1], transaction, deficit):
                 return False
         return True
@@ -177,7 +177,7 @@ class Spec(object):
         self.update_new_weights(stop)
         self._roles[start].new_inst += count
         self.update_new_weights(start)
-        return HostAction(host, stop=stop, start=start)
+        return Action(host=host, stop=stop, start=start)
 
     def update_new_weights(self, node):
         for edge in self._dep_graph.out_edges(node):
@@ -206,9 +206,8 @@ if __name__ == '__main__':
 
     hosts = {'localhost:2181': 'secondary_head',
              'localhost:2182': 'node_controller',
-             'localhost:2183': 'node_controller',
-             'localhost:2184': 'node_controller'}
+             'localhost:2183': 'node_controller'}
 
-    services = ['app', 'app', 'db']
+    services = ['app', 'db', 'hadoop']
 
     spec.diff(hosts, services)
