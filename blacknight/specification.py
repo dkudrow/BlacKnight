@@ -11,7 +11,7 @@ from blacknight import log
 
 class Role(object):
     """
-    A convenience class to keep track of service roles in an appliance.
+    A convenience class for managing service roles in an appliance.
     """
     def __init__(self, name, role):
         self.name = name
@@ -28,41 +28,40 @@ class Role(object):
         # These attributes are used in diff()
         self.cur_inst = None    # current instance count of role
         self.new_inst = None    # Uncommitted change in instances count
-        self.cur_hosts = None       # Hosts on which this role runs (leaves only)
-        self.new_hosts = None       # Hosts on which this role runs (leaves only)
+        self.cur_hosts = None   # Hosts on which this role runs (leaves only)
+        self.new_hosts = None   # Hosts on which this role runs (leaves only)
 
 
-class Spec(object):
+class Specification(object):
     """
     A specification that describes the desired configuration of an appliance.
 
-    The specification is loaded from a YAML file that defines the different
-    roles a service can fulfill as well as how the different roles should be
-    managed. The format is as follows::
+    The internal representation of the specification takes the form of a
+    directed graph. Vertexes in this graph represent service roles. Edges
+    represent the dependencies between roles. The specification is loaded from a
+    YAML file that defines the different service roles. The format is as
+    follows::
 
-        --- # 10_infrastructure
+        --- # specification.yaml
         role_name:
-            min_instances:  <int>   # min. instances of role for functional appliance
-            max_instances:  <int>   # max useful instances of role (null indicates no max.)
-            start_hook: <string>    # command to start service (abs. path)
-            stop_hook:  <string>    # command to stop service (abs. path)
-            deps:                   # list of dependencies on other roles
-                - [<string>, <int>] # dependee, ratio of dependers to  dependees
+            min_inst: <int>       # min instances of role for functional appliance
+            max_inst: <int>       # max useful instances of role
+            start_hook: <string>  # command to start service (abs. path)
+            start_args: <list>    # arguments to start hook
+            stop_hook: <string>   # command to stop service (abs. path)
+            stop_args: <list>     # arguments to stop hook
+            deps:                 # dependencies on other roles
+                <string>: <int>   # dependency: max co-tenancy
         ...
-
-    The current state of the appliance can be polled from the ZooKeeper
-    client and compared to the spec to determine if any changes should be made.
     """
     def __init__(self, yaml_spec):
         """
-        Creates a Spec object from a YAML file.
+        Initialize a specification from a YAML file.
 
-        The YAML file is converted into a collection of _Role instances. The
-        minimum service count for each role is automatically adjusted to
-        satisfy all dependencies.
+        WRITEME
 
-        :param str yaml_spec: YAML appliance specification
-        :raises ValueError: if there is a problem with the specification
+        :param yaml_spec: filename of YAML specification
+        :type yaml_spec: string
         """
         log.add_logger(self)
 
@@ -83,6 +82,9 @@ class Spec(object):
             for dependency, ratio in role.deps.iteritems():
                 self._dep_graph.add_edge(name, dependency)
 
+        # Make sure there are no cyclic dependencies
+        if not nx.is_directed_acyclic_graph(self._dep_graph):
+            raise ValueError('found cycle in dependency graph')
 
         # Find roots of dependency graph (top level services in appliance)
         self._roots = [node for node, deg in self._dep_graph.in_degree_iter() if deg == 0]
@@ -95,7 +97,7 @@ class Spec(object):
             if role.name not in self._roots:
                 role.min_inst = 0
         for root in self._roots:
-            for edge in self.dfs_traverse(root):
+            for edge in self.dfs_iter(root):
                 predecessor = self._roles[edge[0]]
                 successor = self._roles[edge[1]]
                 ratio = predecessor.deps[successor.name]
@@ -104,14 +106,6 @@ class Spec(object):
             role.min_inst = ceil(role.min_inst)
 
         # TODO: max instances?
-        # TODO: validate dependency graph/roles
-
-    def dfs_traverse(self, root):
-        stack = self._dep_graph.out_edges(root)
-        while stack:
-            edge = stack.pop()
-            stack += self._dep_graph.out_edges(edge[1])
-            yield edge
 
     def diff(self, hosts, services):
 
@@ -172,6 +166,22 @@ class Spec(object):
         return True
 
     def swap_roles_on_host(self, stop, start, count):
+        """
+        Exchange roles on a host and return the resultant `Action`.
+
+        WRITEME
+
+        :param stop: role to stop
+        :param start: role to start
+        :param count: instances for role to exchange
+
+        :type stop: string
+        :type start: string
+        :type count: int
+
+        :return: corresponding `Action` object
+        :rtype: `Action`
+        """
         host = self._roles[stop].new_hosts.pop()
         self._roles[stop].new_inst -= count
         self.update_new_weights(stop)
@@ -180,10 +190,35 @@ class Spec(object):
         return Action(host=host, stop=stop, start=start)
 
     def update_new_weights(self, node):
+        """
+        Update the weights of a node's outgoing edges
+
+        WRITEME
+
+        :param node: node to update
+        :type node: string
+        """
         for edge in self._dep_graph.out_edges(node):
             ratio = self._roles[edge[0]].deps[edge[1]]
             new_weight = self._roles[node].new_inst / ratio
             self._dep_graph.add_edge(*edge, new_weight=new_weight)
+
+    def dfs_iter(self, root):
+        """
+        Depth first search starting at root.
+
+        WRITEME
+
+        :param root: root of DFS
+        :type root: string
+        :return: next edge in dependency graph
+        :rtype: tuple of strings
+        """
+        stack = self._dep_graph.out_edges(root)
+        while stack:
+            edge = stack.pop()
+            stack += self._dep_graph.out_edges(edge[1])
+            yield edge
 
     def dump(self, label=None):
         if label:
@@ -202,7 +237,7 @@ class Spec(object):
 if __name__ == '__main__':
     log.init_logger()
 
-    spec = Spec(open('config/spec.d/spec.yaml', 'r').read())
+    spec = Specification(open('config/spec.d/spec.yaml', 'r').read())
 
     hosts = {'localhost:2181': 'secondary_head',
              'localhost:2182': 'node_controller',

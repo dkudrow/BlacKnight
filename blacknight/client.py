@@ -8,7 +8,7 @@ from kazoo.client import KazooClient
 from kazoo.protocol.states import EventType, WatchedEvent
 
 import log
-from blacknight.spec import Spec
+from blacknight.specification import Specification
 
 
 class Client(object):
@@ -63,7 +63,7 @@ class Client(object):
         spec_znodes = [self._spec_path + '/' + z for z in children]
         for spec_znode in spec_znodes:
             data, stat = self._client.get(spec_znode)
-            self._specs.append(Spec(data))
+            self._specs.append(Specification(data))
             self.debug('Parsed \'%s\'' % spec_znode)
 
         # Add local ZooKeeper server to ensemble
