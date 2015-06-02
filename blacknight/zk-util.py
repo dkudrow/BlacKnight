@@ -3,8 +3,8 @@
 from kazoo.client import KazooClient
 from kazoo.exceptions import NoNodeError
 from client import Client
-import os
 import sys
+from random import randint
 
 
 class ZKUtil(object):
@@ -14,33 +14,37 @@ class ZKUtil(object):
         self.client.start()
 
     def start_service(self, args):
-        path = Client.services_path + '/' + args[0]
-        role = args[1]
+        instance = randint(0, 1000000)
+        path = Client.services_path + '/' + args[0] + '/' + instance
         self.client.ensure_path(path)
-        self.client.set(path, role)
 
     def start_host(self, args):
-        path = Client.hosts_path + '/' + args[0]
+        path = Client.unused_hosts_path + '/' + args[0]
         self.client.ensure_path(path)
-        self.client.set(path, '')
 
     def start_service_on_host(self, args):
-        path = Client.hosts_path + '/' + args[0]
-        role = args[1]
+        try:
+            self.client.delete(Client.unused_hosts_path + '/' + args[1])
+        except NoNodeError:
+            pass
+        path = Client.services_path + '/' + args[0] + '/' + args[1]
         self.client.ensure_path(path)
-        self.client.set(path, role)
 
     def stop_service(self, args):
-        path = Client.services_path + '/' + args[0]
-        self.client.delete(path)
+        path = Client.services_path + '/' + args[0] + '/' + args[1]
+        try:
+            self.client.delete()
+        except NoNodeError:
+            pass
 
     def stop_host(self, args):
-        path = Client.hosts_path + '/' + args[0]
-        self.client.delete(path)
-
-    def stop_service_on_host(self, args):
-        path = Client.services_path + '/' + args[0]
-        self.client.set(path, '')
+        roles = self.client.get_children(Client.services_path)
+        for role in roles:
+            try:
+                path = Client.services_path + '/' + role + '/' + args[0]
+                self.client.delete(path)
+            except:
+                pass
 
     def set_arg(self, args):
         path = Client.args_path + '/' + args[0]
@@ -58,6 +62,14 @@ class ZKUtil(object):
         self.client.ensure_path(Client.spec_znode)
         self.client.set(Client.spec_znode, value)
 
+    def dump(self, *args):
+        roles = self.client.get_children(Client.services_path)
+        print '/blacknight/services'
+        for role in roles:
+            print '\t/blacknight/{}'.format(role)
+            services = self.client.get_children(Client.services_path + '/' + role)
+            for service in services:
+                print '\t/blacknight/{}/{}'.format(role, service)
 
 if __name__ == '__main__':
     zkutil = ZKUtil()

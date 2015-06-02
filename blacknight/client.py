@@ -18,6 +18,7 @@ class Client(object):
     lock_path = zk_path + '/lock'
     ensemble_path = zk_path + '/ensemble'
     services_path = zk_path + '/services'
+    unused_hosts_path = services_path + '/unused_hosts'
     hosts_path = zk_path + '/hosts'
     args_path = zk_path + '/args'
 
@@ -41,8 +42,14 @@ class Client(object):
         self.join_election()
 
     def lead(self):
-        # This method is called whenever a change is detected in the ensemble
-        def watcher():
+        self.info('elected leader')
+        self.is_leader = True
+
+        self.client.ensure_path(Client.args_path)
+        self.client.ensure_path(Client.services_path)
+
+        @self.client.ChildrenWatch(Client.services_path)
+        def watch_services():
             with self.lock:
                 sleep(2) # FIXME wait for ephemeral nodes to vanish...
                 self.info('leader detected change')
@@ -52,27 +59,10 @@ class Client(object):
                 # self._client.reconfig('', '', ensemble)
 
                 # Query appliance state and remediate if necessary
-                hosts, services, args = self.query()
-                actions = self.spec.diff(hosts, services)
+                services, args = self.query()
+                actions = self.spec.diff(services)
                 for action in actions:
                     action.run(args)
-
-        self.info('elected leader')
-        self.is_leader = True
-
-        self.client.ensure_path(Client.args_path)
-        self.client.ensure_path(Client.hosts_path)
-        self.client.ensure_path(Client.services_path)
-
-        @self.client.ChildrenWatch(Client.hosts_path)
-        def watch_hosts(*args, **kwargs):
-            print 'host watcher called'
-            watcher()
-
-        @self.client.ChildrenWatch(Client.services_path)
-        def watch_services(*args, **kwargs):
-            print 'service watcher called'
-            watcher()
 
         while True:
             cmd = raw_input('> ')
@@ -88,31 +78,21 @@ class Client(object):
                 print self.query()
 
     def query(self):
-        # Get current hosts
-        cur_hosts = {}
-        hosts = self.client.get_children(Client.hosts_path)
-        for host in hosts:
-            path = Client.hosts_path + '/' + host
-            role, stat = self.client.get(path)
-            cur_hosts[host] = role
-
-        # Get current services
-        cur_services = []
-        services = self.client.get_children(Client.services_path)
-        for service in services:
-            path = Client.services_path + '/' + service
-            role, stat = self.client.get(path)
-            cur_services.append(role)
+        services = {}
+        children = self.client.get_children(Client.services_path)
+        for role in children:
+            role_path = Client.services_path + '/' + role
+            services[role] = self.client.get_children(role_path)
 
         # Get current appliance configuration
-        cur_args = {}
-        args = self.client.get_children(Client.args_path)
-        for arg in args:
+        args = {}
+        children = self.client.get_children(Client.args_path)
+        for arg in children:
             path = Client.args_path + '/' + arg
             value, stat = self.client.get(path)
-            cur_args[arg] = value
+            args[arg] = value
 
-        return cur_hosts, cur_services, cur_args
+        return services, args
 
     ###############
     #   TESTING   #

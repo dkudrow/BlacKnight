@@ -105,13 +105,19 @@ class Specification(object):
         for role in self.roles.itervalues():
             role.min_inst = ceil(role.min_inst)
 
-    def diff(self, hosts, services):
+    def diff(self, services):
 
         committed_transactions = []
 
         # Get current instance count for each role
-        all_inst = hosts.values() + services
-        inst_count = {r: all_inst.count(r) for r in self.dep_graph}
+        inst_count = {role: len(services[role]) if role in services else 0 for role in self.roles}
+
+        # Get list of hosts
+        unused_hosts = services['unused_hosts'] if 'unused_hosts' in services else []
+        for role in self.leaves:
+            hosts = services[role] if role in services else []
+            self.roles[role].cur_hosts = list(hosts)
+            self.roles[role].new_hosts = list(hosts)
 
         # Update the graph for the current appliance state
         for node in self.dep_graph.nodes_iter():
@@ -122,14 +128,6 @@ class Specification(object):
                 ratio = self.roles[node].deps[edge[1]]
                 cur_weight = inst_count[node] / ratio
                 self.dep_graph.add_edge(*edge, cur_weight=cur_weight, new_weight=cur_weight)
-
-        # Determine which roles are on which hosts
-        unused_hosts = hosts.keys()
-        for host, role in hosts.iteritems():
-            if role:
-                self.roles[role].cur_hosts.append(host)
-                self.roles[role].new_hosts.append(host)
-                unused_hosts.remove(host)
 
         # Attempt to satisfy min_inst for all top-level roles
         for root in self.roots:
@@ -296,16 +294,6 @@ if __name__ == '__main__':
 
     spec = Specification(open('config/spec.d/spec.yaml', 'r').read())
 
-    hosts = {'localhost:2181': 'secondary_head',
-             'localhost:2182': 'node_controller',
-             'localhost:2185': 'node_controller',
-             'localhost:2186': 'node_controller'}
+    services = {'unused_hosts': ['host1.net', 'host2.net', 'host3.net']}
 
-    hosts = {'localhost:2181': '',
-             'localhost:2182': '',
-             'localhost:2185': '',
-             'localhost:2186': ''}
-
-    services = []
-
-    print spec.diff(hosts, services)
+    print spec.diff(services)
