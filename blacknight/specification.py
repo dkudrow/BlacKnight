@@ -150,11 +150,13 @@ class Specification(object):
         attempt_succeeded = list(self._roots)
         while attempt_succeeded:
             for root in attempt_succeeded:
-                if self._roles[root].cur_inst >= self._roles[root].max_inst:
+                cur_inst = self._roles[root].cur_inst
+                max_inst = self._roles[root].max_inst
+                if max_inst and cur_inst <= max_inst:
                     attempt_succeeded.remove(root)
                     continue
                 transaction = []
-                if self.add_role_attempt(root, transaction):
+                if self.add_role_attempt(root, transaction, take_host=False):
                     transaction.reverse()
                     committed_transactions += transaction
                     self.commit()
@@ -164,28 +166,30 @@ class Specification(object):
 
         return committed_transactions
 
-    def add_role_attempt(self, root, transaction, count=1):
+    def add_role_attempt(self, root, transaction, count=1, take_host=True):
         out_edges = self._dep_graph.out_edges(root)
 
         # We need to re-purpose a host for this role
         if not out_edges:
             for leaf in [leaf for leaf in self._leaves if leaf != root]:
+                new_inst = self._roles[leaf].new_inst
                 in_degree = self._dep_graph.in_degree(leaf, weight='new_weight')
-                if self._roles[leaf].new_inst >= ceil(in_degree) + count:
+                if take_host and new_inst >= ceil(in_degree) + count:
                     action = self.swap_roles_on_host(leaf, root, count)
                     transaction.append(action)
                     return True
             return False
 
         # Update edge weights and recurse if necessary
-        self._roles[root].new_inst += count
+        root_role = self._roles[root]
+        root_role.new_inst += count
         self.update_new_weights(root)
-        transaction += [Action(start=root) for i in range(count)]
+        transaction += [Action(start=root_role) for i in range(count)]
         for edge in out_edges:
             new_inst = self._roles[edge[1]].new_inst
             in_degree = self._dep_graph.in_degree(edge[1], weight = 'new_weight')
             deficit = int(ceil(in_degree) - new_inst)
-            if deficit > 0 and not self.add_role_attempt(edge[1], transaction, deficit):
+            if deficit > 0 and not self.add_role_attempt(edge[1], transaction,count=deficit, take_host=take_host):
                 return False
         return True
 
@@ -206,12 +210,15 @@ class Specification(object):
         :return: corresponding `Action` object
         :rtype: `Action`
         """
-        host = self._roles[stop].new_hosts.pop()
-        self._roles[stop].new_inst -= count
+        stop_role = self._roles[stop]
+        start_role = self._roles[start]
+        host = stop_role.new_hosts.pop()
+        stop_role.new_inst -= count
         self.update_new_weights(stop)
-        self._roles[start].new_inst += count
+        start_role.new_inst += count
+        start_role.new_hosts.append(host)
         self.update_new_weights(start)
-        return Action(host=host, stop=stop, start=start)
+        return Action(host=host, stop=stop_role, start=start_role)
 
     def update_new_weights(self, node):
         """
@@ -285,10 +292,10 @@ if __name__ == '__main__':
 
     hosts = {'localhost:2181': 'secondary_head',
              'localhost:2182': 'node_controller',
-             'localhost:2182': 'node_controller',
-             'localhost:2182': 'node_controller',
-             'localhost:2182': 'node_controller',
-             'localhost:2183': 'node_controller'}
+             'localhost:2183': 'node_controller',
+             'localhost:2184': 'node_controller',
+             'localhost:2185': 'node_controller',
+             'localhost:2186': 'node_controller'}
 
     services = ['app', 'app', 'hadoop']
 
