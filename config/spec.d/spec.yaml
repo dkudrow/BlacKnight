@@ -2,18 +2,18 @@ secondary_head:
   min_instances: 0
   max_instances: 1
   start_hook: config/hooks/start_secondary.sh
-  start_args: [node, primary, partition, riak_key, riak_secret]
+  start_args: [p, q, k, s]
   stop_hook: config/hooks/stop_secondary.sh
-  stop_args: [node, primary, partition]
+  stop_args: [p, q]
   dependencies:
 
 node_controller:
   min_instances: 1
   max_instances: ~
   start_hook: config/hooks/start_nc.sh
-  start_args: [node, primary, secondary]
+  start_args: [p, q]
   stop_hook: config/hooks/stop_nc.sh
-  stop_args: [node, primary, secondary]
+  stop_args: [p, q]
   dependencies:
 
 app:

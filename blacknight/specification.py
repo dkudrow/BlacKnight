@@ -136,7 +136,7 @@ class Specification(object):
             deficit = int(self.roles[root].min_inst - self.roles[root].cur_inst)
             if deficit > 0:
                 transaction = []
-                if self.add_role_attempt(root, transaction, deficit):
+                if self.add_role_attempt(root, transaction, unused_hosts, count=deficit):
                     transaction.reverse()
                     committed_transactions += transaction
                     self.commit()
@@ -156,7 +156,7 @@ class Specification(object):
                     attempt_succeeded.remove(root)
                     continue
                 transaction = []
-                if self.add_role_attempt(root, transaction, take_host=False):
+                if self.add_role_attempt(root, transaction, unused_hosts, take_host=False):
                     transaction.reverse()
                     committed_transactions += transaction
                     self.commit()
@@ -166,11 +166,18 @@ class Specification(object):
 
         return committed_transactions
 
-    def add_role_attempt(self, root, transaction, count=1, take_host=True):
+    def add_role_attempt(self, root, transaction, unused_hosts, count=1, take_host=True):
         out_edges = self.dep_graph.out_edges(root)
+        root_role = self.roles[root]
 
         # We need to re-purpose a host for this role
         if not out_edges:
+            if len(unused_hosts) >= count:
+                for new_host in [unused_hosts.pop() for i in range(count)]:
+                    root_role.new_hosts.append(new_host)
+                    root_role.new_inst += 1
+                    transaction.append(Action(host=new_host, start=root_role))
+                return True
             for leaf in [leaf for leaf in self.leaves if leaf != root]:
                 new_inst = self.roles[leaf].new_inst
                 in_degree = self.dep_graph.in_degree(leaf, weight='new_weight')
@@ -181,7 +188,6 @@ class Specification(object):
             return False
 
         # Update edge weights and recurse if necessary
-        root_role = self.roles[root]
         root_role.new_inst += count
         self.update_new_weights(root)
         transaction += [Action(start=root_role) for i in range(count)]
@@ -189,7 +195,7 @@ class Specification(object):
             new_inst = self.roles[edge[1]].new_inst
             in_degree = self.dep_graph.in_degree(edge[1], weight = 'new_weight')
             deficit = int(ceil(in_degree) - new_inst)
-            if deficit > 0 and not self.add_role_attempt(edge[1], transaction,count=deficit, take_host=take_host):
+            if deficit > 0 and not self.add_role_attempt(edge[1], transaction, unused_hosts, count=deficit, take_host=take_host):
                 return False
         return True
 
@@ -292,11 +298,14 @@ if __name__ == '__main__':
 
     hosts = {'localhost:2181': 'secondary_head',
              'localhost:2182': 'node_controller',
-             'localhost:2183': 'node_controller',
-             'localhost:2184': 'node_controller',
              'localhost:2185': 'node_controller',
              'localhost:2186': 'node_controller'}
 
-    services = ['app', 'app', 'hadoop']
+    hosts = {'localhost:2181': '',
+             'localhost:2182': '',
+             'localhost:2185': '',
+             'localhost:2186': ''}
+
+    services = []
 
     print spec.diff(hosts, services)

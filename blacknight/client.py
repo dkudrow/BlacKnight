@@ -93,7 +93,7 @@ class Client(object):
         hosts = self.client.get_children(Client.hosts_path)
         for host in hosts:
             path = Client.hosts_path + '/' + host
-            role = self.client.get(path)
+            role, stat = self.client.get(path)
             cur_hosts[host] = role
 
         # Get current services
@@ -101,15 +101,15 @@ class Client(object):
         services = self.client.get_children(Client.services_path)
         for service in services:
             path = Client.services_path + '/' + service
-            role = self.client.get(path)
+            role, stat = self.client.get(path)
             cur_services.append(role)
 
         # Get current appliance configuration
-        cur_args = []
+        cur_args = {}
         args = self.client.get_children(Client.args_path)
         for arg in args:
             path = Client.args_path + '/' + arg
-            value = self.client.get(path)
+            value, stat = self.client.get(path)
             cur_args[arg] = value
 
         return cur_hosts, cur_services, cur_args
@@ -146,7 +146,3 @@ if __name__ == '__main__':
     elif len(sys.argv) < 3:
         port = sys.argv[1]
         zkc = Client(port=port)
-    else:
-        port = sys.argv[1]
-        primary = sys.argv[2] == 'primary'
-        zkc = Client(port=port, primary_head=primary)

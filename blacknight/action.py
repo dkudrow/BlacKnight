@@ -23,12 +23,18 @@ class Action(object):
         return s
 
     def run(self, args):
-        # TODO client gets args from zookeeper
-
         if self.stop:
-            # TODO
-            pass
+            cmd = self.stop.stop_hook
+            for arg in self.stop.stop_args:
+                cmd += ' -{} {}'.format(arg, args[arg])
+            if self.host:
+                cmd = 'ssh {} \'{}\''.format(self.host, cmd)
+            print cmd
 
         if self.start:
-            # TODO
-            pass
+            cmd = self.start.start_hook
+            for arg in self.start.start_args:
+                cmd += ' -{} {}'.format(arg, args[arg])
+            if self.host:
+                cmd = 'ssh {} \'{}\''.format(self.host, cmd)
+            print cmd
