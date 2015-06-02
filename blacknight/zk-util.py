@@ -14,7 +14,7 @@ class ZKUtil(object):
         self.client.start()
 
     def start_service(self, args):
-        instance = randint(0, 1000000)
+        instance = str(randint(0, 1000000))
         path = Client.services_path + '/' + args[0] + '/' + instance
         self.client.ensure_path(path)
 
@@ -31,11 +31,13 @@ class ZKUtil(object):
         self.client.ensure_path(path)
 
     def stop_service(self, args):
-        path = Client.services_path + '/' + args[0] + '/' + args[1]
-        try:
-            self.client.delete()
-        except NoNodeError:
-            pass
+        roles = self.client.get_children(Client.services_path)
+        for role in roles:
+            try:
+                path = Client.services_path + '/' + role + '/' + args[0]
+                self.client.delete(path)
+            except:
+                pass
 
     def stop_host(self, args):
         roles = self.client.get_children(Client.services_path)

@@ -140,7 +140,7 @@ class Specification(object):
                     self.commit()
                 else:
                     self.error('cannot start {}, aborting.'.format(root))
-                    return [Action()]
+                    return []
 
         # Fill roles until we're out of room
         # TODO add surplus role priority to spec
@@ -174,21 +174,21 @@ class Specification(object):
                 for new_host in [unused_hosts.pop() for i in range(count)]:
                     root_role.new_hosts.append(new_host)
                     root_role.new_inst += 1
-                    transaction.append(Action(host=new_host, start=root_role))
+                    transaction.append(Action(root_role, host=new_host))
                 return True
             for leaf in [leaf for leaf in self.leaves if leaf != root]:
                 new_inst = self.roles[leaf].new_inst
                 in_degree = self.dep_graph.in_degree(leaf, weight='new_weight')
                 if take_host and new_inst >= ceil(in_degree) + count:
-                    action = self.swap_roles_on_host(leaf, root, count)
-                    transaction.append(action)
+                    actions = self.swap_roles_on_host(leaf, root, count)
+                    transaction += actions
                     return True
             return False
 
         # Update edge weights and recurse if necessary
         root_role.new_inst += count
         self.update_new_weights(root)
-        transaction += [Action(start=root_role) for i in range(count)]
+        transaction += [Action(root_role) for i in range(count)]
         for edge in out_edges:
             new_inst = self.roles[edge[1]].new_inst
             in_degree = self.dep_graph.in_degree(edge[1], weight = 'new_weight')
@@ -222,7 +222,7 @@ class Specification(object):
         start_role.new_inst += count
         start_role.new_hosts.append(host)
         self.update_new_weights(start)
-        return Action(host=host, stop=stop_role, start=start_role)
+        return [Action(start_role, host=host), Action(stop_role, host=host, start=False)]
 
     def update_new_weights(self, node):
         """

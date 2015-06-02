@@ -49,7 +49,7 @@ class Client(object):
         self.client.ensure_path(Client.services_path)
 
         @self.client.ChildrenWatch(Client.services_path)
-        def watch_services():
+        def watch_services(children):
             with self.lock:
                 sleep(2) # FIXME wait for ephemeral nodes to vanish...
                 self.info('leader detected change')
@@ -62,7 +62,7 @@ class Client(object):
                 services, args = self.query()
                 actions = self.spec.diff(services)
                 for action in actions:
-                    action.run(args)
+                    action.run(services, args)
 
         while True:
             cmd = raw_input('> ')

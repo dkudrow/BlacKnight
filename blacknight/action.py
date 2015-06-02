@@ -9,32 +9,35 @@ class Action(object):
     """
     A remediating action to be performed by the client.
     """
-    def __init__(self, host=None, start=None, stop=None):
+    def __init__(self, role, host=None, start=True):
+        self.role = role
         self.host = host
         self.start = start
-        self.stop = stop
 
     def __repr__(self):
-        s = 'Action('
-        s += 'host={}, '.format(self.host) if self. host else ''
-        s += 'start={}, '.format(self.start.name) if self. start else ''
-        s += 'stop={}'.format(self.stop.name) if self. stop else ''
+        s = 'Action({}, start={}'.format(self.role.name, self.start)
+        s += ', host={}'.format(self.host) if self.host else ''
         s += ')'
         return s
 
-    def run(self, args):
-        if self.stop:
-            cmd = self.stop.stop_hook
-            for arg in self.stop.stop_args:
-                cmd += ' -{} {}'.format(arg, args[arg])
-            if self.host:
-                cmd = 'ssh {} \'{}\''.format(self.host, cmd)
-            print cmd
-
+    def run(self, services, args_dict):
         if self.start:
-            cmd = self.start.start_hook
-            for arg in self.start.start_args:
-                cmd += ' -{} {}'.format(arg, args[arg])
-            if self.host:
-                cmd = 'ssh {} \'{}\''.format(self.host, cmd)
-            print cmd
+            cmd = './' + self.role.start_hook
+            args = list(self.role.start_args)
+        else:
+            cmd = self.role.stop_hook
+            args = list(self.role.stop_hook)
+
+        if 'h' in args:
+            cmd += ' -h {}'.format(self.host)
+            args.remove('h')
+
+        if 'i' in args:
+            cmd += ' -i {}'.format(services[self.role.name].pop())
+            args.remove('i')
+
+        for arg in args:
+            cmd += ' -{} {}'.format(arg, args_dict[arg])
+
+        subprocess.call(cmd.split())
+        # print cmd
