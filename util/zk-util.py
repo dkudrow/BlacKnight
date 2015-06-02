@@ -12,7 +12,7 @@ class ZKUtil(object):
         self._client = KazooClient(self._local_zk)
         self._client.start()
 
-    def _role(self, args):
+    def role(self, args):
         role = args[1]
         node = args[2]
         ensemble_path = args[3] if len(args) > 3 else '/ensemble'
@@ -20,13 +20,13 @@ class ZKUtil(object):
         return role, path
 
     def start_role(self, args):
-        role, path = self._role(args)
+        role, path = self.role(args)
         cur_roles, stat = self._client.get(path)
         cur_roles += ' ' + role
         self._client.set(path, cur_roles)
 
     def stop_role(self, args):
-        role, path = self._role(args)
+        role, path = self.role(args)
         cur_roles, stat = self._client.get(path)
         cur_roles = cur_roles.split()
         cur_roles.remove(role)

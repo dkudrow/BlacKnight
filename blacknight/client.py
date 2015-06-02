@@ -1,132 +1,78 @@
 """
 FarmCloud Client
 """
-import sys
-from time import sleep
-
 from kazoo.client import KazooClient
-from kazoo.protocol.states import EventType, WatchedEvent
-
+from specification import Specification
+from time import sleep
 import log
-from blacknight.specification import Specification
+import logging
+import sys
 
 
 class Client(object):
-    """
-    The clients are responsible for monitoring the state of the appliance and
-    remediating in the case of failure.
 
-    One client runs on each physical node in the appliance. All clients
-    participate in an election on which all candidates block except for the
-    current leader. The leader is tasked with listening for changes in the
-    appliance and, in the event of a change, making any adjustments
-    necessary to maintain the specification.
+    # ZooKeeper paths
+    zk_path = '/blacknight'
+    spec_znode = zk_path + '/spec.yaml'
+    elect_path = zk_path + '/elect'
+    lock_path = zk_path + '/lock'
+    ensemble_path = zk_path + '/ensemble'
+    services_path = zk_path + '/services'
+    hosts_path = zk_path + '/hosts'
+    args_path = zk_path + '/args'
 
-    ZooKeeper is used to maintain the appliance state. Each client contains a
-    *KazooClient* ZooKeeper client to communicate with the ensemble. The default
-    znode layout is:
-
-        * */spec* - tiered appliance specifications (executed in ASCII order)
-        * */ensemble* - for each node in the appliance there is a znode containing a whitespace separated list of roles that it currently fulfills
-        * */elect* - used for by Kazoo for the leader election
-    """
-    def __init__(self, port='2181', primary_head=False,
-                 ensemble_path='/ensemble',
-                 elect_path='/elect', spec_path='/spec'):
-        """
-        :param port: ZooKeeper server port
-        :param primary_head: True if this a the primary head node
-        :param ensemble_path: root znode for group membership
-        :param elect_path: root znode for leader election
-        """
+    def __init__(self, port='2181'):
         log.add_logger(self)
-        self._is_leader = False
-        self._local_zk = 'localhost' + ':' + str(port)
-        self._ensemble_path = ensemble_path
-        self._elect_path = elect_path
-        self._spec_path = spec_path
-        self.debug('Local ZK server is \'%s\'' % self._local_zk)
-        self.debug('Ensemble znode is \'%s\'' % self._ensemble_path)
-        self.debug('Election znode is \'%s\'' % self._elect_path)
-        self.debug('Spec znode is \'%s\'' % self._elect_path)
+        self.is_leader = False
+        self.local_zk = 'localhost' + ':' + str(port)
 
         # Start the ZK client
-        self._client = KazooClient(self._local_zk)
-        self._client.start()
-        self.debug('Kazoo client started')
+        self.client = KazooClient(self.local_zk)
+        self.client.start()
 
         # Load the appliance specification
-        self._specs = []
-        children = sorted(self._client.get_children(self._spec_path))
-        if not children:
-            raise ValueError('could not find specifications in path \'%s\'' % self._spec_path)
-        spec_znodes = [self._spec_path + '/' + z for z in children]
-        for spec_znode in spec_znodes:
-            data, stat = self._client.get(spec_znode)
-            self._specs.append(Specification(data))
-            self.debug('Parsed \'%s\'' % spec_znode)
+        spec_file, stat = self.client.get(Client.spec_znode)
+        self.spec = Specification(spec_file)
 
-        # Add local ZooKeeper server to ensemble
-        ensemble_znode = self._ensemble_path + '/' + self._local_zk
-        self._client.create(ensemble_znode, ephemeral=True, makepath=True)
-        self.debug('\'%s\' added to ensemble' % self._local_zk)
+        # Get synchronization info
+        self.election = self.client.Election(Client.elect_path)
+        self.lock = self.client.Lock(Client.lock_path)
 
-        # If this is the primary head node initialize its role
-        if primary_head:
-            self._client.set(self._ensemble_path + '/' + self._local_zk,
-                             'primary_head')
-
-        # Join the election
-        self._election = self._client.Election(self._elect_path)
         self.join_election()
 
-    def _lead(self):
-        """
-        Called by the appliance's newly elected leader. It registers a
-        watcher with the ensemble membership path in ZooKeeper and listens
-        for changes. When a change is detected, the appliance state is
-        queried from ZooKeeper and diff'ed against the specification to
-        produce a list of remediating actions. These actions are then
-        performed one at a time.
-
-        """
+    def lead(self):
         # This method is called whenever a change is detected in the ensemble
-        def watch_ensemble(event):
-            # Watchers cannot be unregistered so we must ensure that only
-            # the watcher created by the leader is triggered (hence _is_leader)
-            if event.type == EventType.CHILD and self._is_leader:
+        def watcher():
+            with self.lock:
                 sleep(2) # FIXME wait for ephemeral nodes to vanish...
-                # reconfigure ZK
-                ensemble = self._client.get_children(event.path)
-                ensemble = reduce(lambda a, b: a + ',' + b, ensemble)
-                self.info('Detected change in ensemble (%s)' % ensemble)
+                self.info('leader detected change')
+                # TODO: reconfigure ZK
+                # ensemble = self._client.get_children(event.path)
+                # ensemble = reduce(lambda a, b: a + ',' + b, ensemble)
                 # self._client.reconfig('', '', ensemble)
 
-                # Query appliance state and generate list of actions
-                actions = []
-                state = self.query()
-                self.debug('Current state is %s' % state)
-                for spec in self._specs:
-                    #FIXME this is ugly
-                    # Node-aware specification (IaaS level)
-                    if int(spec.split('_')[0]) <= 10:
-                        actions += spec.infrastructure_diff(state)
-                    # Node-agnostic specification (PaaS level)
-                    else:
-                        pass
-
-                # Perform actions generated from spec
-                cur_primary = self.primary()
-                cur_cloud = self.cloud()
+                # Query appliance state and remediate if necessary
+                hosts, services, args = self.query()
+                actions = self.spec.diff(hosts, services)
                 for action in actions:
-                    action.run(cur_primary, cur_cloud)
+                    action.run(args)
 
-                # Re-instate watcher
-                self._client.get_children(event.path, watch=watch_ensemble)
+        self.info('elected leader')
+        self.is_leader = True
 
-        self.info('Elected leader')
-        self._is_leader = True
-        watch_ensemble(WatchedEvent(EventType.CHILD, None, self._ensemble_path))
+        self.client.ensure_path(Client.args_path)
+        self.client.ensure_path(Client.hosts_path)
+        self.client.ensure_path(Client.services_path)
+
+        @self.client.ChildrenWatch(Client.hosts_path)
+        def watch_hosts(*args, **kwargs):
+            print 'host watcher called'
+            watcher()
+
+        @self.client.ChildrenWatch(Client.services_path)
+        def watch_services(*args, **kwargs):
+            print 'service watcher called'
+            watcher()
 
         while True:
             cmd = raw_input('> ')
@@ -141,44 +87,32 @@ class Client(object):
                 print 'Current appliance state:'
                 print self.query()
 
-    # TODO
-    def primary(self):
-        """
-        Return the hostname of the current primary head node.
-
-        :return:
-        """
-        return 'primary.appliance.net'
-
-    # TODO
-    def cloud(self):
-        """
-        Return the hostname of the current cloud controller.
-
-        :return:
-        """
-        return 'clc.appliance.net'
-
     def query(self):
-        """
-        Extracts the current appliance state from the ensemble membership
-        path.
+        # Get current hosts
+        cur_hosts = {}
+        hosts = self.client.get_children(Client.hosts_path)
+        for host in hosts:
+            path = Client.hosts_path + '/' + host
+            role = self.client.get(path)
+            cur_hosts[host] = role
 
-        The state is returned as a dict with the nodes as keys and a list
-        of roles fulfilled by each node as values:
+        # Get current services
+        cur_services = []
+        services = self.client.get_children(Client.services_path)
+        for service in services:
+            path = Client.services_path + '/' + service
+            role = self.client.get(path)
+            cur_services.append(role)
 
-            { 'hostname:port' : ['role_1', 'role_2'] }
+        # Get current appliance configuration
+        cur_args = []
+        args = self.client.get_children(Client.args_path)
+        for arg in args:
+            path = Client.args_path + '/' + arg
+            value = self.client.get(path)
+            cur_args[arg] = value
 
-        :return: appliance state
-        """
-        state = {}
-        ensemble = self._client.get_children(self._ensemble_path)
-        for node in ensemble:
-            state[node] = []
-            roles = self._client.get(self._ensemble_path + '/' + node)[0]
-            for role in roles.split():
-                state[node].append(role)
-        return state
+        return cur_hosts, cur_services, cur_args
 
     ###############
     #   TESTING   #
@@ -187,24 +121,25 @@ class Client(object):
     # Join the election
     def join_election(self):
         self.debug('Joining election')
-        self._is_leader = False
-        self._election.run(self._lead)
-        self._client.stop()
+        self.is_leader = False
+        self.election.run(self.lead)
+        self.client.stop()
 
     # Reset the client connection
     def reset(self):
-        self._client.start()
-        ensemble_znode = self._ensemble_path + '/' + self._local_zk
-        self._client.create(ensemble_znode, ephemeral=True, makepath=True)
+        self.client.start()
+        ensemble_znode = self._ensemble_path + '/' + self.local_zk
+        self.client.create(ensemble_znode, ephemeral=True, makepath=True)
         self.join_election()
 
     # Stop the client connection
     def stop(self):
-        self._client.stop()
+        self.client.stop()
 
 
 if __name__ == '__main__':
     log.init_logger()
+    logging.basicConfig()
 
     if len(sys.argv) < 2:
         zkc = Client()

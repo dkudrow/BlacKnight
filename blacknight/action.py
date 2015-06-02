@@ -3,7 +3,7 @@ Remediation Actions
 """
 import subprocess
 
-from blacknight import log
+import log
 
 class Action(object):
     """
