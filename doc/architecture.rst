@@ -30,7 +30,7 @@ Service
 Abstractions
 ------------
 
-BlacKnight is built around a few basic abstractions that provide us with a way of describing the state of the appliance.
+BlacKnight is built around a few simple abstractions that provide us with a way of describing the state of the appliance.
 
 
 Roles
