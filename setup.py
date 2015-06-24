@@ -14,4 +14,5 @@ setuptools.setup(
       install_requires=['kazoo', 'PyYAML', 'networkx', 'Sphinx', 'sphinx-rtd-theme'],
       # package_data=[],
       # data_files=[],
+      entry_points={'console_scripts': ['blacknight=blacknight:main']}
       )

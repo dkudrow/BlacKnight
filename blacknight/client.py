@@ -33,7 +33,6 @@ class Client(object):
         :return:
         """
         log.add_logger(self)
-        self.is_leader = False
         self.local_zk = 'localhost' + ':' + str(port)
 
         # Start the ZK client
@@ -48,7 +47,8 @@ class Client(object):
         self.election = self.client.Election(Client.elect_path)
         self.lock = self.client.Lock(Client.lock_path)
 
-        self.join_election()
+    def run(self):
+        self.election.run(self.lead)
 
     def lead(self):
         """
@@ -56,7 +56,6 @@ class Client(object):
         :return:
         """
         self.info('elected leader')
-        self.is_leader = True
 
         self.client.ensure_path(Client.args_path)
         self.client.ensure_path(Client.services_path)
@@ -110,28 +109,6 @@ class Client(object):
             args[arg] = value
 
         return services, args
-
-    ###############
-    #   TESTING   #
-    ###############
-
-    # Join the election
-    def join_election(self):
-        self.debug('Joining election')
-        self.is_leader = False
-        self.election.run(self.lead)
-        self.client.stop()
-
-    # Reset the client connection
-    def reset(self):
-        self.client.start()
-        ensemble_znode = self._ensemble_path + '/' + self.local_zk
-        self.client.create(ensemble_znode, ephemeral=True, makepath=True)
-        self.join_election()
-
-    # Stop the client connection
-    def stop(self):
-        self.client.stop()
 
 
 if __name__ == '__main__':
