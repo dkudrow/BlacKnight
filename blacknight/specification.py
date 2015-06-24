@@ -296,7 +296,7 @@ class Specification(object):
 if __name__ == '__main__':
     log.init_logger()
 
-    spec = Specification(open('config/spec.d/spec.yaml', 'r').read())
+    spec = Specification(open('test/spec.d/spec.yaml', 'r').read())
 
     services = {'unused_hosts': ['host1.net', 'host2.net', 'host3.net']}
 

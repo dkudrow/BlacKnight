@@ -10,4 +10,6 @@ zkconf/
 # Sphinx generated docs
 sphinx-output/
 
-spec.png
+# Distribution package
+dist/
+blacknight.egg-info/

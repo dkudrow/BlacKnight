@@ -65,8 +65,8 @@ class riak {
     content => template('riak/limits.conf.erb')
   }
 
-  #file { '/etc/riak/app.config' :
-    #content => template('riak/riak-app.config.erb'),
+  #file { '/etc/riak/app.test' :
+    #content => template('riak/riak-app.test.erb'),
     #owner   => 'riak',
     #group   => 'riak',
     #require => Package[ 'riak' ],
@@ -79,8 +79,8 @@ class riak {
     #require => Package[ 'riak' ],
   #}
 
-  #file { '/etc/riak-cs/app.config' :
-    #content => template('riak/riak-cs-app.config.erb'),
+  #file { '/etc/riak-cs/app.test' :
+    #content => template('riak/riak-cs-app.test.erb'),
     #owner   => 'riakcs',
     #group   => 'riak',
     #require => Package[ 'riak-cs' ],
@@ -100,8 +100,8 @@ class riak {
       #source   => 'http://s3.amazonaws.com/downloads.basho.com/stanchion/1.5/1.5.0/rhel/6/stanchion-1.5.0-1.el6.x86_64.rpm',
     #}
 
-    #file { '/etc/stanchion/app.config' :
-      #content => template('riak/stanchion-app.config.erb'),
+    #file { '/etc/stanchion/app.test' :
+      #content => template('riak/stanchion-app.test.erb'),
       #owner   => 'stanchion',
       #group   => 'riak',
       #require => Package[ 'stanchion' ],

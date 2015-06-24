@@ -1,12 +1,17 @@
-#!/usr/bin/env python
+ #!/usr/bin/env python
 
-from distutils.core import setup
+import setuptools
 
-setup(name='blacknight',
-      version='0.1',
+setuptools.setup(
+      name='blacknight',
+      version='0.1.0',
       description='Fault-Management for Cloud Software Appliances',
-      Author='Daniel Kudrow',
-      author_email='dkudrow@cs.ucsb.edu',
       url='https://github.com/dkudrow/BlacKnight/',
-      py_modules=['blacknight'],
+      author='Daniel Kudrow',
+      author_email='dkudrow@cs.ucsb.edu',
+      # license='',
+      packages=setuptools.find_packages(),
+      install_requires=['kazoo', 'PyYAML', 'networkx', 'Sphinx', 'sphinx-rtd-theme'],
+      # package_data=[],
+      # data_files=[],
       )

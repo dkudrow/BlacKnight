@@ -1,27 +1,27 @@
 secondary_head:
   min_instances: 0
   max_instances: 1
-  start_hook: config/hooks/start_secondary.sh
+  start_hook: test/hooks/start_secondary.sh
   start_args: [h]
-  stop_hook: config/hooks/stop_secondary.sh
+  stop_hook: test/hooks/stop_secondary.sh
   stop_args: [h]
   dependencies:
 
 node_controller:
   min_instances: 1
   max_instances: ~
-  start_hook: config/hooks/start_nc.sh
+  start_hook: test/hooks/start_nc.sh
   start_args: [h]
-  stop_hook: config/hooks/stop_nc.sh
+  stop_hook: test/hooks/stop_nc.sh
   stop_args: [h]
   dependencies:
 
 app:
   min_instances: 3
   max_instances: ~
-  start_hook: config/hooks/start_app.sh
+  start_hook: test/hooks/start_app.sh
   start_args:
-  stop_hook: config/hooks/stop_app.sh
+  stop_hook: test/hooks/stop_app.sh
   stop_args: [i]
   dependencies:
     node_controller: 2
@@ -31,9 +31,9 @@ app:
 db:
   min_instances: 0
   max_instances: ~
-  start_hook: config/hooks/start_db.sh
+  start_hook: test/hooks/start_db.sh
   start_args:
-  stop_hook: config/hooks/stop_db.sh
+  stop_hook: test/hooks/stop_db.sh
   stop_args: [i]
   dependencies:
     node_controller: 2
@@ -41,9 +41,9 @@ db:
 hadoop:
   min_instances: 0
   max_instances: ~
-  start_hook: config/hooks/start_hadoop.sh
+  start_hook: test/hooks/start_hadoop.sh
   start_args:
-  stop_hook: config/hooks/stop_hadoop.sh
+  stop_hook: test/hooks/stop_hadoop.sh
   stop_args: [i]
   dependencies:
     node_controller: 2

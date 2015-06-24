@@ -1,2 +1,0 @@
-# TODO
-* Automate venv setup
