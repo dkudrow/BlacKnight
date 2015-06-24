@@ -78,7 +78,7 @@ The current state is determined by performing a census on the active services. T
 
 
 Diff
-----
+^^^^
 
 The diff operation below is used to generate a list of actions to transition between the current state and the state that best approximates the optimal appliance given avaiable hardware. diff is invoked every time a change is detected in the appliance.
 
@@ -105,5 +105,6 @@ Developing Appliances
 
 WRITEME
 
+cloud manager and primary head node (not role)
 responsibilities of roles in assessing their own status
 atomicity of roles
