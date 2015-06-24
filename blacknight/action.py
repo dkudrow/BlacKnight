@@ -10,6 +10,13 @@ class Action(object):
     A remediating action to be performed by the client.
     """
     def __init__(self, role, host=None, start=True):
+        """
+
+        :param role:
+        :param host:
+        :param start:
+        :return:
+        """
         self.role = role
         self.host = host
         self.start = start
@@ -21,6 +28,12 @@ class Action(object):
         return s
 
     def run(self, services, args_dict):
+        """
+
+        :param services:
+        :param args_dict:
+        :return:
+        """
         if self.start:
             cmd = './' + self.role.start_hook
             args = list(self.role.start_args)

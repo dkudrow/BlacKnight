@@ -1,5 +1,5 @@
 """
-FarmCloud Client
+BlacKnight Client
 """
 from kazoo.client import KazooClient
 from specification import Specification
@@ -10,7 +10,11 @@ import sys
 
 
 class Client(object):
+    """
+    The Client runs on each host in the deployment
 
+    WRITEME
+    """
     # ZooKeeper paths
     zk_path = '/blacknight'
     spec_znode = zk_path + '/spec.yaml'
@@ -23,6 +27,11 @@ class Client(object):
     args_path = zk_path + '/args'
 
     def __init__(self, port='2181'):
+        """
+
+        :param port:
+        :return:
+        """
         log.add_logger(self)
         self.is_leader = False
         self.local_zk = 'localhost' + ':' + str(port)
@@ -42,6 +51,10 @@ class Client(object):
         self.join_election()
 
     def lead(self):
+        """
+
+        :return:
+        """
         self.info('elected leader')
         self.is_leader = True
 
@@ -78,6 +91,10 @@ class Client(object):
                 print self.query()
 
     def query(self):
+        """
+
+        :return:
+        """
         services = {}
         children = self.client.get_children(Client.services_path)
         for role in children:

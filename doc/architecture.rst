@@ -80,13 +80,30 @@ The current state is determined by performing a census on the active services. T
 Diff
 ----
 
-The Diff operation below is used to generate a list of actions to transition between the current state and the state that best approximates the optimal appliance given avaiable hardware. The Diff is invoked every time a change is detected in the appliance.
+The diff operation below is used to generate a list of actions to transition between the current state and the state that best approximates the optimal appliance given avaiable hardware. diff is invoked every time a change is detected in the appliance.
 
 The diff occurs in two phases. The first phase brings the appliance to it's minimum viable configuration. If this fails, it is because the appliance lacks the necessary hardware for a the minimum configuration and the appliance fail-stops. If the first phase succeeds, the second phase attempts to bring the appliance to its optimal configuration. If this fails, the appliance simply runs at a degraded state since the minimum viable configuration is guaranteed by the first stage.
 
+Both phases make use of a recursive sub-routine which attempts to increase the representation of a role. The sub-routine traverses a weighted DAG constructedpa from the current state of the appliance. The nodes in the DAG correspond to roles with the node weights indicating the current representation of the role. The edges corresond to dependencies with the edge weights corresponding to the total demand of the dependency (current representation times dependency capacity).
+
+ FIGURE
+
+The sub-routine starts by provisionally increasing the weight of the node and updating the weights of outgoing edges. The node's successor's are then visited and for each the in-degree (sum of weights of incoming edges) is compared to its weight. If the in-degree exceeds the successor's node weight, demand for that role has exceeded supply and it's representation has to be increased. This is done by calling the sub-routine recursively.
+
+The recursion ends when a leaf node is reached. Leaf nodes are roles with no dependencies and have an implicit dependence on a physical host in the appliance. Thus when increasing the representation of a leaf node, we must allocate a physical host to accommodate. If there is an unused physical host, it is allocated. If there is not, we search for a role that contains a surplus (current reprsentation is greater than min representation) and re-purpose one of its hosts. If no host can be allocated, we must abort the whole tree of recursive calls.
+
+Because we cannot know until we reach a leaf node whether the appliance can support increase in representation, all provisional changes are transactional. If we successfully increase the the weight of a leaf node, the changes are committed. Otherwise the changes are aborted.
+
+
+Implementation
+--------------
+
+WRITEME
 
 Developing Appliances
 ---------------------
+
+WRITEME
 
 responsibilities of roles in assessing their own status
 atomicity of roles

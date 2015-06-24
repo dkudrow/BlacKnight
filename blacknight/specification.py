@@ -3,7 +3,6 @@ Appliance Specification
 """
 from math import ceil
 import networkx as nx
-import matplotlib.pyplot as plt
 import yaml
 from action import Action
 import log
@@ -106,6 +105,11 @@ class Specification(object):
             role.min_inst = ceil(role.min_inst)
 
     def diff(self, services):
+        """
+
+        :param services:
+        :return:
+        """
 
         committed_transactions = []
 
@@ -165,6 +169,15 @@ class Specification(object):
         return committed_transactions
 
     def add_role_attempt(self, root, transaction, unused_hosts, count=1, take_host=True):
+        """
+
+        :param root:
+        :param transaction:
+        :param unused_hosts:
+        :param count:
+        :param take_host:
+        :return:
+        """
         out_edges = self.dep_graph.out_edges(root)
         root_role = self.roles[root]
 
@@ -279,15 +292,6 @@ class Specification(object):
             edge_data = self.dep_graph.get_edge_data(*edge)
             edge_data['new_weight'] = edge_data['cur_weight']
 
-    def dump(self, label=None):
-        if label:
-            labels = {role.name: role.__getattribute__(label) for role in self.roles.itervalues()}
-        else:
-            labels = None
-        print labels
-        nx.draw_networkx(self.dep_graph, with_labels=True, labels=labels)
-        plt.savefig('spec.png')
-        plt.show()
 
 if __name__ == '__main__':
     log.init_logger()

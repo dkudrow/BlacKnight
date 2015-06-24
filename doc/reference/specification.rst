@@ -1,4 +1,7 @@
-BlacKnight Specification
-========================
+:mod:`blacknight.specification`
+===============================
 
 .. automodule:: blacknight.specification
+    :members:
+
+

@@ -1,4 +1,7 @@
-BlacKnight Action
-=================
+:mod:`blacknight.action`
+========================
 
 .. automodule:: blacknight.action
+    :members:
+
+
