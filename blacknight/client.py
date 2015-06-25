@@ -11,15 +11,14 @@ import sys
 
 class Client(object):
     """
-    The Client runs on each host in the deployment
-
-    WRITEME
+    The BlacKnight client that runs on every host in the deployment.
     """
     # ZooKeeper paths
     zk_path = '/blacknight'
     spec_znode = zk_path + '/spec.yaml'
     elect_path = zk_path + '/elect'
     lock_path = zk_path + '/lock'
+    barrier_path = zk_path + '/barrier'
     ensemble_path = zk_path + '/ensemble'
     services_path = zk_path + '/services'
     unused_hosts_path = services_path + '/unused_hosts'
@@ -28,6 +27,7 @@ class Client(object):
 
     def __init__(self, port='2181'):
         """
+        Initialize a client to run on a host.
 
         :param port:
         :return:
@@ -46,6 +46,7 @@ class Client(object):
         # Get synchronization info
         self.election = self.client.Election(Client.elect_path)
         self.lock = self.client.Lock(Client.lock_path)
+        self.barrier = self.client.Barrier(Client.barrier_path)
 
     def run(self):
         self.election.run(self.lead)
@@ -60,12 +61,16 @@ class Client(object):
         self.client.ensure_path(Client.args_path)
         self.client.ensure_path(Client.services_path)
 
+        # TODO: should we set allow_session_lost=True for this watcher?
         @self.client.ChildrenWatch(Client.services_path)
         def watch_services(children):
+
+            # Perform remediation under lock in case a watcher from a previous
+            # leader hasn't been cleared for some reason
             with self.lock:
-                sleep(2) # FIXME wait for ephemeral nodes to vanish...
-                self.info('leader detected change')
-                # TODO: reconfigure ZK
+                # TODO: find a better way to wait for ephemeral nodes to vanish
+                sleep(2)
+                # TODO: reconfigure ZooKeeper
                 # ensemble = self._client.get_children(event.path)
                 # ensemble = reduce(lambda a, b: a + ',' + b, ensemble)
                 # self._client.reconfig('', '', ensemble)
@@ -76,18 +81,13 @@ class Client(object):
                 for action in actions:
                     action.run(services, args)
 
+            # The barrier must be reset every time the watcher is triggered
+            self.barrier.remove()
+
+        # Wait behind a barrier for a watcher to be triggered
         while True:
-            cmd = raw_input('> ')
-            if cmd == 'help':
-                print '\thelp  -- this message'
-                print '\tfail  -- simulate failover'
-                print '\tquery -- print current appliance state'
-            elif cmd == 'fail':
-                print 'Simulating failover'
-                return
-            elif cmd == 'query':
-                print 'Current appliance state:'
-                print self.query()
+            self.barrier.create()
+            self.barrier.wait()
 
     def query(self):
         """
