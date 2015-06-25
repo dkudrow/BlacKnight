@@ -25,7 +25,7 @@ class Client(object):
     hosts_path = zk_path + '/hosts'
     args_path = zk_path + '/args'
 
-    def __init__(self, port='2181'):
+    def __init__(self, port):
         """
         Initialize a client to run on a host.
 
