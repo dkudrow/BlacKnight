@@ -13,49 +13,47 @@ class ZKUtil(object):
         self.client = KazooClient(self.local_zk)
         self.client.start()
 
-    def start_service(self, args):
+    def start_service(self, service):
         instance = str(randint(0, 1000000))
-        path = Client.services_path + '/' + args[0] + '/' + instance
+        path = Client.services_path + '/' + service + '/' + instance
         self.client.ensure_path(path)
 
-    def start_host(self, args):
-        path = Client.unused_hosts_path + '/' + args[0]
+    def start_host(self, host):
+        path = Client.unused_hosts_path + '/' + host
         self.client.ensure_path(path)
 
-    def start_service_on_host(self, args):
+    def start_service_on_host(self, service, host):
         try:
-            self.client.delete(Client.unused_hosts_path + '/' + args[1])
+            self.client.delete(Client.unused_hosts_path + '/' + host)
         except NoNodeError:
             pass
-        path = Client.services_path + '/' + args[0] + '/' + args[1]
+        path = Client.services_path + '/' + service + '/' + host
         self.client.ensure_path(path)
 
-    def stop_service(self, args):
+    def stop_service(self, service_id):
         roles = self.client.get_children(Client.services_path)
         for role in roles:
             try:
-                path = Client.services_path + '/' + role + '/' + args[0]
+                path = Client.services_path + '/' + role + '/' + service_id
                 self.client.delete(path)
             except:
                 pass
 
-    def stop_host(self, args):
+    def stop_host(self, host):
         roles = self.client.get_children(Client.services_path)
         for role in roles:
             try:
-                path = Client.services_path + '/' + role + '/' + args[0]
+                path = Client.services_path + '/' + role + '/' + host
                 self.client.delete(path)
             except:
                 pass
 
-    def set_arg(self, args):
-        path = Client.args_path + '/' + args[0]
-        arg = args[1]
+    def set_arg(self, arg, value):
+        path = Client.args_path + '/' + arg
         self.client.ensure_path(path)
-        self.client.set(path, arg)
+        self.client.set(path, value)
 
-    def load_spec(self, args):
-        filename = args[0]
+    def load_spec(self, filename):
         try:
             value = open(filename, 'r').read()
         except IOError:
