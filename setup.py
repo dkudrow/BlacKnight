@@ -14,5 +14,5 @@ setup(name='blacknight',
                         'networkx',
                         'Sphinx',
                         'sphinx-rtd-theme'],
-      entry_points={'console_scripts': ['blacknight=blacknight:main'],
-                    'console_scripts': ['blacknight-util=blacknight:util']})
+      entry_points={'console_scripts': ['blacknight=blacknight:main',
+                                        'blacknight-util=blacknight:util']})

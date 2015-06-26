@@ -2,11 +2,15 @@ __author__ = 'dkudrow'
 
 
 from client import Client
-from util import ZKUtil
+from util import Util
 from argparse import ArgumentParser
 
 
 def main():
+    """
+
+    :return:
+    """
     parser = ArgumentParser()
     parser.add_argument('-p', default='2181')
     args = parser.parse_args()
@@ -14,16 +18,13 @@ def main():
 
 
 def util():
+    """
+
+    :return:
+    """
     parser = ArgumentParser()
-    parser.add_argument('-p', default='2181')
-    parser.add_argument('-f', default='')
-    parser.add_argument('-s', default='')
-    parser.add_argument('-i', default='')
-    parser.add_argument('-h', default='')
-    parser.add_argument('-a', default='')
-    parser.add_argument('-v', default='')
-    parser.add_argument('cmd', default='')
-    subparsers = parser.add_subparsers()
+    parser.add_argument('-p', '--port', default='2181')
+    subparsers = parser.add_subparsers(dest='subcommand')
 
     start_service = subparsers.add_parser('start_service')
     start_service.add_argument('service', default='')
@@ -48,6 +49,10 @@ def util():
     start_service = subparsers.add_parser('load_spec')
     start_service.add_argument('filename', default='')
 
-    args = parser.parse_args()
+    dump = subparsers.add_parser('dump')
 
-    print args
+    kwargs = vars(parser.parse_args())
+    subcommand = kwargs.pop('subcommand')
+    port = kwargs.pop('port')
+
+    getattr(Util(port), subcommand)(**kwargs)

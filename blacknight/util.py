@@ -7,7 +7,7 @@ import sys
 from random import randint
 
 
-class ZKUtil(object):
+class Util(object):
     def __init__(self, port='2181'):
         self.local_zk = 'localhost' + ':' + str(port)
         self.client = KazooClient(self.local_zk)
@@ -62,7 +62,7 @@ class ZKUtil(object):
         self.client.ensure_path(Client.spec_znode)
         self.client.set(Client.spec_znode, value)
 
-    def dump(self, *args):
+    def dump(self):
         roles = self.client.get_children(Client.services_path)
         print '/blacknight/services'
         for role in roles:
@@ -70,8 +70,3 @@ class ZKUtil(object):
             services = self.client.get_children(Client.services_path + '/' + role)
             for service in services:
                 print '\t/blacknight/{}/{}'.format(role, service)
-
-if __name__ == '__main__':
-    zkutil = ZKUtil()
-    cmd = getattr(zkutil, sys.argv[1])
-    cmd(sys.argv[2:])
