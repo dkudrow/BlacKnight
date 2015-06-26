@@ -1,0 +1,5 @@
+# eucalyptus.repo
+
+[eucalyptus]
+name=Eucalpytus
+baseurl=http://downloads.eucalyptus.com/software/eucalyptus/build-deps/3.4/rhel/$releasever/$basearch

@@ -2,6 +2,7 @@
 BlacKnight Client
 """
 from kazoo.client import KazooClient
+from kazoo.exceptions import NoNodeError
 from specification import Specification
 from time import sleep
 import log
@@ -40,6 +41,8 @@ class Client(object):
         self.client.start()
 
         # Load the appliance specification
+        # TODO: set watcher to reload spec when it changes
+        # TODO: __init__ fails if spec does not exist
         spec_file, stat = self.client.get(Client.spec_znode)
         self.spec = Specification(spec_file)
 
@@ -109,14 +112,3 @@ class Client(object):
             args[arg] = value
 
         return services, args
-
-
-if __name__ == '__main__':
-    log.init_logger()
-    logging.basicConfig()
-
-    if len(sys.argv) < 2:
-        zkc = Client()
-    elif len(sys.argv) < 3:
-        port = sys.argv[1]
-        zkc = Client(port=port)

@@ -4,6 +4,7 @@ __author__ = 'dkudrow'
 from client import Client
 from util import Util
 from argparse import ArgumentParser
+import logging
 
 
 def main():
@@ -11,10 +12,11 @@ def main():
 
     :return:
     """
+    logging.basicConfig()
     parser = ArgumentParser()
-    parser.add_argument('-p', default='2181')
+    parser.add_argument('-p', '--port', default='2181')
     args = parser.parse_args()
-    Client(args.p).run()
+    Client(args.port).run()
 
 
 def util():

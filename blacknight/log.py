@@ -2,22 +2,10 @@ import logging
 
 
 def add_logger(c):
-    c._logger= logging.getLogger('blacknight')
+    c.log = logging.getLogger('blacknight')
 
-    c.debug = c._logger.debug
-    c.info = c._logger.info
-    c.warn = c._logger.warn
-    c.error = c._logger.error
-    c.critical = c._logger.critical
-
-
-def init_logger(name='blacknight', level=logging.DEBUG, logfile=''):
-    formatter = logging.Formatter('%(levelname)s:%(message)s')
-
-    handler = logging.FileHandler(logfile) if logfile else \
-        logging.StreamHandler()
-    handler.setFormatter(formatter)
-
-    logger = logging.getLogger(name)
-    logger.setLevel(level)
-    logger.addHandler(handler)
+    c.debug = c.log.debug
+    c.info = c.log.info
+    c.warn = c.log.warn
+    c.error = c.log.error
+    c.critical = c.log.critical
