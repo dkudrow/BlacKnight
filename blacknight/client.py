@@ -41,10 +41,14 @@ class Client(object):
         self.client.start()
 
         # Load the appliance specification
-        # TODO: set watcher to reload spec when it changes
-        # TODO: __init__ fails if spec does not exist
-        spec_file, stat = self.client.get(Client.spec_znode)
-        self.spec = Specification(spec_file)
+        # TODO: handle no spec in ZooKeeper (barrier before run?)
+        @self.client.DataWatch(Client.spec_znode)
+        def watch_spec(data, stat):
+            if data:
+                self.info('Reloading spec.yaml')
+                self.spec = Specification(data)
+            else:
+                self.spec = None
 
         # Get synchronization info
         self.election = self.client.Election(Client.elect_path)
@@ -52,6 +56,8 @@ class Client(object):
         self.barrier = self.client.Barrier(Client.barrier_path)
 
     def run(self):
+        # TODO: check client and spec before running
+        self.info('Joining election')
         self.election.run(self.lead)
 
     def lead(self):
@@ -59,7 +65,7 @@ class Client(object):
 
         :return:
         """
-        self.info('elected leader')
+        self.info('Elected leader')
 
         self.client.ensure_path(Client.args_path)
         self.client.ensure_path(Client.services_path)
@@ -71,6 +77,8 @@ class Client(object):
             # Perform remediation under lock in case a watcher from a previous
             # leader hasn't been cleared for some reason
             with self.lock:
+
+                self.info('Detected change')
                 # TODO: find a better way to wait for ephemeral nodes to vanish
                 sleep(2)
                 # TODO: reconfigure ZooKeeper
@@ -81,6 +89,7 @@ class Client(object):
                 # Query appliance state and remediate if necessary
                 services, args = self.query()
                 actions = self.spec.diff(services)
+                self.info('Actions: {}'.format(actions))
                 for action in actions:
                     action.run(services, args)
 

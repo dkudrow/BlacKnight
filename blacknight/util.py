@@ -66,7 +66,7 @@ class Util(object):
         roles = self.client.get_children(Client.services_path)
         print '/blacknight/services'
         for role in roles:
-            print '\t/blacknight/{}'.format(role)
+            print '  /blacknight/{}'.format(role)
             services = self.client.get_children(Client.services_path + '/' + role)
             for service in services:
-                print '\t/blacknight/{}/{}'.format(role, service)
+                print '    /blacknight/{}/{}'.format(role, service)
