@@ -9,6 +9,7 @@ zkconf/
 
 # Sphinx generated docs
 sphinx-output/
+doc/_build/
 
 # Distribution package
 dist/
