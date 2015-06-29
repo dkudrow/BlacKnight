@@ -3,6 +3,12 @@
 # sphinx-to-gh-pages
 #	Build Sphinx docs and push them to Github Pages branch
 #
+# Note: the local gh-pages branch must already exist before running this
+# script. Run the following commands before using:
+#
+#	git checkout -b gh-pages
+#	git pull origin gh-pages
+#
 
 GH_PAGES_SOURCES='doc blacknight'
 
