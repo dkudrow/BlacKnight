@@ -14,3 +14,6 @@ doc/_build/
 # Distribution package
 dist/
 blacknight.egg-info/
+
+# PyCharm workspace
+.idea/workspace.xml
