@@ -1,0 +1,87 @@
+2015-06-29 16:53:39,148 [myid:] - INFO  [main:QuorumPeerConfig@109] - Reading configuration from: ./localhost:2184/zoo.cfg
+2015-06-29 16:53:39,267 [myid:4] - INFO  [main:DatadirCleanupManager@78] - autopurge.snapRetainCount set to 3
+2015-06-29 16:53:39,268 [myid:4] - INFO  [main:DatadirCleanupManager@79] - autopurge.purgeInterval set to 0
+2015-06-29 16:53:39,268 [myid:4] - INFO  [main:DatadirCleanupManager@101] - Purge task is not scheduled.
+2015-06-29 16:53:39,785 [myid:4] - INFO  [main:QuorumPeerMain@136] - Starting quorum peer
+2015-06-29 16:53:39,879 [myid:4] - INFO  [main:NIOServerCnxnFactory@670] - Configuring NIO connection handler with 10s sessionless connection timeout, 1 selector thread(s), 4 worker threads, and 64 kB direct buffers.
+2015-06-29 16:53:39,917 [myid:4] - INFO  [main:NIOServerCnxnFactory@683] - binding to port 0.0.0.0/0.0.0.0:2184
+2015-06-29 16:53:40,217 [myid:4] - INFO  [main:Slf4jLog@67] - Logging to org.slf4j.impl.Log4jLoggerAdapter(org.mortbay.log) via org.mortbay.log.Slf4jLog
+2015-06-29 16:53:40,401 [myid:4] - INFO  [main:QuorumPeer@1205] - Local sessions disabled
+2015-06-29 16:53:40,401 [myid:4] - INFO  [main:QuorumPeer@1216] - Local session upgrading disabled
+2015-06-29 16:53:40,401 [myid:4] - INFO  [main:QuorumPeer@1185] - tickTime set to 2000
+2015-06-29 16:53:40,401 [myid:4] - INFO  [main:QuorumPeer@1227] - minSessionTimeout set to 4000
+2015-06-29 16:53:40,402 [myid:4] - INFO  [main:QuorumPeer@1238] - maxSessionTimeout set to 40000
+2015-06-29 16:53:40,402 [myid:4] - INFO  [main:QuorumPeer@1253] - initLimit set to 10
+2015-06-29 16:53:40,543 [myid:4] - INFO  [main:FileSnap@83] - Reading snapshot ./localhost:2184/data/version-2/snapshot.200000095
+2015-06-29 16:53:40,863 [myid:4] - INFO  [main:Slf4jLog@67] - jetty-6.1.26
+2015-06-29 16:53:41,034 [myid:4] - WARN  [main:Slf4jLog@76] - failed SocketConnector@0.0.0.0:8080: java.net.BindException: Address already in use
+2015-06-29 16:53:41,034 [myid:4] - WARN  [main:Slf4jLog@76] - failed Server@74c314a4: java.net.BindException: Address already in use
+2015-06-29 16:53:41,051 [myid:4] - WARN  [main:QuorumPeer@650] - Problem starting AdminServer
+org.apache.zookeeper.server.admin.AdminServer$AdminServerException: Problem starting AdminServer on port 8080, command URL /commands
+	at org.apache.zookeeper.server.admin.JettyAdminServer.start(JettyAdminServer.java:89)
+	at org.apache.zookeeper.server.quorum.QuorumPeer.start(QuorumPeer.java:648)
+	at org.apache.zookeeper.server.quorum.QuorumPeerMain.runFromConfig(QuorumPeerMain.java:171)
+	at org.apache.zookeeper.server.quorum.QuorumPeerMain.initializeAndRun(QuorumPeerMain.java:120)
+	at org.apache.zookeeper.server.quorum.QuorumPeerMain.main(QuorumPeerMain.java:79)
+Caused by: java.net.BindException: Address already in use
+	at java.net.PlainSocketImpl.socketBind(Native Method)
+	at java.net.AbstractPlainSocketImpl.bind(AbstractPlainSocketImpl.java:376)
+	at java.net.ServerSocket.bind(ServerSocket.java:376)
+	at java.net.ServerSocket.<init>(ServerSocket.java:237)
+	at java.net.ServerSocket.<init>(ServerSocket.java:181)
+	at org.mortbay.jetty.bio.SocketConnector.newServerSocket(SocketConnector.java:80)
+	at org.mortbay.jetty.bio.SocketConnector.open(SocketConnector.java:73)
+	at org.mortbay.jetty.AbstractConnector.doStart(AbstractConnector.java:283)
+	at org.mortbay.jetty.bio.SocketConnector.doStart(SocketConnector.java:147)
+	at org.mortbay.component.AbstractLifeCycle.start(AbstractLifeCycle.java:50)
+	at org.mortbay.jetty.Server.doStart(Server.java:235)
+	at org.mortbay.component.AbstractLifeCycle.start(AbstractLifeCycle.java:50)
+	at org.apache.zookeeper.server.admin.JettyAdminServer.start(JettyAdminServer.java:85)
+	... 4 more
+org.apache.zookeeper.server.admin.AdminServer$AdminServerException: Problem starting AdminServer on port 8080, command URL /commands
+2015-06-29 16:53:41,079 [myid:4] - INFO  [QuorumPeerListener:QuorumCnxManager$Listener@550] - My election bind port: localhost/127.0.0.1:4184
+2015-06-29 16:53:41,092 [myid:4] - INFO  [localhost/127.0.0.1:4184:QuorumCnxManager$Listener@556] - Received connection request /127.0.0.1:53628
+2015-06-29 16:53:41,123 [myid:4] - INFO  [localhost/127.0.0.1:4184:QuorumCnxManager$Listener@556] - Received connection request /127.0.0.1:53629
+2015-06-29 16:53:41,137 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:QuorumPeer@913] - LOOKING
+2015-06-29 16:53:41,140 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:FastLeaderElection@888] - New election. My id =  4, proposed zxid=0x30000005b
+2015-06-29 16:53:41,144 [myid:4] - INFO  [WorkerReceiver[myid=4]:FastLeaderElection@682] - Notification: 2 (message format version), 5 (n.leader), 0x30000005b (n.zxid), 0x1 (n.round), LOOKING (n.state), 2 (n.sid), 0x3 (n.peerEPoch), LOOKING (my state)100000000 (n.config version)
+2015-06-29 16:53:41,153 [myid:4] - INFO  [WorkerReceiver[myid=4]:FastLeaderElection@682] - Notification: 2 (message format version), 5 (n.leader), 0x30000005b (n.zxid), 0x1 (n.round), LOOKING (n.state), 1 (n.sid), 0x3 (n.peerEPoch), LOOKING (my state)100000000 (n.config version)
+2015-06-29 16:53:41,158 [myid:4] - INFO  [WorkerReceiver[myid=4]:FastLeaderElection@682] - Notification: 2 (message format version), 4 (n.leader), 0x30000005b (n.zxid), 0x1 (n.round), LOOKING (n.state), 4 (n.sid), 0x3 (n.peerEPoch), LOOKING (my state)100000000 (n.config version)
+2015-06-29 16:53:41,159 [myid:4] - INFO  [WorkerReceiver[myid=4]:FastLeaderElection@682] - Notification: 2 (message format version), 5 (n.leader), 0x30000005b (n.zxid), 0x1 (n.round), LOOKING (n.state), 5 (n.sid), 0x3 (n.peerEPoch), LOOKING (my state)100000000 (n.config version)
+2015-06-29 16:53:41,160 [myid:4] - INFO  [WorkerReceiver[myid=4]:FastLeaderElection@682] - Notification: 2 (message format version), 5 (n.leader), 0x30000005b (n.zxid), 0x1 (n.round), LOOKING (n.state), 4 (n.sid), 0x3 (n.peerEPoch), LOOKING (my state)100000000 (n.config version)
+2015-06-29 16:53:41,163 [myid:4] - INFO  [WorkerReceiver[myid=4]:FastLeaderElection@682] - Notification: 2 (message format version), 5 (n.leader), 0x30000005b (n.zxid), 0x1 (n.round), LOOKING (n.state), 3 (n.sid), 0x3 (n.peerEPoch), LOOKING (my state)100000000 (n.config version)
+2015-06-29 16:53:41,364 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id4,name1=replica.4,name2=LeaderElection]
+2015-06-29 16:53:41,365 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:QuorumPeer@989] - FOLLOWING
+2015-06-29 16:53:41,384 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Learner@93] - TCP NoDelay set to: true
+2015-06-29 16:53:41,412 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Environment@109] - Server environment:zookeeper.version=3.5.0-alpha-1615249, built on 08/01/2014 22:13 GMT
+2015-06-29 16:53:41,413 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Environment@109] - Server environment:host.name=chrubuntu
+2015-06-29 16:53:41,413 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Environment@109] - Server environment:java.version=1.7.0_79
+2015-06-29 16:53:41,413 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Environment@109] - Server environment:java.vendor=Oracle Corporation
+2015-06-29 16:53:41,413 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Environment@109] - Server environment:java.home=/usr/lib/jvm/java-7-openjdk-amd64/jre
+2015-06-29 16:53:41,413 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Environment@109] - Server environment:java.class.path=./jline-2.11.jar:./servlet-api-2.5-20081211.jar:./jackson-mapper-asl-1.9.11.jar:./slf4j-log4j12-1.7.5.jar:./jetty-util-6.1.26.jar:./slf4j-api-1.7.5.jar:./log4j-1.2.16.jar:./commons-cli-1.2.jar:./jackson-core-asl-1.9.11.jar:./zookeeper-3.5.0-alpha.jar:./javacc.jar:./jetty-6.1.26.jar:./netty-3.7.0.Final.jar:.
+2015-06-29 16:53:41,414 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Environment@109] - Server environment:java.library.path=/usr/java/packages/lib/amd64:/usr/lib/x86_64-linux-gnu/jni:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/usr/lib/jni:/lib:/usr/lib
+2015-06-29 16:53:41,414 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Environment@109] - Server environment:java.io.tmpdir=/tmp
+2015-06-29 16:53:41,414 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Environment@109] - Server environment:java.compiler=<NA>
+2015-06-29 16:53:41,426 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Environment@109] - Server environment:os.name=Linux
+2015-06-29 16:53:41,426 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Environment@109] - Server environment:os.arch=amd64
+2015-06-29 16:53:41,426 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Environment@109] - Server environment:os.version=3.13.0-36-generic
+2015-06-29 16:53:41,427 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Environment@109] - Server environment:user.name=dkudrow
+2015-06-29 16:53:41,427 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Environment@109] - Server environment:user.home=/home/dkudrow
+2015-06-29 16:53:41,427 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Environment@109] - Server environment:user.dir=/home/dkudrow/PycharmProjects/BlacKnight/zkconf
+2015-06-29 16:53:41,431 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Environment@109] - Server environment:os.memory.free=21MB
+2015-06-29 16:53:41,431 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Environment@109] - Server environment:os.memory.max=592MB
+2015-06-29 16:53:41,432 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Environment@109] - Server environment:os.memory.total=28MB
+2015-06-29 16:53:41,433 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:ZooKeeperServer@781] - minSessionTimeout set to 4000
+2015-06-29 16:53:41,433 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:ZooKeeperServer@790] - maxSessionTimeout set to 40000
+2015-06-29 16:53:41,434 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:ZooKeeperServer@152] - Created server with tickTime 2000 minSessionTimeout 4000 maxSessionTimeout 40000 datadir ./localhost:2184/data/version-2 snapdir ./localhost:2184/data/version-2
+2015-06-29 16:53:41,456 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Follower@65] - FOLLOWING - LEADER ELECTION TOOK - 91
+2015-06-29 16:53:41,537 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Learner@332] - Getting a diff from the leader 0x30000005b
+2015-06-29 16:53:41,547 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Learner@475] - Learner received NEWLEADER message
+2015-06-29 16:53:41,548 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:FileTxnSnapLog@298] - Snapshotting: 0x30000005b to ./localhost:2184/data/version-2/snapshot.30000005b
+2015-06-29 16:53:41,610 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Learner@459] - Learner received UPTODATE message
+2015-06-29 16:53:41,627 [myid:4] - INFO  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:CommitProcessor@253] - Configuring CommitProcessor with 2 worker threads.
+2015-06-29 16:53:52,003 [myid:4] - WARN  [QuorumPeer[myid=4]/0:0:0:0:0:0:0:0:2184:Follower@121] - Got zxid 0x400000001 expected 0x1
+2015-06-29 16:53:52,007 [myid:4] - INFO  [SyncThread:4:FileTxnLog@200] - Creating new log file: log.400000001
+2015-06-29 16:53:58,005 [myid:4] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2184:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:55040
+2015-06-29 16:53:58,014 [myid:4] - INFO  [NIOWorkerThread-1:NIOServerCnxn@835] - Processing srvr command from /127.0.0.1:55040
+2015-06-29 16:53:58,018 [myid:4] - INFO  [NIOWorkerThread-1:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:55040 (no session established for client)

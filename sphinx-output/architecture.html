@@ -1,0 +1,300 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>System Architecture &mdash; BlacKnight 0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="BlacKnight 0.1 documentation" href="index.html"/>
+        <link rel="next" title="Installation" href="install.html"/>
+        <link rel="prev" title="Welcome to BlacKnight’s documentation!" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> BlacKnight
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">System Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#cloud-software-appliances">Cloud Software Appliances</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#terminology">Terminology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#abstractions">Abstractions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#roles">Roles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#appliance-state">Appliance State</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#diff">Diff</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#implementation">Implementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#developing-appliances">Developing Appliances</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#puppet">Puppet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#blacknight">BlacKnight</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#eucalyptus">Eucalyptus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#external-documentation">External Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reference/client.html"><code class="docutils literal"><span class="pre">blacknight.client</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/specification.html"><code class="docutils literal"><span class="pre">blacknight.specification</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/action.html"><code class="docutils literal"><span class="pre">blacknight.action</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">BlacKnight</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>System Architecture</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/architecture.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="system-architecture">
+<h1>System Architecture<a class="headerlink" href="#system-architecture" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="cloud-software-appliances">
+<h2>Cloud Software Appliances<a class="headerlink" href="#cloud-software-appliances" title="Permalink to this headline">¶</a></h2>
+<p>Unlike a general purpose cloud, a cloud software appliance (or simply <em>&#8220;appliance&#8221;</em>) is a private cloud that exposes only the APIs of the applications it is hosting. An appliance consists of a small scale private cloud, pre-loaded with a limited set of applications as well as the platform and infrastructure on which they run. You can think of it as a web-service-in-a-box. An appliance is meant to be fully self-contained, operating for long periods of time without an operator. Therefore, it must be able to detect changes to it&#8217;s configuration (e.g. hardware and software failures) and adjust to make best the best use of existing resources.</p>
+<p>To make these concepts a little more concrete, I will refer to the following toy appliance throughout this document:</p>
+<p>FIGURE</p>
+<p>This appliance is composed of</p>
+<ul class="simple">
+<li>four hosts running a Eucalyptus cloud;</li>
+<li>non-user facing utilities (Hadoop, MySQL) running in Eucalyptus VM instances;</li>
+<li>a user facing API (fictional FarmApp web application) running in Eucalyptus VM instances.</li>
+</ul>
+</div>
+<div class="section" id="terminology">
+<h2>Terminology<a class="headerlink" href="#terminology" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>Host</dt>
+<dd>Refers to a physical machine in the appliance.</dd>
+<dt>Service</dt>
+<dd>Refers to a network-accessible process (or group of processes) that are started and stopped together. This includes infrastructure management (e.g. Eucalyptus node controller), platform tools (e.g. virtual machine instance running a MySQL database) as well as application services (e.g. appliance&#8217;s user facing API).</dd>
+</dl>
+</div>
+<div class="section" id="abstractions">
+<h2>Abstractions<a class="headerlink" href="#abstractions" title="Permalink to this headline">¶</a></h2>
+<p>BlacKnight is built around a few simple abstractions that provide us with a way of describing the state of the appliance.</p>
+<div class="section" id="roles">
+<h3>Roles<a class="headerlink" href="#roles" title="Permalink to this headline">¶</a></h3>
+<p>The <strong>role</strong> is the basic building block in describing appliance state. A role embodies a type of service (or collection of services) that fails atomically. We say that a role is <strong>represented</strong> by the services that fulfill it. The roles in our toy appliance are:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">farmapp</span></code> - VM instance running the FarmApp application</li>
+<li><code class="docutils literal"><span class="pre">hadoop</span></code> - VM instance running Hadoop</li>
+<li><code class="docutils literal"><span class="pre">mysql</span></code> - VM instance running a MySQL database server</li>
+<li><code class="docutils literal"><span class="pre">euca_nc</span></code> - Eucalyptus node controller (component of Eucalyptus cloud manager)</li>
+<li><code class="docutils literal"><span class="pre">euca_slave</span></code> - backup Eucalyptus head node (component of Eucalyptus cloud manager)</li>
+</ul>
+<p>An example of a role is the appliance&#8217;s database service: a VM instance running a MySQL server. We&#8217;ll dub this role <code class="docutils literal"><span class="pre">mysql</span></code>. If there are two VM instances running MySQL servers, the representation of <code class="docutils literal"><span class="pre">mysql</span></code> is two.</p>
+<p>Each role has two components: <strong>start/stop hooks</strong> and <strong>dependencies</strong>. Start and stop hooks can be triggered to increase or decrease the representation of the role respectively. Practically speaking, these hooks are shell commands that can be invoked to start another service that fulfills the role. In the case of <code class="docutils literal"><span class="pre">mysql</span></code>, the start hook would be a shell script that starts a new VM instance running a MySQL server and the stop hook would terminate such an instance. The requirement that roles fail atomically stems from the fact that they must be fully controllable through only a start and stop hook. It is up to the appliance creator to ensure that all roles implement fail-stop.</p>
+<p>The dependency consists of a list of other roles which must be present in the appliance before <em>this</em> role can run. Each dependency is a tuple consisting of a role name and an integer <strong>capacity</strong>. This is because it is not enough simply to know that one role depends on another - the relationship has to be quantified. The capacity indicates how many <em>dependers</em> a <em>dependee</em> will support. Consider the <code class="docutils literal"><span class="pre">hadoop</span></code> role which consists of a VM instance running Hadoop process:</p>
+<dl class="docutils">
+<dt><code class="docutils literal"><span class="pre">hadoop</span></code></dt>
+<dd><ul class="first last simple">
+<li>start hook: <code class="docutils literal"><span class="pre">/opt/hooks/start_hadoop.sh</span></code></li>
+<li>stop hook: <code class="docutils literal"><span class="pre">/opt/hooks/stop_hadoop.sh</span></code></li>
+<li>dependencies: <code class="docutils literal"><span class="pre">(euca_nc:</span> <span class="pre">2),</span> <span class="pre">(mysql:</span> <span class="pre">10)</span></code></li>
+</ul>
+</dd>
+</dl>
+<p>A VM instance has to be resident in Eucalyptus node controller and so the <code class="docutils literal"><span class="pre">hadoop</span></code> depends on <code class="docutils literal"><span class="pre">euca_nc</span></code>. Furthermore, the Hadoop process must have access to the database and so <code class="docutils literal"><span class="pre">hadoop</span></code> also depends on <code class="docutils literal"><span class="pre">mysql</span></code>. The capacity of <code class="docutils literal"><span class="pre">euca_nc</span></code> to support <code class="docutils literal"><span class="pre">hadoop</span></code> is 2. This means that there can be at most VM instances running Hadoop per node controller in the appliance. Similarly a single MySQL server can support up to 10 Hadoop processes. If we want to start up an 11th Hadoop process, we must start an additional MySQL server to support it.</p>
+</div>
+<div class="section" id="appliance-state">
+<h3>Appliance State<a class="headerlink" href="#appliance-state" title="Permalink to this headline">¶</a></h3>
+<p>We can describe the state of the appliance using the representation of each role. There are a few different appliance states that we are interested in. The first is the <strong>minimum viable appliance</strong>. This is the smallest representation of each role that still yields a functional appliance. The second is the <strong>optimal appliance</strong>. This is the maximum representation of each role, beyond which performance does not increase. Lastly, we need to be able to describe the <strong>current state</strong> of the appliance - i.e. the current representation of each role.</p>
+<p>The first two states are determined by the appliance creator in a <strong>specification</strong> file. The specification contains a definition for each role that looks like this:</p>
+<ul>
+<li><dl class="first docutils">
+<dt>rolename</dt>
+<dd><ul class="first last simple">
+<li>start hook</li>
+<li>stop hook</li>
+<li>minimum representation</li>
+<li>maximum representation</li>
+<li>dependencies</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>The minimum viable appliance is determined from <em>minimum representation</em> and the optimal appliance is determined from <em>maximum representation</em> (this field can be left empty which will result in BlacKnight attempting to increase the representation of this role whenever possible).</p>
+<p>The current state is determined by performing a census on the active services. This results in a <em>current representation</em> for each role.</p>
+</div>
+<div class="section" id="diff">
+<h3>Diff<a class="headerlink" href="#diff" title="Permalink to this headline">¶</a></h3>
+<p>The diff operation below is used to generate a list of actions to transition between the current state and the state that best approximates the optimal appliance given avaiable hardware. diff is invoked every time a change is detected in the appliance.</p>
+<p>The diff occurs in two phases. The first phase brings the appliance to it&#8217;s minimum viable configuration. If this fails, it is because the appliance lacks the necessary hardware for a the minimum configuration and the appliance fail-stops. If the first phase succeeds, the second phase attempts to bring the appliance to its optimal configuration. If this fails, the appliance simply runs at a degraded state since the minimum viable configuration is guaranteed by the first stage.</p>
+<p>Both phases make use of a recursive sub-routine which attempts to increase the representation of a role. The sub-routine traverses a weighted DAG constructedpa from the current state of the appliance. The nodes in the DAG correspond to roles with the node weights indicating the current representation of the role. The edges corresond to dependencies with the edge weights corresponding to the total demand of the dependency (current representation times dependency capacity).</p>
+<blockquote>
+<div>FIGURE</div></blockquote>
+<p>The sub-routine starts by provisionally increasing the weight of the node and updating the weights of outgoing edges. The node&#8217;s successor&#8217;s are then visited and for each the in-degree (sum of weights of incoming edges) is compared to its weight. If the in-degree exceeds the successor&#8217;s node weight, demand for that role has exceeded supply and it&#8217;s representation has to be increased. This is done by calling the sub-routine recursively.</p>
+<p>The recursion ends when a leaf node is reached. Leaf nodes are roles with no dependencies and have an implicit dependence on a physical host in the appliance. Thus when increasing the representation of a leaf node, we must allocate a physical host to accommodate. If there is an unused physical host, it is allocated. If there is not, we search for a role that contains a surplus (current reprsentation is greater than min representation) and re-purpose one of its hosts. If no host can be allocated, we must abort the whole tree of recursive calls.</p>
+<p>Because we cannot know until we reach a leaf node whether the appliance can support increase in representation, all provisional changes are transactional. If we successfully increase the the weight of a leaf node, the changes are committed. Otherwise the changes are aborted.</p>
+</div>
+</div>
+<div class="section" id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
+<p>WRITEME</p>
+</div>
+<div class="section" id="developing-appliances">
+<h2>Developing Appliances<a class="headerlink" href="#developing-appliances" title="Permalink to this headline">¶</a></h2>
+<p>WRITEME</p>
+<p>cloud manager and primary head node (not role)
+responsibilities of roles in assessing their own status
+atomicity of roles</p>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="install.html" class="btn btn-neutral float-right" title="Installation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Welcome to BlacKnight’s documentation!" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Daniel Kudrow.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

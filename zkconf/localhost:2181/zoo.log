@@ -1,0 +1,307 @@
+2015-06-29 16:53:39,144 [myid:] - INFO  [main:QuorumPeerConfig@109] - Reading configuration from: ./localhost:2181/zoo.cfg
+2015-06-29 16:53:39,274 [myid:1] - INFO  [main:DatadirCleanupManager@78] - autopurge.snapRetainCount set to 3
+2015-06-29 16:53:39,274 [myid:1] - INFO  [main:DatadirCleanupManager@79] - autopurge.purgeInterval set to 0
+2015-06-29 16:53:39,274 [myid:1] - INFO  [main:DatadirCleanupManager@101] - Purge task is not scheduled.
+2015-06-29 16:53:39,823 [myid:1] - INFO  [main:QuorumPeerMain@136] - Starting quorum peer
+2015-06-29 16:53:39,905 [myid:1] - INFO  [main:NIOServerCnxnFactory@670] - Configuring NIO connection handler with 10s sessionless connection timeout, 1 selector thread(s), 4 worker threads, and 64 kB direct buffers.
+2015-06-29 16:53:39,938 [myid:1] - INFO  [main:NIOServerCnxnFactory@683] - binding to port 0.0.0.0/0.0.0.0:2181
+2015-06-29 16:53:40,149 [myid:1] - INFO  [main:Slf4jLog@67] - Logging to org.slf4j.impl.Log4jLoggerAdapter(org.mortbay.log) via org.mortbay.log.Slf4jLog
+2015-06-29 16:53:40,240 [myid:1] - INFO  [main:QuorumPeer@1205] - Local sessions disabled
+2015-06-29 16:53:40,240 [myid:1] - INFO  [main:QuorumPeer@1216] - Local session upgrading disabled
+2015-06-29 16:53:40,240 [myid:1] - INFO  [main:QuorumPeer@1185] - tickTime set to 2000
+2015-06-29 16:53:40,240 [myid:1] - INFO  [main:QuorumPeer@1227] - minSessionTimeout set to 4000
+2015-06-29 16:53:40,243 [myid:1] - INFO  [main:QuorumPeer@1238] - maxSessionTimeout set to 40000
+2015-06-29 16:53:40,243 [myid:1] - INFO  [main:QuorumPeer@1253] - initLimit set to 10
+2015-06-29 16:53:40,315 [myid:1] - INFO  [main:FileSnap@83] - Reading snapshot ./localhost:2181/data/version-2/snapshot.200000095
+2015-06-29 16:53:40,568 [myid:1] - INFO  [main:Slf4jLog@67] - jetty-6.1.26
+2015-06-29 16:53:40,634 [myid:1] - WARN  [main:Slf4jLog@76] - failed SocketConnector@0.0.0.0:8080: java.net.BindException: Address already in use
+2015-06-29 16:53:40,634 [myid:1] - WARN  [main:Slf4jLog@76] - failed Server@44c75ba4: java.net.BindException: Address already in use
+2015-06-29 16:53:40,648 [myid:1] - WARN  [main:QuorumPeer@650] - Problem starting AdminServer
+org.apache.zookeeper.server.admin.AdminServer$AdminServerException: Problem starting AdminServer on port 8080, command URL /commands
+	at org.apache.zookeeper.server.admin.JettyAdminServer.start(JettyAdminServer.java:89)
+	at org.apache.zookeeper.server.quorum.QuorumPeer.start(QuorumPeer.java:648)
+	at org.apache.zookeeper.server.quorum.QuorumPeerMain.runFromConfig(QuorumPeerMain.java:171)
+	at org.apache.zookeeper.server.quorum.QuorumPeerMain.initializeAndRun(QuorumPeerMain.java:120)
+	at org.apache.zookeeper.server.quorum.QuorumPeerMain.main(QuorumPeerMain.java:79)
+Caused by: java.net.BindException: Address already in use
+	at java.net.PlainSocketImpl.socketBind(Native Method)
+	at java.net.AbstractPlainSocketImpl.bind(AbstractPlainSocketImpl.java:376)
+	at java.net.ServerSocket.bind(ServerSocket.java:376)
+	at java.net.ServerSocket.<init>(ServerSocket.java:237)
+	at java.net.ServerSocket.<init>(ServerSocket.java:181)
+	at org.mortbay.jetty.bio.SocketConnector.newServerSocket(SocketConnector.java:80)
+	at org.mortbay.jetty.bio.SocketConnector.open(SocketConnector.java:73)
+	at org.mortbay.jetty.AbstractConnector.doStart(AbstractConnector.java:283)
+	at org.mortbay.jetty.bio.SocketConnector.doStart(SocketConnector.java:147)
+	at org.mortbay.component.AbstractLifeCycle.start(AbstractLifeCycle.java:50)
+	at org.mortbay.jetty.Server.doStart(Server.java:235)
+	at org.mortbay.component.AbstractLifeCycle.start(AbstractLifeCycle.java:50)
+	at org.apache.zookeeper.server.admin.JettyAdminServer.start(JettyAdminServer.java:85)
+	... 4 more
+org.apache.zookeeper.server.admin.AdminServer$AdminServerException: Problem starting AdminServer on port 8080, command URL /commands
+2015-06-29 16:53:40,666 [myid:1] - INFO  [QuorumPeerListener:QuorumCnxManager$Listener@550] - My election bind port: localhost/127.0.0.1:4181
+2015-06-29 16:53:40,702 [myid:1] - INFO  [localhost/127.0.0.1:4181:QuorumCnxManager$Listener@556] - Received connection request /127.0.0.1:36548
+2015-06-29 16:53:40,721 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:QuorumPeer@913] - LOOKING
+2015-06-29 16:53:40,723 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:FastLeaderElection@888] - New election. My id =  1, proposed zxid=0x30000005b
+2015-06-29 16:53:40,731 [myid:1] - INFO  [WorkerSender[myid=1]:QuorumCnxManager@197] - Have smaller server identifier, so dropping the connection: (2, 1)
+2015-06-29 16:53:40,735 [myid:1] - INFO  [WorkerReceiver[myid=1]:FastLeaderElection@682] - Notification: 2 (message format version), 1 (n.leader), 0x30000005b (n.zxid), 0x1 (n.round), LOOKING (n.state), 1 (n.sid), 0x3 (n.peerEPoch), LOOKING (my state)100000000 (n.config version)
+2015-06-29 16:53:40,739 [myid:1] - INFO  [WorkerReceiver[myid=1]:FastLeaderElection@682] - Notification: 2 (message format version), 3 (n.leader), 0x30000005b (n.zxid), 0x1 (n.round), LOOKING (n.state), 3 (n.sid), 0x3 (n.peerEPoch), LOOKING (my state)100000000 (n.config version)
+2015-06-29 16:53:40,746 [myid:1] - WARN  [WorkerSender[myid=1]:QuorumCnxManager@384] - Cannot open channel to 4 at election address localhost/127.0.0.1:4184
+java.net.ConnectException: Connection refused
+	at java.net.PlainSocketImpl.socketConnect(Native Method)
+	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:339)
+	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:200)
+	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:182)
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392)
+	at java.net.Socket.connect(Socket.java:579)
+	at org.apache.zookeeper.server.quorum.QuorumCnxManager.connectOne(QuorumCnxManager.java:369)
+	at org.apache.zookeeper.server.quorum.QuorumCnxManager.connectOne(QuorumCnxManager.java:407)
+	at org.apache.zookeeper.server.quorum.QuorumCnxManager.toSend(QuorumCnxManager.java:346)
+	at org.apache.zookeeper.server.quorum.FastLeaderElection$Messenger$WorkerSender.process(FastLeaderElection.java:480)
+	at org.apache.zookeeper.server.quorum.FastLeaderElection$Messenger$WorkerSender.run(FastLeaderElection.java:459)
+	at java.lang.Thread.run(Thread.java:745)
+2015-06-29 16:53:40,752 [myid:1] - INFO  [localhost/127.0.0.1:4181:QuorumCnxManager$Listener@556] - Received connection request /127.0.0.1:36552
+2015-06-29 16:53:40,757 [myid:1] - WARN  [WorkerSender[myid=1]:QuorumCnxManager@384] - Cannot open channel to 5 at election address localhost/127.0.0.1:4185
+java.net.ConnectException: Connection refused
+	at java.net.PlainSocketImpl.socketConnect(Native Method)
+	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:339)
+	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:200)
+	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:182)
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392)
+	at java.net.Socket.connect(Socket.java:579)
+	at org.apache.zookeeper.server.quorum.QuorumCnxManager.connectOne(QuorumCnxManager.java:369)
+	at org.apache.zookeeper.server.quorum.QuorumCnxManager.connectOne(QuorumCnxManager.java:407)
+	at org.apache.zookeeper.server.quorum.QuorumCnxManager.toSend(QuorumCnxManager.java:346)
+	at org.apache.zookeeper.server.quorum.FastLeaderElection$Messenger$WorkerSender.process(FastLeaderElection.java:480)
+	at org.apache.zookeeper.server.quorum.FastLeaderElection$Messenger$WorkerSender.run(FastLeaderElection.java:459)
+	at java.lang.Thread.run(Thread.java:745)
+2015-06-29 16:53:40,766 [myid:1] - INFO  [WorkerReceiver[myid=1]:FastLeaderElection@682] - Notification: 2 (message format version), 3 (n.leader), 0x30000005b (n.zxid), 0x1 (n.round), LOOKING (n.state), 1 (n.sid), 0x3 (n.peerEPoch), LOOKING (my state)100000000 (n.config version)
+2015-06-29 16:53:40,768 [myid:1] - WARN  [WorkerSender[myid=1]:QuorumCnxManager@384] - Cannot open channel to 4 at election address localhost/127.0.0.1:4184
+java.net.ConnectException: Connection refused
+	at java.net.PlainSocketImpl.socketConnect(Native Method)
+	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:339)
+	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:200)
+	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:182)
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392)
+	at java.net.Socket.connect(Socket.java:579)
+	at org.apache.zookeeper.server.quorum.QuorumCnxManager.connectOne(QuorumCnxManager.java:369)
+	at org.apache.zookeeper.server.quorum.QuorumCnxManager.connectOne(QuorumCnxManager.java:407)
+	at org.apache.zookeeper.server.quorum.QuorumCnxManager.toSend(QuorumCnxManager.java:346)
+	at org.apache.zookeeper.server.quorum.FastLeaderElection$Messenger$WorkerSender.process(FastLeaderElection.java:480)
+	at org.apache.zookeeper.server.quorum.FastLeaderElection$Messenger$WorkerSender.run(FastLeaderElection.java:459)
+	at java.lang.Thread.run(Thread.java:745)
+2015-06-29 16:53:40,785 [myid:1] - WARN  [WorkerSender[myid=1]:QuorumCnxManager@384] - Cannot open channel to 5 at election address localhost/127.0.0.1:4185
+java.net.ConnectException: Connection refused
+	at java.net.PlainSocketImpl.socketConnect(Native Method)
+	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:339)
+	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:200)
+	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:182)
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392)
+	at java.net.Socket.connect(Socket.java:579)
+	at org.apache.zookeeper.server.quorum.QuorumCnxManager.connectOne(QuorumCnxManager.java:369)
+	at org.apache.zookeeper.server.quorum.QuorumCnxManager.connectOne(QuorumCnxManager.java:407)
+	at org.apache.zookeeper.server.quorum.QuorumCnxManager.toSend(QuorumCnxManager.java:346)
+	at org.apache.zookeeper.server.quorum.FastLeaderElection$Messenger$WorkerSender.process(FastLeaderElection.java:480)
+	at org.apache.zookeeper.server.quorum.FastLeaderElection$Messenger$WorkerSender.run(FastLeaderElection.java:459)
+	at java.lang.Thread.run(Thread.java:745)
+2015-06-29 16:53:40,870 [myid:1] - INFO  [WorkerReceiver[myid=1]:FastLeaderElection@682] - Notification: 2 (message format version), 2 (n.leader), 0x30000005b (n.zxid), 0x1 (n.round), LOOKING (n.state), 2 (n.sid), 0x3 (n.peerEPoch), LOOKING (my state)100000000 (n.config version)
+2015-06-29 16:53:40,889 [myid:1] - INFO  [WorkerReceiver[myid=1]:FastLeaderElection@682] - Notification: 2 (message format version), 3 (n.leader), 0x30000005b (n.zxid), 0x1 (n.round), LOOKING (n.state), 2 (n.sid), 0x3 (n.peerEPoch), LOOKING (my state)100000000 (n.config version)
+2015-06-29 16:53:41,051 [myid:1] - INFO  [localhost/127.0.0.1:4181:QuorumCnxManager$Listener@556] - Received connection request /127.0.0.1:36562
+2015-06-29 16:53:41,057 [myid:1] - INFO  [WorkerReceiver[myid=1]:FastLeaderElection@682] - Notification: 2 (message format version), 5 (n.leader), 0x30000005b (n.zxid), 0x1 (n.round), LOOKING (n.state), 5 (n.sid), 0x3 (n.peerEPoch), LOOKING (my state)100000000 (n.config version)
+2015-06-29 16:53:41,060 [myid:1] - WARN  [WorkerSender[myid=1]:QuorumCnxManager@384] - Cannot open channel to 4 at election address localhost/127.0.0.1:4184
+java.net.ConnectException: Connection refused
+	at java.net.PlainSocketImpl.socketConnect(Native Method)
+	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:339)
+	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:200)
+	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:182)
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392)
+	at java.net.Socket.connect(Socket.java:579)
+	at org.apache.zookeeper.server.quorum.QuorumCnxManager.connectOne(QuorumCnxManager.java:369)
+	at org.apache.zookeeper.server.quorum.QuorumCnxManager.connectOne(QuorumCnxManager.java:407)
+	at org.apache.zookeeper.server.quorum.QuorumCnxManager.toSend(QuorumCnxManager.java:346)
+	at org.apache.zookeeper.server.quorum.FastLeaderElection$Messenger$WorkerSender.process(FastLeaderElection.java:480)
+	at org.apache.zookeeper.server.quorum.FastLeaderElection$Messenger$WorkerSender.run(FastLeaderElection.java:459)
+	at java.lang.Thread.run(Thread.java:745)
+2015-06-29 16:53:41,062 [myid:1] - INFO  [WorkerReceiver[myid=1]:FastLeaderElection@682] - Notification: 2 (message format version), 5 (n.leader), 0x30000005b (n.zxid), 0x1 (n.round), LOOKING (n.state), 1 (n.sid), 0x3 (n.peerEPoch), LOOKING (my state)100000000 (n.config version)
+2015-06-29 16:53:41,070 [myid:1] - INFO  [WorkerReceiver[myid=1]:FastLeaderElection@682] - Notification: 2 (message format version), 5 (n.leader), 0x30000005b (n.zxid), 0x1 (n.round), LOOKING (n.state), 3 (n.sid), 0x3 (n.peerEPoch), LOOKING (my state)100000000 (n.config version)
+2015-06-29 16:53:41,083 [myid:1] - INFO  [WorkerReceiver[myid=1]:FastLeaderElection@682] - Notification: 2 (message format version), 5 (n.leader), 0x30000005b (n.zxid), 0x1 (n.round), LOOKING (n.state), 2 (n.sid), 0x3 (n.peerEPoch), LOOKING (my state)100000000 (n.config version)
+2015-06-29 16:53:41,145 [myid:1] - INFO  [localhost/127.0.0.1:4181:QuorumCnxManager$Listener@556] - Received connection request /127.0.0.1:36571
+2015-06-29 16:53:41,148 [myid:1] - INFO  [WorkerReceiver[myid=1]:FastLeaderElection@682] - Notification: 2 (message format version), 4 (n.leader), 0x30000005b (n.zxid), 0x1 (n.round), LOOKING (n.state), 4 (n.sid), 0x3 (n.peerEPoch), LOOKING (my state)100000000 (n.config version)
+2015-06-29 16:53:41,160 [myid:1] - INFO  [WorkerReceiver[myid=1]:FastLeaderElection@682] - Notification: 2 (message format version), 5 (n.leader), 0x30000005b (n.zxid), 0x1 (n.round), LOOKING (n.state), 4 (n.sid), 0x3 (n.peerEPoch), LOOKING (my state)100000000 (n.config version)
+2015-06-29 16:53:41,361 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=LeaderElection]
+2015-06-29 16:53:41,362 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:QuorumPeer@989] - FOLLOWING
+2015-06-29 16:53:41,386 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Learner@93] - TCP NoDelay set to: true
+2015-06-29 16:53:41,416 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@109] - Server environment:zookeeper.version=3.5.0-alpha-1615249, built on 08/01/2014 22:13 GMT
+2015-06-29 16:53:41,417 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@109] - Server environment:host.name=chrubuntu
+2015-06-29 16:53:41,417 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@109] - Server environment:java.version=1.7.0_79
+2015-06-29 16:53:41,417 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@109] - Server environment:java.vendor=Oracle Corporation
+2015-06-29 16:53:41,417 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@109] - Server environment:java.home=/usr/lib/jvm/java-7-openjdk-amd64/jre
+2015-06-29 16:53:41,417 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@109] - Server environment:java.class.path=./jline-2.11.jar:./servlet-api-2.5-20081211.jar:./jackson-mapper-asl-1.9.11.jar:./slf4j-log4j12-1.7.5.jar:./jetty-util-6.1.26.jar:./slf4j-api-1.7.5.jar:./log4j-1.2.16.jar:./commons-cli-1.2.jar:./jackson-core-asl-1.9.11.jar:./zookeeper-3.5.0-alpha.jar:./javacc.jar:./jetty-6.1.26.jar:./netty-3.7.0.Final.jar:.
+2015-06-29 16:53:41,417 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@109] - Server environment:java.library.path=/usr/java/packages/lib/amd64:/usr/lib/x86_64-linux-gnu/jni:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/usr/lib/jni:/lib:/usr/lib
+2015-06-29 16:53:41,417 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@109] - Server environment:java.io.tmpdir=/tmp
+2015-06-29 16:53:41,418 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@109] - Server environment:java.compiler=<NA>
+2015-06-29 16:53:41,418 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@109] - Server environment:os.name=Linux
+2015-06-29 16:53:41,418 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@109] - Server environment:os.arch=amd64
+2015-06-29 16:53:41,418 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@109] - Server environment:os.version=3.13.0-36-generic
+2015-06-29 16:53:41,434 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@109] - Server environment:user.name=dkudrow
+2015-06-29 16:53:41,434 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@109] - Server environment:user.home=/home/dkudrow
+2015-06-29 16:53:41,434 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@109] - Server environment:user.dir=/home/dkudrow/PycharmProjects/BlacKnight/zkconf
+2015-06-29 16:53:41,434 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@109] - Server environment:os.memory.free=19MB
+2015-06-29 16:53:41,435 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@109] - Server environment:os.memory.max=592MB
+2015-06-29 16:53:41,435 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@109] - Server environment:os.memory.total=28MB
+2015-06-29 16:53:41,444 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:ZooKeeperServer@781] - minSessionTimeout set to 4000
+2015-06-29 16:53:41,444 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:ZooKeeperServer@790] - maxSessionTimeout set to 40000
+2015-06-29 16:53:41,444 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:ZooKeeperServer@152] - Created server with tickTime 2000 minSessionTimeout 4000 maxSessionTimeout 40000 datadir ./localhost:2181/data/version-2 snapdir ./localhost:2181/data/version-2
+2015-06-29 16:53:41,445 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Follower@65] - FOLLOWING - LEADER ELECTION TOOK - 83
+2015-06-29 16:53:41,526 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Learner@332] - Getting a diff from the leader 0x30000005b
+2015-06-29 16:53:41,535 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Learner@475] - Learner received NEWLEADER message
+2015-06-29 16:53:41,536 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:FileTxnSnapLog@298] - Snapshotting: 0x30000005b to ./localhost:2181/data/version-2/snapshot.30000005b
+2015-06-29 16:53:41,610 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Learner@459] - Learner received UPTODATE message
+2015-06-29 16:53:41,638 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:CommitProcessor@253] - Configuring CommitProcessor with 2 worker threads.
+2015-06-29 16:53:52,004 [myid:1] - WARN  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Follower@121] - Got zxid 0x400000001 expected 0x1
+2015-06-29 16:53:52,005 [myid:1] - INFO  [SyncThread:1:FileTxnLog@200] - Creating new log file: log.400000001
+2015-06-29 16:53:57,933 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51598
+2015-06-29 16:53:57,949 [myid:1] - INFO  [NIOWorkerThread-1:NIOServerCnxn@835] - Processing srvr command from /127.0.0.1:51598
+2015-06-29 16:53:57,953 [myid:1] - INFO  [NIOWorkerThread-1:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51598 (no session established for client)
+2015-06-29 16:54:03,635 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51603
+2015-06-29 16:54:03,657 [myid:1] - INFO  [NIOWorkerThread-2:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51603
+2015-06-29 16:54:03,673 [myid:1] - INFO  [CommitProcWorkThread-1:ZooKeeperServer@619] - Established session 0x14e41bd999e0000 with negotiated timeout 30000 for client /127.0.0.1:51603
+2015-06-29 16:54:21,372 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51604
+2015-06-29 16:54:21,373 [myid:1] - INFO  [NIOWorkerThread-4:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51604
+2015-06-29 16:54:21,384 [myid:1] - INFO  [CommitProcWorkThread-2:ZooKeeperServer@619] - Established session 0x14e41bd999e0001 with negotiated timeout 10000 for client /127.0.0.1:51604
+2015-06-29 16:56:36,848 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51605
+2015-06-29 16:56:36,850 [myid:1] - INFO  [NIOWorkerThread-4:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51605
+2015-06-29 16:56:36,858 [myid:1] - INFO  [CommitProcWorkThread-1:ZooKeeperServer@619] - Established session 0x14e41bd999e0002 with negotiated timeout 10000 for client /127.0.0.1:51605
+2015-06-29 16:56:38,926 [myid:1] - WARN  [NIOWorkerThread-4:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e0002, likely client has closed socket
+2015-06-29 16:56:38,927 [myid:1] - INFO  [NIOWorkerThread-4:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e0002]
+2015-06-29 16:56:38,927 [myid:1] - INFO  [NIOWorkerThread-4:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51605 which had sessionid 0x14e41bd999e0002
+2015-06-29 16:56:43,490 [myid:1] - WARN  [NIOWorkerThread-3:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e0001, likely client has closed socket
+2015-06-29 16:56:43,491 [myid:1] - INFO  [NIOWorkerThread-3:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e0001]
+2015-06-29 16:56:43,495 [myid:1] - INFO  [NIOWorkerThread-3:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51604 which had sessionid 0x14e41bd999e0001
+2015-06-29 16:56:45,466 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51606
+2015-06-29 16:56:45,468 [myid:1] - INFO  [NIOWorkerThread-4:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51606
+2015-06-29 16:56:45,474 [myid:1] - INFO  [CommitProcWorkThread-2:ZooKeeperServer@619] - Established session 0x14e41bd999e0003 with negotiated timeout 10000 for client /127.0.0.1:51606
+2015-06-29 16:57:33,915 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51607
+2015-06-29 16:57:33,917 [myid:1] - INFO  [NIOWorkerThread-4:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51607
+2015-06-29 16:57:33,925 [myid:1] - INFO  [CommitProcWorkThread-1:ZooKeeperServer@619] - Established session 0x14e41bd999e0004 with negotiated timeout 10000 for client /127.0.0.1:51607
+2015-06-29 16:57:33,970 [myid:1] - WARN  [NIOWorkerThread-1:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e0004, likely client has closed socket
+2015-06-29 16:57:33,971 [myid:1] - INFO  [NIOWorkerThread-1:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e0004]
+2015-06-29 16:57:33,972 [myid:1] - INFO  [NIOWorkerThread-1:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51607 which had sessionid 0x14e41bd999e0004
+2015-06-29 16:57:39,141 [myid:1] - WARN  [NIOWorkerThread-4:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e0003, likely client has closed socket
+2015-06-29 16:57:39,142 [myid:1] - INFO  [NIOWorkerThread-4:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e0003]
+2015-06-29 16:57:39,142 [myid:1] - INFO  [NIOWorkerThread-4:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51606 which had sessionid 0x14e41bd999e0003
+2015-06-29 16:57:42,244 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51608
+2015-06-29 16:57:42,245 [myid:1] - INFO  [NIOWorkerThread-1:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51608
+2015-06-29 16:57:42,255 [myid:1] - INFO  [CommitProcWorkThread-2:ZooKeeperServer@619] - Established session 0x14e41bd999e0005 with negotiated timeout 10000 for client /127.0.0.1:51608
+2015-06-29 16:58:53,928 [myid:1] - WARN  [NIOWorkerThread-4:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e0005, likely client has closed socket
+2015-06-29 16:58:53,928 [myid:1] - INFO  [NIOWorkerThread-4:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e0005]
+2015-06-29 16:58:53,929 [myid:1] - INFO  [NIOWorkerThread-4:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51608 which had sessionid 0x14e41bd999e0005
+2015-06-29 16:58:56,486 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51609
+2015-06-29 16:58:56,487 [myid:1] - INFO  [NIOWorkerThread-1:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51609
+2015-06-29 16:58:56,493 [myid:1] - INFO  [CommitProcWorkThread-1:ZooKeeperServer@619] - Established session 0x14e41bd999e0006 with negotiated timeout 10000 for client /127.0.0.1:51609
+2015-06-29 16:59:17,309 [myid:1] - WARN  [NIOWorkerThread-4:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e0006, likely client has closed socket
+2015-06-29 16:59:17,309 [myid:1] - INFO  [NIOWorkerThread-4:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e0006]
+2015-06-29 16:59:17,310 [myid:1] - INFO  [NIOWorkerThread-4:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51609 which had sessionid 0x14e41bd999e0006
+2015-06-29 16:59:23,987 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51610
+2015-06-29 16:59:23,988 [myid:1] - INFO  [NIOWorkerThread-2:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51610
+2015-06-29 16:59:23,994 [myid:1] - INFO  [CommitProcWorkThread-2:ZooKeeperServer@619] - Established session 0x14e41bd999e0007 with negotiated timeout 10000 for client /127.0.0.1:51610
+2015-06-29 17:01:37,706 [myid:1] - WARN  [NIOWorkerThread-4:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e0007, likely client has closed socket
+2015-06-29 17:01:37,707 [myid:1] - INFO  [NIOWorkerThread-4:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e0007]
+2015-06-29 17:01:37,707 [myid:1] - INFO  [NIOWorkerThread-4:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51610 which had sessionid 0x14e41bd999e0007
+2015-06-29 17:01:57,415 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51696
+2015-06-29 17:01:57,416 [myid:1] - INFO  [NIOWorkerThread-1:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51696
+2015-06-29 17:01:57,422 [myid:1] - INFO  [CommitProcWorkThread-1:ZooKeeperServer@619] - Established session 0x14e41bd999e0008 with negotiated timeout 10000 for client /127.0.0.1:51696
+2015-06-29 17:01:59,736 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51697
+2015-06-29 17:01:59,737 [myid:1] - INFO  [NIOWorkerThread-1:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51697
+2015-06-29 17:01:59,744 [myid:1] - INFO  [CommitProcWorkThread-2:ZooKeeperServer@619] - Established session 0x14e41bd999e0009 with negotiated timeout 10000 for client /127.0.0.1:51697
+2015-06-29 17:01:59,826 [myid:1] - WARN  [NIOWorkerThread-4:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e0009, likely client has closed socket
+2015-06-29 17:01:59,827 [myid:1] - INFO  [NIOWorkerThread-4:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e0009]
+2015-06-29 17:01:59,828 [myid:1] - INFO  [NIOWorkerThread-4:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51697 which had sessionid 0x14e41bd999e0009
+2015-06-29 17:02:00,116 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51698
+2015-06-29 17:02:00,117 [myid:1] - INFO  [NIOWorkerThread-1:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51698
+2015-06-29 17:02:00,123 [myid:1] - INFO  [CommitProcWorkThread-1:ZooKeeperServer@619] - Established session 0x14e41bd999e000a with negotiated timeout 10000 for client /127.0.0.1:51698
+2015-06-29 17:02:00,177 [myid:1] - WARN  [NIOWorkerThread-2:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e000a, likely client has closed socket
+2015-06-29 17:02:00,177 [myid:1] - INFO  [NIOWorkerThread-2:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e000a]
+2015-06-29 17:02:00,178 [myid:1] - INFO  [NIOWorkerThread-2:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51698 which had sessionid 0x14e41bd999e000a
+2015-06-29 17:02:00,415 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51699
+2015-06-29 17:02:00,417 [myid:1] - INFO  [NIOWorkerThread-4:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51699
+2015-06-29 17:02:00,423 [myid:1] - INFO  [CommitProcWorkThread-2:ZooKeeperServer@619] - Established session 0x14e41bd999e000b with negotiated timeout 10000 for client /127.0.0.1:51699
+2015-06-29 17:02:00,481 [myid:1] - WARN  [NIOWorkerThread-3:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e000b, likely client has closed socket
+2015-06-29 17:02:00,481 [myid:1] - INFO  [NIOWorkerThread-3:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e000b]
+2015-06-29 17:02:00,482 [myid:1] - INFO  [NIOWorkerThread-3:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51699 which had sessionid 0x14e41bd999e000b
+2015-06-29 17:04:48,059 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51702
+2015-06-29 17:04:48,060 [myid:1] - INFO  [NIOWorkerThread-1:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51702
+2015-06-29 17:04:48,066 [myid:1] - INFO  [CommitProcWorkThread-1:ZooKeeperServer@619] - Established session 0x14e41bd999e000c with negotiated timeout 10000 for client /127.0.0.1:51702
+2015-06-29 17:04:54,410 [myid:1] - WARN  [NIOWorkerThread-2:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e0008, likely client has closed socket
+2015-06-29 17:04:54,410 [myid:1] - INFO  [NIOWorkerThread-2:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e0008]
+2015-06-29 17:04:54,411 [myid:1] - INFO  [NIOWorkerThread-2:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51696 which had sessionid 0x14e41bd999e0008
+2015-06-29 17:05:06,277 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51703
+2015-06-29 17:05:06,279 [myid:1] - INFO  [NIOWorkerThread-2:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51703
+2015-06-29 17:05:06,286 [myid:1] - INFO  [CommitProcWorkThread-2:ZooKeeperServer@619] - Established session 0x14e41bd999e000d with negotiated timeout 10000 for client /127.0.0.1:51703
+2015-06-29 17:05:06,339 [myid:1] - WARN  [NIOWorkerThread-4:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e000d, likely client has closed socket
+2015-06-29 17:05:06,340 [myid:1] - INFO  [NIOWorkerThread-4:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e000d]
+2015-06-29 17:05:06,340 [myid:1] - INFO  [NIOWorkerThread-4:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51703 which had sessionid 0x14e41bd999e000d
+2015-06-29 17:05:06,577 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51704
+2015-06-29 17:05:06,578 [myid:1] - INFO  [NIOWorkerThread-1:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51704
+2015-06-29 17:05:06,592 [myid:1] - INFO  [CommitProcWorkThread-1:ZooKeeperServer@619] - Established session 0x14e41bd999e000e with negotiated timeout 10000 for client /127.0.0.1:51704
+2015-06-29 17:05:06,655 [myid:1] - WARN  [NIOWorkerThread-1:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e000e, likely client has closed socket
+2015-06-29 17:05:06,656 [myid:1] - INFO  [NIOWorkerThread-1:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e000e]
+2015-06-29 17:05:06,658 [myid:1] - INFO  [NIOWorkerThread-1:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51704 which had sessionid 0x14e41bd999e000e
+2015-06-29 17:05:06,892 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51705
+2015-06-29 17:05:06,893 [myid:1] - INFO  [NIOWorkerThread-3:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51705
+2015-06-29 17:05:06,898 [myid:1] - INFO  [CommitProcWorkThread-2:ZooKeeperServer@619] - Established session 0x14e41bd999e000f with negotiated timeout 10000 for client /127.0.0.1:51705
+2015-06-29 17:05:06,958 [myid:1] - WARN  [NIOWorkerThread-3:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e000f, likely client has closed socket
+2015-06-29 17:05:06,959 [myid:1] - INFO  [NIOWorkerThread-3:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e000f]
+2015-06-29 17:05:06,959 [myid:1] - INFO  [NIOWorkerThread-3:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51705 which had sessionid 0x14e41bd999e000f
+2015-06-29 17:05:07,191 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51706
+2015-06-29 17:05:07,192 [myid:1] - INFO  [NIOWorkerThread-2:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51706
+2015-06-29 17:05:07,200 [myid:1] - INFO  [CommitProcWorkThread-1:ZooKeeperServer@619] - Established session 0x14e41bd999e0010 with negotiated timeout 10000 for client /127.0.0.1:51706
+2015-06-29 17:05:07,244 [myid:1] - WARN  [NIOWorkerThread-2:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e0010, likely client has closed socket
+2015-06-29 17:05:07,244 [myid:1] - INFO  [NIOWorkerThread-2:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e0010]
+2015-06-29 17:05:07,245 [myid:1] - INFO  [NIOWorkerThread-2:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51706 which had sessionid 0x14e41bd999e0010
+2015-06-29 17:05:07,483 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51707
+2015-06-29 17:05:07,484 [myid:1] - INFO  [NIOWorkerThread-4:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51707
+2015-06-29 17:05:07,490 [myid:1] - INFO  [CommitProcWorkThread-2:ZooKeeperServer@619] - Established session 0x14e41bd999e0011 with negotiated timeout 10000 for client /127.0.0.1:51707
+2015-06-29 17:05:07,531 [myid:1] - WARN  [NIOWorkerThread-4:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e0011, likely client has closed socket
+2015-06-29 17:05:07,532 [myid:1] - INFO  [NIOWorkerThread-4:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e0011]
+2015-06-29 17:05:07,532 [myid:1] - INFO  [NIOWorkerThread-4:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51707 which had sessionid 0x14e41bd999e0011
+2015-06-29 17:05:28,974 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51708
+2015-06-29 17:05:28,975 [myid:1] - INFO  [NIOWorkerThread-4:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51708
+2015-06-29 17:05:28,982 [myid:1] - INFO  [CommitProcWorkThread-1:ZooKeeperServer@619] - Established session 0x14e41bd999e0012 with negotiated timeout 10000 for client /127.0.0.1:51708
+2015-06-29 17:05:29,024 [myid:1] - WARN  [NIOWorkerThread-2:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e0012, likely client has closed socket
+2015-06-29 17:05:29,025 [myid:1] - INFO  [NIOWorkerThread-2:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e0012]
+2015-06-29 17:05:29,025 [myid:1] - INFO  [NIOWorkerThread-2:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51708 which had sessionid 0x14e41bd999e0012
+2015-06-29 17:07:09,160 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51709
+2015-06-29 17:07:09,161 [myid:1] - INFO  [NIOWorkerThread-3:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51709
+2015-06-29 17:07:09,167 [myid:1] - INFO  [CommitProcWorkThread-2:ZooKeeperServer@619] - Established session 0x14e41bd999e0013 with negotiated timeout 10000 for client /127.0.0.1:51709
+2015-06-29 17:07:09,225 [myid:1] - WARN  [NIOWorkerThread-2:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e0013, likely client has closed socket
+2015-06-29 17:07:09,225 [myid:1] - INFO  [NIOWorkerThread-2:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e0013]
+2015-06-29 17:07:09,226 [myid:1] - INFO  [NIOWorkerThread-2:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51709 which had sessionid 0x14e41bd999e0013
+2015-06-29 17:07:09,462 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51710
+2015-06-29 17:07:09,463 [myid:1] - INFO  [NIOWorkerThread-1:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51710
+2015-06-29 17:07:09,469 [myid:1] - INFO  [CommitProcWorkThread-1:ZooKeeperServer@619] - Established session 0x14e41bd999e0014 with negotiated timeout 10000 for client /127.0.0.1:51710
+2015-06-29 17:07:09,513 [myid:1] - WARN  [NIOWorkerThread-1:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e0014, likely client has closed socket
+2015-06-29 17:07:09,514 [myid:1] - INFO  [NIOWorkerThread-1:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e0014]
+2015-06-29 17:07:09,514 [myid:1] - INFO  [NIOWorkerThread-1:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51710 which had sessionid 0x14e41bd999e0014
+2015-06-29 17:07:09,761 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51711
+2015-06-29 17:07:09,762 [myid:1] - INFO  [NIOWorkerThread-4:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51711
+2015-06-29 17:07:09,767 [myid:1] - INFO  [CommitProcWorkThread-2:ZooKeeperServer@619] - Established session 0x14e41bd999e0015 with negotiated timeout 10000 for client /127.0.0.1:51711
+2015-06-29 17:07:09,811 [myid:1] - WARN  [NIOWorkerThread-4:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e0015, likely client has closed socket
+2015-06-29 17:07:09,812 [myid:1] - INFO  [NIOWorkerThread-4:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e0015]
+2015-06-29 17:07:09,812 [myid:1] - INFO  [NIOWorkerThread-4:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51711 which had sessionid 0x14e41bd999e0015
+2015-06-29 17:37:06,987 [myid:1] - INFO  [NIOWorkerThread-1:QuorumZooKeeperServer@132] - Submitting global closeSession request for session 0x14e41bd999e0000
+2015-06-29 17:37:06,999 [myid:1] - INFO  [NIOWorkerThread-4:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e0000]
+2015-06-29 17:37:07,000 [myid:1] - INFO  [NIOWorkerThread-4:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51603 which had sessionid 0x14e41bd999e0000
+2015-06-29 23:08:49,871 [myid:1] - INFO  [CommitProcWorkThread-1:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e000c]
+2015-06-29 23:08:49,872 [myid:1] - INFO  [CommitProcWorkThread-1:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51702 which had sessionid 0x14e41bd999e000c
+2015-06-29 23:08:50,226 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51973
+2015-06-29 23:08:50,227 [myid:1] - INFO  [NIOWorkerThread-1:ZooKeeperServer@877] - Client attempting to renew session 0x14e41bd999e000c at /127.0.0.1:51973
+2015-06-29 23:08:50,227 [myid:1] - INFO  [NIOWorkerThread-1:Learner@115] - Revalidating client: 0x14e41bd999e000c
+2015-06-29 23:08:50,228 [myid:1] - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:ZooKeeperServer@627] - Invalid session 0x14e41bd999e000c for client /127.0.0.1:51973, probably expired
+2015-06-29 23:08:50,228 [myid:1] - INFO  [NIOWorkerThread-4:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51973 which had sessionid 0x14e41bd999e000c
+2015-06-29 23:08:50,690 [myid:1] - INFO  [NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory$AcceptThread@296] - Accepted socket connection from /127.0.0.1:51974
+2015-06-29 23:08:50,692 [myid:1] - INFO  [NIOWorkerThread-3:ZooKeeperServer@872] - Client attempting to establish new session at /127.0.0.1:51974
+2015-06-29 23:08:50,698 [myid:1] - INFO  [CommitProcWorkThread-1:ZooKeeperServer@619] - Established session 0x14e41bd999e0016 with negotiated timeout 10000 for client /127.0.0.1:51974
+2015-06-29 23:09:25,599 [myid:1] - WARN  [NIOWorkerThread-4:NIOServerCnxn@368] - Unable to read additional data from client sessionid 0x14e41bd999e0016, likely client has closed socket
+2015-06-29 23:09:25,600 [myid:1] - INFO  [NIOWorkerThread-4:MBeanRegistry@119] - Unregister MBean [org.apache.ZooKeeperService:name0=ReplicatedServer_id1,name1=replica.1,name2=Follower,name3=Connections,name4=127.0.0.1,name5=0x14e41bd999e0016]
+2015-06-29 23:09:25,600 [myid:1] - INFO  [NIOWorkerThread-4:NIOServerCnxn@1006] - Closed socket connection for client /127.0.0.1:51974 which had sessionid 0x14e41bd999e0016

@@ -1,0 +1,317 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>blacknight.eucalyptus &mdash; BlacKnight 0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="BlacKnight 0.1 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="../../index.html" class="icon icon-home"> BlacKnight
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture.html">System Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../architecture.html#cloud-software-appliances">Cloud Software Appliances</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../architecture.html#terminology">Terminology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../architecture.html#abstractions">Abstractions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../architecture.html#roles">Roles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../architecture.html#appliance-state">Appliance State</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../architecture.html#diff">Diff</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../architecture.html#implementation">Implementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../architecture.html#developing-appliances">Developing Appliances</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../install.html#puppet">Puppet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../install.html#blacknight">BlacKnight</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../install.html#eucalyptus">Eucalyptus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../install.html#external-documentation">External Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference.html">Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/client.html"><code class="docutils literal"><span class="pre">blacknight.client</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/specification.html"><code class="docutils literal"><span class="pre">blacknight.specification</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/action.html"><code class="docutils literal"><span class="pre">blacknight.action</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/eucalyptus.html"><code class="docutils literal"><span class="pre">blacknight.eucalyptus</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">BlacKnight</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>blacknight.eucalyptus</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <h1>Source code for blacknight.eucalyptus</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Eucalyptus Adapter for BlacKnight</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">client</span> <span class="kn">import</span> <span class="n">BlacKnightClient</span>
+<span class="kn">from</span> <span class="nn">kazoo.client</span> <span class="kn">import</span> <span class="n">KazooClient</span>
+
+
+<div class="viewcode-block" id="Eucalyptus"><a class="viewcode-back" href="../../reference/eucalyptus.html#blacknight.eucalyptus.Eucalyptus">[docs]</a><span class="k">class</span> <span class="nc">Eucalyptus</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An adapter that allows us to run Eucalyptus as a BlacKnight service.</span>
+
+<span class="sd">    As Eucalyptus&#39; various components (understandably) do not have integrated support for BlacKnight we have to implement this functionality externally. This module contains a daemon that runs on each host to determine where the primary and secondary Eucalyptus heads are. When a change occurs (e.g. failover), ZooKeeper is updated so that BlacKnight can act accordingly. In an ideal world Eucalyptus would do this itself like all of the other services in an appliance...</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Node status</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="mi">0</span>        <span class="c"># Not a Eucalyptus head node</span>
+    <span class="n">PRIMARY</span> <span class="o">=</span> <span class="mi">1</span>     <span class="c"># Primary head node</span>
+    <span class="n">SECONDARY</span> <span class="o">=</span> <span class="mi">2</span>   <span class="c"># Secondary head node</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">eucarc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param port: ZooKeeper port</span>
+<span class="sd">        :param eucarc: absolute path to eucarc</span>
+<span class="sd">        :param interval: polling interval (seconds)</span>
+
+<span class="sd">        :type: port: int</span>
+<span class="sd">        :type: eucarc: string</span>
+<span class="sd">        :type: interval: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;blacknight.eucalyptus&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hostname</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_zk</span> <span class="o">=</span> <span class="s">&#39;localhost&#39;</span> <span class="o">+</span> <span class="s">&#39;:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">Eucalyptus</span><span class="o">.</span><span class="n">NONE</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">=</span> <span class="n">interval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">primary_arg_path</span> <span class="o">=</span> <span class="n">BlacKnightClient</span><span class="o">.</span><span class="n">args_path</span> <span class="o">+</span> <span class="s">&#39;/p&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">secondary_arg_path</span> <span class="o">=</span> <span class="n">BlacKnightClient</span><span class="o">.</span><span class="n">args_path</span> <span class="o">+</span> <span class="s">&#39;/s&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">secondary_service_path</span> <span class="o">=</span> <span class="n">BlacKnightClient</span><span class="o">.</span><span class="n">services_path</span> <span class="o">+</span> <span class="s">&#39;/secondary_head/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">hostname</span>
+
+        <span class="c"># Source eucarc</span>
+        <span class="k">if</span> <span class="n">eucarc</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;bash &#39;</span><span class="p">,</span> <span class="s">&#39;-c&#39;</span><span class="p">,</span> <span class="s">&#39;source {} &amp;&amp; env&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">eucarc</span><span class="p">)]</span>
+            <span class="n">stdout</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">stdout</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">):</span>
+                <span class="n">key</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s">&#39;=&#39;</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+            <span class="c"># proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)</span>
+            <span class="c"># for line in proc.stdout:</span>
+            <span class="c">#     (key, _, value) = line.partition(&#39;=&#39;)</span>
+            <span class="c">#     os.environ[key] = value</span>
+            <span class="c"># proc.communicate()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Sourced eucarc from {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">eucarc</span><span class="p">))</span>
+
+        <span class="c"># Start ZooKeeper client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">KazooClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">local_zk</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">ensure_path</span><span class="p">(</span><span class="n">BlacKnightClient</span><span class="o">.</span><span class="n">services_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">ensure_path</span><span class="p">(</span><span class="n">BlacKnightClient</span><span class="o">.</span><span class="n">args_path</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Eucalyptus.run"><a class="viewcode-back" href="../../reference/eucalyptus.html#blacknight.eucalyptus.Eucalyptus.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run the adapter daemon.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># TODO: there&#39;s probably a sexier way of doing this</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">new_status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_status</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="n">new_status</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">new_status</span> <span class="o">==</span> <span class="n">Eucalyptus</span><span class="o">.</span><span class="n">PRIMARY</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">become_primary</span><span class="p">()</span>
+                <span class="k">elif</span> <span class="n">new_status</span> <span class="o">==</span> <span class="n">Eucalyptus</span><span class="o">.</span><span class="n">SECONDARY</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">become_secondary</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">new_status</span>
+
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Eucalyptus.check_status"><a class="viewcode-back" href="../../reference/eucalyptus.html#blacknight.eucalyptus.Eucalyptus.check_status">[docs]</a>    <span class="k">def</span> <span class="nf">check_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns whether this host is a Eucalyptus primary or secondary head.</span>
+
+<span class="sd">        Note: this method cannot be made static because eucarc is sourced in the constructor.</span>
+
+<span class="sd">        :return: status (NONE, PRIMARY or SECONDARY)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># TODO: doesn&#39;t do anything yet</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">(</span><span class="s">&#39;euca-describe-services&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">output</span> <span class="o">==</span> <span class="s">&#39;primary&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Eucalyptus</span><span class="o">.</span><span class="n">PRIMARY</span>
+        <span class="k">elif</span> <span class="n">output</span> <span class="o">==</span> <span class="s">&#39;secondary&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Eucalyptus</span><span class="o">.</span><span class="n">SECONDARY</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Eucalyptus</span><span class="o">.</span><span class="n">NONE</span>
+</div>
+<div class="viewcode-block" id="Eucalyptus.clear"><a class="viewcode-back" href="../../reference/eucalyptus.html#blacknight.eucalyptus.Eucalyptus.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clear the host&#39;s current status from ZooKeeper</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">Eucalyptus</span><span class="o">.</span><span class="n">PRIMARY</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">primary_arg_path</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">Eucalyptus</span><span class="o">.</span><span class="n">SECONDARY</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">secondary_arg_path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">secondary_service_path</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Eucalyptus.become_primary"><a class="viewcode-back" href="../../reference/eucalyptus.html#blacknight.eucalyptus.Eucalyptus.become_primary">[docs]</a>    <span class="k">def</span> <span class="nf">become_primary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Register the host as a Eucalytpus primary head.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">primary_arg_path</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hostname</span><span class="p">,</span> <span class="n">ephemeral</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Eucalyptus.become_secondary"><a class="viewcode-back" href="../../reference/eucalyptus.html#blacknight.eucalyptus.Eucalyptus.become_secondary">[docs]</a>    <span class="k">def</span> <span class="nf">become_secondary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Register the host as a Eucalytpus secondary head.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">secondary_arg_path</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hostname</span><span class="p">,</span> <span class="n">ephemeral</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">secondary_service_path</span><span class="p">,</span> <span class="n">ephemeral</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Daniel Kudrow.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
