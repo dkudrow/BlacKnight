@@ -1,0 +1,8 @@
+#!/bin/bash
+#
+# Simluate start hadoop
+#
+
+source test/hooks/config.sh
+
+python -m blacknight util start_service hadoop

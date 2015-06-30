@@ -1,0 +1,8 @@
+#!/bin/bash
+#
+# Simluate start db
+#
+
+source test/hooks/config.sh
+
+python -m blacknight util start_service db
