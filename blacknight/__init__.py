@@ -1,28 +1,32 @@
+"""
+BlacKnight
+"""
+
 __author__ = 'dkudrow'
 
 
-from client import Client
-from util import Util
-from argparse import ArgumentParser
 import logging
+from argparse import ArgumentParser
+from client import BlacKnightClient
+from eucalyptus import Eucalyptus
+from util import Util
 
 
 def main():
     """
-
-    :return:
+    Start the BlacKnight daemon.
     """
     logging.basicConfig()
+    logging.getLogger('blacknight').setLevel(logging.DEBUG)
     parser = ArgumentParser()
     parser.add_argument('-p', '--port', default='2181')
     args = parser.parse_args()
-    Client(args.port).run()
+    BlacKnightClient(args.port).run()
 
 
 def util():
     """
-
-    :return:
+    Run the BlacKnight utility.
     """
     parser = ArgumentParser()
     parser.add_argument('-p', '--port', default='2181')
@@ -51,10 +55,24 @@ def util():
     start_service = subparsers.add_parser('load_spec')
     start_service.add_argument('filename', default='')
 
-    dump = subparsers.add_parser('dump')
+    subparsers.add_parser('dump')
 
     kwargs = vars(parser.parse_args())
     subcommand = kwargs.pop('subcommand')
     port = kwargs.pop('port')
 
     getattr(Util(port), subcommand)(**kwargs)
+
+
+def euca():
+    """
+    Start the Eucalytpus adapter daemon.
+    """
+    logging.basicConfig()
+    logging.getLogger('blacknight').setLevel(logging.DEBUG)
+    parser = ArgumentParser()
+    parser.add_argument('-p', '--port', default='2181')
+    parser.add_argument('-f', '--eucarc', default='')
+    parser.add_argument('-i', '--interval', default='')
+    args = parser.parse_args()
+    Eucalyptus(args.port, eucarc=args.eucarc, interval=args.interval).run()

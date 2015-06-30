@@ -9,3 +9,4 @@ BlacKnight source code reference
     reference/client
     reference/specification
     reference/action
+    reference/eucalyptus

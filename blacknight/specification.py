@@ -5,35 +5,35 @@ from math import ceil
 import networkx as nx
 import yaml
 from action import Action
-import log
+import logging
 
 
 class Role(object):
     """
-    A convenience class for managing service roles in an appliance.
+    A convenience class for managing roles in an appliance.
     """
     def __init__(self, name, role):
         self.name = name
-        self.min_inst = role['min_instances']
-        self.max_inst = role['max_instances']
+        self.min_rep = role['min_representation']
+        self.max_rep = role['max_representation']
         self.start_hook = role['start_hook']
         self.start_args = role['start_args'] if role['start_args'] else []
         self.stop_hook = role['stop_hook']
         self.stop_args = role['stop_args'] if role['stop_args'] else []
         self.deps = role['dependencies'] if role['dependencies'] else {}
-        for role, ratio in self.deps.iteritems():
-            self.deps[role] = float(ratio)
+        for role, capacity in self.deps.iteritems():
+            self.deps[role] = float(capacity)
 
         # These attributes are used in diff()
-        self.cur_inst = None    # current instance count of role
-        self.new_inst = None    # Uncommitted change in instances count
+        self.cur_rep = None    # current representation of role
+        self.new_rep = None    # Uncommitted change in representation
         self.cur_hosts = None   # Hosts on which this role runs (leaves only)
         self.new_hosts = None   # Uncmomited changes to hosts (leaves only)
 
 
 class Specification(object):
     """
-    A specification that describes the desired configuration of an appliance.
+    A specification that describes the optimal configuration of an appliance.
 
     The internal representation of the specification takes the form of a
     directed graph. Vertexes in this graph represent service roles. Edges
@@ -43,8 +43,8 @@ class Specification(object):
 
         --- # spec.yaml
         role_name:
-            min_inst: <int>       # min instances of role for functional appliance
-            max_inst: <int>       # max useful instances of role
+            min_rep: <int>       # min instances of role for functional appliance
+            max_rep: <int>       # max useful instances of role
             start_hook: <string>  # command to start service (abs. path)
             start_args: <list>    # arguments to start hook
             stop_hook: <string>   # command to stop service (abs. path)
@@ -60,9 +60,10 @@ class Specification(object):
         WRITEME
 
         :param yaml_spec: YAML appliance specification
+
         :type yaml_spec: string
         """
-        log.add_logger(self)
+        self.logger = logging.getLogger('blacknight.specification')
 
         # Parse YAML
         try:
@@ -91,18 +92,18 @@ class Specification(object):
         # Find leaves of dependency graph (services that run on physical nodes)
         self.leaves = [node for node, deg in self.dep_graph.out_degree_iter() if deg == 0]
 
-        # Infer min_inst values based on dependencies
+        # Infer min_rep values based on dependencies
         for role in self.roles.itervalues():
             if role.name not in self.roots:
-                role.min_inst = 0
+                role.min_rep = 0
         for root in self.roots:
             for edge in self.dfs_iter(root):
                 predecessor = self.roles[edge[0]]
                 successor = self.roles[edge[1]]
                 ratio = predecessor.deps[successor.name]
-                successor.min_inst += ceil(predecessor.min_inst) / ratio
+                successor.min_rep += ceil(predecessor.min_rep) / ratio
         for role in self.roles.itervalues():
-            role.min_inst = ceil(role.min_inst)
+            role.min_rep = ceil(role.min_rep)
 
     def diff(self, services):
         """
@@ -110,6 +111,7 @@ class Specification(object):
         :param services:
         :return:
         """
+        self.logger.debug('Starting diff')
 
         committed_transactions = []
 
@@ -118,6 +120,7 @@ class Specification(object):
 
         # Get list of hosts
         unused_hosts = services['unused_hosts'] if 'unused_hosts' in services else []
+        self.logger.debug('unused_hosts={}'.format(unused_hosts))
         for role in self.leaves:
             hosts = services[role] if role in services else []
             self.roles[role].cur_hosts = list(hosts)
@@ -126,24 +129,27 @@ class Specification(object):
         # Update the graph for the current appliance state
         for node in self.dep_graph.nodes_iter():
             role = self.roles[node]
-            role.cur_inst = role.new_inst = inst_count[node]
+            role.cur_rep = role.new_rep = inst_count[node]
             role.cur_hosts, role.new_hosts = [], []
+            self.logger.debug('{}(cur_rep={}, cur_hosts={})'.format(node, role.cur_rep, role.cur_hosts))
             for edge in self.dep_graph.out_edges(node):
                 ratio = self.roles[node].deps[edge[1]]
                 cur_weight = inst_count[node] / ratio
                 self.dep_graph.add_edge(*edge, cur_weight=cur_weight, new_weight=cur_weight)
 
-        # Attempt to satisfy min_inst for all top-level roles
+        # Attempt to satisfy min_rep for all top-level roles
+        # TODO: this should be for all roles (not just top-level)
         for root in self.roots:
-            deficit = int(self.roles[root].min_inst - self.roles[root].cur_inst)
+            deficit = int(self.roles[root].min_rep - self.roles[root].cur_rep)
             if deficit > 0:
+                self.logger.debug('\'{}\' has deficit of {}'.format(root, deficit))
                 transaction = []
                 if self.add_role_attempt(root, transaction, unused_hosts, count=deficit):
                     transaction.reverse()
                     committed_transactions += transaction
                     self.commit()
                 else:
-                    self.error('cannot start {}, aborting.'.format(root))
+                    self.logger.error('Aborting - could not overcome deficit of {} for \'{}\''.format(deficit, root))
                     return []
 
         # Fill roles until we're out of room
@@ -152,9 +158,9 @@ class Specification(object):
         attempt_succeeded = list(self.roots)
         while attempt_succeeded:
             for root in attempt_succeeded:
-                cur_inst = self.roles[root].cur_inst
-                max_inst = self.roles[root].max_inst
-                if max_inst and cur_inst <= max_inst:
+                cur_rep = self.roles[root].cur_rep
+                max_rep = self.roles[root].max_rep
+                if max_rep and cur_rep <= max_rep:
                     attempt_succeeded.remove(root)
                     continue
                 transaction = []
@@ -186,26 +192,26 @@ class Specification(object):
             if len(unused_hosts) >= count:
                 for new_host in [unused_hosts.pop() for i in range(count)]:
                     root_role.new_hosts.append(new_host)
-                    root_role.new_inst += 1
+                    root_role.new_rep += 1
                     transaction.append(Action(root_role, host=new_host))
                 return True
             for leaf in [leaf for leaf in self.leaves if leaf != root]:
-                new_inst = self.roles[leaf].new_inst
+                new_rep = self.roles[leaf].new_rep
                 in_degree = self.dep_graph.in_degree(leaf, weight='new_weight')
-                if take_host and new_inst >= ceil(in_degree) + count:
+                if take_host and new_rep >= ceil(in_degree) + count:
                     actions = self.swap_roles_on_host(leaf, root, count)
                     transaction += actions
                     return True
             return False
 
         # Update edge weights and recurse if necessary
-        root_role.new_inst += count
+        root_role.new_rep += count
         self.update_new_weights(root)
         transaction += [Action(root_role) for i in range(count)]
         for edge in out_edges:
-            new_inst = self.roles[edge[1]].new_inst
+            new_rep = self.roles[edge[1]].new_rep
             in_degree = self.dep_graph.in_degree(edge[1], weight = 'new_weight')
-            deficit = int(ceil(in_degree) - new_inst)
+            deficit = int(ceil(in_degree) - new_rep)
             if deficit > 0 and not self.add_role_attempt(edge[1], transaction, unused_hosts, count=deficit, take_host=take_host):
                 return False
         return True
@@ -230,9 +236,9 @@ class Specification(object):
         stop_role = self.roles[stop]
         start_role = self.roles[start]
         host = stop_role.new_hosts.pop()
-        stop_role.new_inst -= count
+        stop_role.new_rep -= count
         self.update_new_weights(stop)
-        start_role.new_inst += count
+        start_role.new_rep += count
         start_role.new_hosts.append(host)
         self.update_new_weights(start)
         return [Action(start_role, host=host), Action(stop_role, host=host, start=False)]
@@ -248,7 +254,7 @@ class Specification(object):
         """
         for edge in self.dep_graph.out_edges(node):
             ratio = self.roles[edge[0]].deps[edge[1]]
-            new_weight = self.roles[node].new_inst / ratio
+            new_weight = self.roles[node].new_rep / ratio
             self.dep_graph.add_edge(*edge, new_weight=new_weight)
 
     def dfs_iter(self, root):
@@ -274,7 +280,7 @@ class Specification(object):
         """
         for node in self.dep_graph.nodes_iter():
             role = self.roles[node]
-            role.cur_inst = role.new_inst
+            role.cur_rep = role.new_rep
             role.cur_hosts = list(role.new_hosts)
         for edge in self.dep_graph.edges_iter():
             edge_data = self.dep_graph.get_edge_data(*edge)
@@ -286,7 +292,7 @@ class Specification(object):
         """
         for node in self.dep_graph.nodes_iter():
             role = self.roles[node]
-            role.new_inst = role.cur_inst
+            role.new_rep = role.cur_rep
             role.new_hosts = list(role.cur_hosts)
         for edge in self.dep_graph.edges_iter():
             edge_data = self.dep_graph.get_edge_data(*edge)

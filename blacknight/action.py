@@ -35,7 +35,7 @@ class Action(object):
         :return:
         """
         if self.start:
-            cmd = './' + self.role.start_hook
+            cmd = self.role.start_hook
             args = list(self.role.start_args)
         else:
             cmd = self.role.stop_hook
@@ -52,5 +52,6 @@ class Action(object):
         for arg in args:
             cmd += ' -{} {}'.format(arg, args_dict[arg])
 
+        print cmd.split()
         subprocess.call(cmd.split())
         # print cmd

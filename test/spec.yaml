@@ -1,27 +1,27 @@
 secondary_head:
-  min_instances: 0
-  max_instances: 1
-  start_hook: test/hooks/start_secondary.sh
+  min_representation: 0
+  max_representation: 1
+  start_hook: /home/dkudrow/PycharmProjects/BlacKnight/test/hooks/start_secondary
   start_args: [h]
-  stop_hook: test/hooks/stop_secondary.sh
+  stop_hook: /home/dkudrow/PycharmProjects/BlacKnight/test/hooks/stop_secondary
   stop_args: [h]
   dependencies:
 
 node_controller:
-  min_instances: 1
-  max_instances: ~
-  start_hook: test/hooks/start_nc.sh
+  min_representation: 1
+  max_representation: /home/dkudrow
+  start_hook: test/hooks/start_nc
   start_args: [h]
-  stop_hook: test/hooks/stop_nc.sh
+  stop_hook: /home/dkudrow/PycharmProjects/BlacKnight/test/hooks/stop_nc
   stop_args: [h]
   dependencies:
 
 app:
-  min_instances: 3
-  max_instances: ~
-  start_hook: test/hooks/start_app.sh
+  min_representation: 3
+  max_representation: /home/dkudrow
+  start_hook: /home/dkudrow/PycharmProjects/BlacKnight/test/hooks/start_app
   start_args:
-  stop_hook: test/hooks/stop_app.sh
+  stop_hook: /home/dkudrow/PycharmProjects/BlacKnight/test/hooks/stop_app
   stop_args: [i]
   dependencies:
     node_controller: 2
@@ -29,21 +29,21 @@ app:
     hadoop: 10
 
 db:
-  min_instances: 0
-  max_instances: ~
-  start_hook: test/hooks/start_db.sh
+  min_representation: 0
+  max_representation: /home/dkudrow
+  start_hook: /home/dkudrow/PycharmProjects/BlacKnight/test/hooks/start_db
   start_args:
-  stop_hook: test/hooks/stop_db.sh
+  stop_hook: /home/dkudrow/PycharmProjects/BlacKnight/test/hooks/stop_db
   stop_args: [i]
   dependencies:
     node_controller: 2
 
 hadoop:
-  min_instances: 0
-  max_instances: ~
-  start_hook: test/hooks/start_hadoop.sh
+  min_representation: 0
+  max_representation: /home/dkudrow
+  start_hook: /home/dkudrow/PycharmProjects/BlacKnight/test/hooks/start_hadoop
   start_args:
-  stop_hook: test/hooks/stop_hadoop.sh
+  stop_hook: /home/dkudrow/PycharmProjects/BlacKnight/test/hooks/stop_hadoop
   stop_args: [i]
   dependencies:
     node_controller: 2
