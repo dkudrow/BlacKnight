@@ -75,7 +75,6 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../architecture.html">System Architecture</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../architecture.html#cloud-software-appliances">Cloud Software Appliances</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../architecture.html#terminology">Terminology</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../architecture.html#abstractions">Abstractions</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../architecture.html#roles">Roles</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../architecture.html#appliance-state">Appliance State</a></li>
@@ -90,6 +89,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../install.html#puppet">Puppet</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../install.html#blacknight">BlacKnight</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../install.html#eucalyptus">Eucalyptus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#development">Development</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../install.html#external-documentation">External Documentation</a></li>
 </ul>
 </li>
@@ -139,48 +139,8 @@
 </div>
           <div role="main" class="document">
             
-  <div class="section" id="module-blacknight.client">
-<span id="blacknight-client"></span><h1><a class="reference internal" href="#module-blacknight.client" title="blacknight.client"><code class="xref py py-mod docutils literal"><span class="pre">blacknight.client</span></code></a><a class="headerlink" href="#module-blacknight.client" title="Permalink to this headline">¶</a></h1>
-<p>BlacKnight Client</p>
-<dl class="class">
-<dt id="blacknight.client.BlacKnightClient">
-<em class="property">class </em><code class="descclassname">blacknight.client.</code><code class="descname">BlacKnightClient</code><span class="sig-paren">(</span><em>port</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/blacknight/client.html#BlacKnightClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blacknight.client.BlacKnightClient" title="Permalink to this definition">¶</a></dt>
-<dd><p>The client that runs on every host in a BlacKnight-based appliance.</p>
-<p>This class wraps the ZooKeeper client around which BlacKnight is built. The clients are perpetually engaged in a leader election which is initiaited by the <a class="reference internal" href="#blacknight.client.BlacKnightClient.run" title="blacknight.client.BlacKnightClient.run"><code class="xref py py-func docutils literal"><span class="pre">run()</span></code></a> method. The current leader is responsible for appliance monitoring and remediation. When a leader is elected it calls the <a class="reference internal" href="#blacknight.client.BlacKnightClient.lead" title="blacknight.client.BlacKnightClient.lead"><code class="xref py py-func docutils literal"><span class="pre">lead()</span></code></a>.</p>
-<dl class="method">
-<dt id="blacknight.client.BlacKnightClient.lead">
-<code class="descname">lead</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/blacknight/client.html#BlacKnightClient.lead"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blacknight.client.BlacKnightClient.lead" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called when this client is elected leader.</p>
-<p>This function monitors the appliance by registering a watcher on the <em>services</em> node. Each service keeps an ephemeral</p>
-<p>WRITEME</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blacknight.client.BlacKnightClient.query">
-<code class="descname">query</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/blacknight/client.html#BlacKnightClient.query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blacknight.client.BlacKnightClient.query" title="Permalink to this definition">¶</a></dt>
-<dd><p>Retrieve the current state of the appliance.</p>
-<p>This method surveys the <code class="docutils literal"><span class="pre">/blacknight/service/</span></code> znode to construct the current applinace state. The services are returned as a dictionary mapping each role to a list of services. The arguments (global configuration parameters such as secret keys) are a returned as a dictionary mapping each argument key to its value.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">services, args</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Tuple({string: []}, {string: string})</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="blacknight.client.BlacKnightClient.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/blacknight/client.html#BlacKnightClient.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blacknight.client.BlacKnightClient.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add this client to the election.</p>
-<p>After calling this method, the client should either be the leader or blocked in the election.</p>
-</dd></dl>
-
-</dd></dl>
-
+  <div class="section" id="blacknight-client">
+<h1><code class="xref py py-mod docutils literal"><span class="pre">blacknight.client</span></code><a class="headerlink" href="#blacknight-client" title="Permalink to this headline">¶</a></h1>
 </div>
 
 
