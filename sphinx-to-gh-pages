@@ -33,6 +33,7 @@ main() {
 	git mv _build/html/* _build/html/.* ..
 	cd ..
 	rm -rf ${GH_PAGES_SOURCES}
+	git rm -r doc/
 	touch .nojekyll
 	git add .nojekyll || abort
 	git commit -m "Generated gh-pages for `git log master -1 --pretty=short --abbrev-commit`" || abort
