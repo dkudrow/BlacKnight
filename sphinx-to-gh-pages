@@ -30,7 +30,7 @@ main() {
 	cd doc
 	make html || abort
 	git add	_build/html/
-	git mv _build/html/* ..
+	git mv _build/html/* _build/html/.* ..
 	cd ..
 	rm -rf ${GH_PAGES_SOURCES}
 	touch .nojekyll
