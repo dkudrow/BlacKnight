@@ -15,17 +15,20 @@ This appliance is composed of
 
 * four hosts running a Eucalyptus cloud;
 * non-user facing utilities (Hadoop, MySQL) running in Eucalyptus VM instances;
-* a user facing API (fictional FarmApp web application) running in Eucalyptus VM instances.
+* a user-facing API (fictional FarmApp web application) running in Eucalyptus VM instances.
 
+.. note::
 
-Terminology
------------
+    Jargon at the instersection of distributed systems, networks and graphs is an utter catastrophe. In the interest of clarity I define my terms below and am consistent in their use throughout this document.
 
-Host
-    Refers to a physical machine in the appliance.
+    Host
+        Refers to a physical machine in the appliance.
 
-Service
-    Refers to a network-accessible process (or group of processes) that are started and stopped together. This includes infrastructure management (e.g. Eucalyptus node controller), platform tools (e.g. virtual machine instance running a MySQL database) as well as application services (e.g. appliance's user facing API).
+    Service
+        Refers to a process (or group of processes) accessible over a network via an API.
+
+    Node
+        Used as it relates to networks and graphs, synonymous with vertex.
 
 Abstractions
 ------------
@@ -98,13 +101,25 @@ Because we cannot know until we reach a leaf node whether the appliance can supp
 Implementation
 --------------
 
-WRITEME
+BlacKnight is implemented as a client that runs on every host in the appliance. All of the clients participate in a leader election so that any given time only one is active. The leader is responsible for monitoring the appliance, performing the diff and initiating remedial actions (the other clients block until they are elected). ZooKeeper is used to manage all of the distributed aspects of BlacKnight including leader election, service detection, and synchronization. If you are not familiar with ZooKeeper, I'm sorry, the documentation is awful. I'll give a brief description in the box below.
+
+Each service in the appliance is responsible for maintaining a node in a pre-determined location in ZooKeeper (e.g. ``/blacknight/services/<unique_service_id>``). This node is ephemeral so if the service dies, the node disappears. The BlacKnight leader registers a watcher on the parent node (in this case ``/blacknight/services``) which will be called every time there is a change in one of its children. The watcher is responsible for querying the state of the appliance by tallying up all of the service nodes, executing a diff and performing any necessary remedial actions.
+
+.. note::
+    FIXME ZooKeeper in a Box
+
+    For the uninitiated ZooKeeper is essentially a distributed filesysem that guarantees Eric Brewer's C and P and the expense of some A. The basic primitive in ZooKeeper is the *node* (occasionally *z-node*) which is similar to a file. A node can contain data and may have children, which makes it looks an awful lot like your run of the mill filesystem hierarchy. An example of a node is ``/blacknight/args/primary_head``. Each of ``blacknight``, ``args``, and ``primary_head`` is a node (which may or may not contain some data) and the ``/``\ s indicate a parent-child relationship. ZooKeeper has a client-server architecture; there are servers on which nodes are actually stored and clients that can communicate with the servers via a limited API to manipulate and access the nodes. Servers and clients are independent processes and can be arranged in any configuration across a deployment (e.g. multiple servers on one machine, dedicated servers, &c.)
+
+One wrinkle here is that ZooKeeper requires at least half of its servers to be up in order to function. In order to get around this, we make use of a ZooKeeper feature new to release 3.5; the *reconfig* command. Reconfig allows us to re-define the server membership so that we never lose a majority. This is okay beacuse the hosts should fail-stop so if they re-enter the appliance, we simply reconfig to accommodate them. Unfortunately Kazoo (our Python ZooKeeper client) support for reconfig is a bit spotty so this feature will have to wait for a future Kazoo release.
+
 
 Developing Appliances
 ---------------------
 
-WRITEME
+I'd like to breifly touch on design considerations for the appliance developer. For the most part he or she is unconstrained but there are a few architectural observations that can be made to maximize the effectiveness of BlacKnight.
 
-cloud manager and primary head node (not role)
-responsibilities of roles in assessing their own status
-atomicity of roles
+#. **User facing services should scale linearly.** BlacKnight operates under the assumption that more is better; three FarmApp services should be better than two. The appliance should be designed to scale to higher demand by starting more services. This should be a familiar concept to seasoned cloud application developers.
+
+#. **Services are responsible for assessing their status.** Each service is responsible for registering itself with BlacKnight (by maintaing a ZooKeeper node). This is safe to the extent that an appliance does not run foreign code but does protect an appliance from faulty services. Sevices should be able to monitor themselves, assess their own status and stop themselves if anything goes wrong. A service with degraded performance can limp along and as long as it maintains its node BlacKnight does not differentiate between a degraded service and a healthy one. A service should stop itself if there are problems so that BlacKnight can restart it.
+
+#. **Roles should fail atomically.** The appliance developer is charged with writing the specification and partitioning the appliance into roles. The whole purpose of a role is to define a service unit that can be controlled with a start-stop switch. Consider a role consisting of a service running inside of a VM instance; what if the service stops but the instance persists? Roles should be designed in such a way that all of the functionality they encapsulate can be relied upon to fail atomically.

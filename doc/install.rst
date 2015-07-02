@@ -45,13 +45,38 @@ Configuration of the installation is handled entirely in ``puppet/manifests/site
 
     node 'objc.cs.ucsb.edu' {
     ...
+.. topic:: Configure Puppet
+
+    1. Open ``puppet/manifests/site.pp`` in your favorite text editor.
+
+    #. For each physical host you wish to include
+
+    #. Define a **node** for each physical machine you wish to include.
+
+        a. For each node, use the ``include`` directive to indidcate which modules should be installed.
+
+        #. Fill in node-specific information such as the hostname and IP addresses
+
+    #. Set the global configuration variables as described in the sections below.
 
 
 BlacKnight
 ----------
 
+Installing BlacKnight via Puppet is straightforward.
+Installing BlacKnight requires no configuration beyond applying the Puppet manifiest.
 * ZooKeeper
 * virtualenv
+
+.. topic:: Installing BlacKnight
+
+    .. code-block:: shell
+
+        # execute the following commands as root.
+        cd puppet/
+        ./run_puppet
+
+* running
 
 
 Eucalyptus
@@ -59,6 +84,12 @@ Eucalyptus
 
 * Riak
 * Eucalyptus setup
+
+
+Development
+-----------
+
+BlacKnight comes equipped with a series of utilities for simulated execution as testing on a full scale appliance can be unwieldy. The **zkconf** tool is extremely useful for quickly deploying temporary ZooKeeper ensembles; it can be found at FIXME and the instructions are straightforward. The :mod:`util` contains various commands for communicating with a local ZooKeeper server to simulate services. The provided specification (``test/spec.yaml``) simply points hooks at blacknight-util to start and stop simulated services.
 
 
 External Documentation
