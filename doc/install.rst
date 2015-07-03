@@ -9,11 +9,12 @@ Puppet
 
 Puppet is a configuration management tool for bootstrapping deployments from a user-specified manifest. Familiarity with puppet is not necessary (you can simply follow the instructions below) but will be helpful for trouble-shooting and required for contributing.
 
-.. topic:: Install Puppet on all hosts
+.. admonition:: Install Puppet on all hosts
+
+    #. Run the following commands in a root shell:
 
     .. code-block:: shell
 
-        # execute the following commands as root
         $ yum install puppet
         $ puppet module install computology-packagecloud
 
@@ -45,30 +46,27 @@ Configuration of the installation is handled entirely in ``puppet/manifests/site
 
     node 'objc.cs.ucsb.edu' {
     ...
-.. topic:: Configure Puppet
+.. admonition:: Configure Puppet
 
-    1. Open ``puppet/manifests/site.pp`` in your favorite text editor.
+    #. Open ``puppet/manifests/site.pp`` in your favorite text editor.
 
-    #. For each physical host you wish to include
-
-    #. Define a **node** for each physical machine you wish to include.
-
-        a. For each node, use the ``include`` directive to indidcate which modules should be installed.
-
-        #. Fill in node-specific information such as the hostname and IP addresses
-
-    #. Set the global configuration variables as described in the sections below.
+    #. For each physical host you wish to include define a **node** as described above.
 
 
 BlacKnight
 ----------
 
-Installing BlacKnight via Puppet is straightforward.
-Installing BlacKnight requires no configuration beyond applying the Puppet manifiest.
-* ZooKeeper
-* virtualenv
+Installing BlacKnight via Puppet is straightforward and requires no manual configuration. BlacKnight itself is distributed as a Python package that can be installed with pip. For convenience, we use the ZooKeeper RPM packaged by Cloudera.
 
-.. topic:: Installing BlacKnight
+.. admonition:: Installing BlacKnight
+
+    In ``puppet/manifests/site.pp``, add the line
+
+    .. code-block:: ruby
+
+        include blacknight
+
+    to each host's node definition.
 
     .. code-block:: shell
 
@@ -76,14 +74,13 @@ Installing BlacKnight requires no configuration beyond applying the Puppet manif
         cd puppet/
         ./run_puppet
 
-* running
-
 
 Eucalyptus
 ----------
 
-* Riak
-* Eucalyptus setup
+
+RiakCS
+^^^^^^
 
 
 Development
