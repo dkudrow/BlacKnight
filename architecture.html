@@ -87,7 +87,14 @@
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="install.html#puppet">Puppet</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#blacknight">BlacKnight</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install.html#eucalyptus">Eucalyptus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#riakcs">RiakCS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="install.html#starting">Starting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#eucalyptus">Eucalyptus</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="install.html#id1">Starting</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#development">Development</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#external-documentation">External Documentation</a></li>
 </ul>
@@ -228,7 +235,6 @@
 <p>Each service in the appliance is responsible for maintaining a node in a pre-determined location in ZooKeeper (e.g. <code class="docutils literal"><span class="pre">/blacknight/services/&lt;unique_service_id&gt;</span></code>). This node is ephemeral so if the service dies, the node disappears. The BlacKnight leader registers a watcher on the parent node (in this case <code class="docutils literal"><span class="pre">/blacknight/services</span></code>) which will be called every time there is a change in one of its children. The watcher is responsible for querying the state of the appliance by tallying up all of the service nodes, executing a diff and performing any necessary remedial actions.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p>FIXME ZooKeeper in a Box</p>
 <p class="last">For the uninitiated ZooKeeper is essentially a distributed filesysem that guarantees Eric Brewer&#8217;s C and P and the expense of some A. The basic primitive in ZooKeeper is the <em>node</em> (occasionally <em>z-node</em>) which is similar to a file. A node can contain data and may have children, which makes it looks an awful lot like your run of the mill filesystem hierarchy. An example of a node is <code class="docutils literal"><span class="pre">/blacknight/args/primary_head</span></code>. Each of <code class="docutils literal"><span class="pre">blacknight</span></code>, <code class="docutils literal"><span class="pre">args</span></code>, and <code class="docutils literal"><span class="pre">primary_head</span></code> is a node (which may or may not contain some data) and the <code class="docutils literal"><span class="pre">/</span></code>s indicate a parent-child relationship. ZooKeeper has a client-server architecture; there are servers on which nodes are actually stored and clients that can communicate with the servers via a limited API to manipulate and access the nodes. Servers and clients are independent processes and can be arranged in any configuration across a deployment (e.g. multiple servers on one machine, dedicated servers, &amp;c.)</p>
 </div>
 <p>One wrinkle here is that ZooKeeper requires at least half of its servers to be up in order to function. In order to get around this, we make use of a ZooKeeper feature new to release 3.5; the <em>reconfig</em> command. Reconfig allows us to re-define the server membership so that we never lose a majority. This is okay beacuse the hosts should fail-stop so if they re-enter the appliance, we simply reconfig to accommodate them. Unfortunately Kazoo (our Python ZooKeeper client) support for reconfig is a bit spotty so this feature will have to wait for a future Kazoo release.</p>

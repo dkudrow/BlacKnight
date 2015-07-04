@@ -87,7 +87,14 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#puppet">Puppet</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#blacknight">BlacKnight</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#eucalyptus">Eucalyptus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#riakcs">RiakCS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#starting">Starting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#eucalyptus">Eucalyptus</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Starting</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#development">Development</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#external-documentation">External Documentation</a></li>
 </ul>
@@ -139,19 +146,31 @@
   <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <p>This section describes the installation of BlacKnight as well as that of a test environment based on Eucalyptus. A Puppet manifest is provided in the <code class="docutils literal"><span class="pre">puppet/</span></code> directory to make this process marginally less painful. This manifest is not perfect - installation requires some supervision and, in certain cases, multiple passes. To ensure that all necessary components are installed run Puppet repeatedly until no messages are printed. All development was done on CentOS 6.6 (final) and determining whether BlacKnight will run in another environment is left as an exercise for the reader.</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">The installation steps will be contained inside of <em>tip</em> boxes like this one. To get through the installation with minimal reading, just jump from one tip box to the next.</p>
+</div>
 <div class="section" id="puppet">
 <h2>Puppet<a class="headerlink" href="#puppet" title="Permalink to this headline">¶</a></h2>
-<p>Puppet is a configuration management tool for bootstrapping deployments from a user-specified manifest. Familiarity with puppet is not necessary (you can simply follow the instructions below) but will be helpful for trouble-shooting and required for contributing.</p>
-<div class="topic">
-<p class="topic-title first">Install Puppet on all hosts</p>
-<div class="highlight-shell"><div class="highlight"><pre><span class="c"># execute the following commands as root</span>
-<span class="nv">$ </span>yum install puppet
-<span class="nv">$ </span>puppet module install computology-packagecloud
+<p>Puppet is a configuration management tool for bootstrapping deployments from a user-specified manifest. Familiarity with puppet is not necessary (you can simply follow the instructions below) but will be helpful for trouble-shooting and required for contributing. It must be present on all hosts in order to be used for the installation.</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p>Run the following commands as root on each host to install Puppet:</p>
+<div class="last highlight-shell"><div class="highlight"><pre>yum install puppet
+puppet module install computology-packagecloud
 </pre></div>
 </div>
 </div>
-<p>Configuration of the installation is handled entirely in <code class="docutils literal"><span class="pre">puppet/manifests/site.pp</span></code>. Deployment-wide configuration is managed using global variables which are inherited by all hosts. Each host in the deployment is declared in a <em>node</em> block. This block contains host-specific information (e.g. hostname, &amp;c.) and several <em>include</em> directives. The includes inform puppet of which modules should be applied to the host in question. Any module in <code class="docutils literal"><span class="pre">puppet/modules/</span></code> can be included.</p>
-<div class="highlight-ruby"><div class="highlight"><pre><span class="c1"># puppet/manifests/site.pp</span>
+<p>Configuration of the installation is handled entirely within <code class="docutils literal"><span class="pre">puppet/manifests/site.pp</span></code>. Deployment-wide configuration is managed using global variables which are inherited by all hosts. Each host in the deployment is declared in a <em>node</em> block. This block contains host-specific information (e.g. hostname, &amp;c.) and several <em>include</em> directives. The includes inform puppet of which modules should be applied to the host in question. Any module in <code class="docutils literal"><span class="pre">puppet/modules/</span></code> can be included.</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p>Open <code class="docutils literal"><span class="pre">puppet/manifests/site.pp</span></code> and using the template below as a guide</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>define a <em>node</em> for each host in the appliance using the template below as a guide.</li>
+</ol>
+</div></blockquote>
+<div class="last highlight-ruby"><div class="highlight"><pre><span class="c1"># puppet/manifests/site.pp</span>
 
 <span class="c1"># Global configuration variables</span>
 <span class="vg">$CLOUD_OPTS</span> <span class="o">=</span> <span class="s1">&#39;--db-home=/usr/pgsql-9.1/ --java-home=/usr/lib/jvm/java-1.7.0&#39;</span>
@@ -177,50 +196,94 @@
 <span class="o">...</span>
 </pre></div>
 </div>
-<div class="topic">
-<p class="topic-title first">Configure Puppet</p>
-<ol class="arabic">
-<li><p class="first">Open <code class="docutils literal"><span class="pre">puppet/manifests/site.pp</span></code> in your favorite text editor.</p>
-</li>
-<li><p class="first">For each physical host you wish to include</p>
-</li>
-<li><p class="first">Define a <strong>node</strong> for each physical machine you wish to include.</p>
-<blockquote>
-<div><ol class="loweralpha simple">
-<li>For each node, use the <code class="docutils literal"><span class="pre">include</span></code> directive to indidcate which modules should be installed.</li>
-<li>Fill in node-specific information such as the hostname and IP addresses</li>
-</ol>
-</div></blockquote>
-</li>
-<li><p class="first">Set the global configuration variables as described in the sections below.</p>
-</li>
-</ol>
 </div>
 </div>
 <div class="section" id="blacknight">
 <h2>BlacKnight<a class="headerlink" href="#blacknight" title="Permalink to this headline">¶</a></h2>
-<p>Installing BlacKnight via Puppet is straightforward.
-Installing BlacKnight requires no configuration beyond applying the Puppet manifiest.
-* ZooKeeper
-* virtualenv</p>
-<div class="topic">
-<p class="topic-title first">Installing BlacKnight</p>
-<div class="highlight-shell"><div class="highlight"><pre><span class="c"># execute the following commands as root.</span>
+<p>Installing BlacKnight via Puppet is straightforward and requires no manual configuration. BlacKnight itself is distributed as a Python package that can be installed with pip. For convenience, we use the ZooKeeper RPM packaged by Cloudera.</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p>In <code class="docutils literal"><span class="pre">site.pp</span></code>, add the line</p>
+<div class="highlight-ruby"><div class="highlight"><pre><span class="kp">include</span> <span class="n">blacknight</span>
+</pre></div>
+</div>
+<p>to each node on which BlacKnight should be installed. Apply the manifest by running the following commands as root.</p>
+<div class="last highlight-shell"><div class="highlight"><pre><span class="c"># execute the following commands as root.</span>
 <span class="nb">cd </span>puppet/
 ./run_puppet
 </pre></div>
 </div>
 </div>
-<ul class="simple">
-<li>running</li>
-</ul>
+</div>
+<div class="section" id="riakcs">
+<h2>RiakCS<a class="headerlink" href="#riakcs" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p>In the following line of <code class="docutils literal"><span class="pre">/etc/riak/advanced.config</span></code>,</p>
+<div class="highlight-erlang"><div class="highlight"><pre><span class="p">{</span><span class="n">add_paths</span><span class="p">,</span> <span class="p">[</span><span class="s">&quot;/usr/lib64/riak-cs/lib/riak_cs-2.0.1/ebin&quot;</span><span class="p">]},</span>
+</pre></div>
+</div>
+<p class="last">the version string (<em>2.0.1</em> above) must match the installed verson of RiakCS or Riak will not start!</p>
+</div>
+<div class="section" id="starting">
+<h3>Starting<a class="headerlink" href="#starting" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-shell"><div class="highlight"><pre><span class="c"># execute the following commands as root on the first host</span>
+riak start
+stanchion start
+riak-cs start
+</pre></div>
+</div>
+<div class="highlight-shell"><div class="highlight"><pre><span class="c"># execute the following commands as root on the remaining hosts</span>
+riak start
+riak-cs start
+riak-admin cluster join &lt;nodename_of_first_node&gt;
+riak-admin plan
+riak-admin comit
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="eucalyptus">
 <h2>Eucalyptus<a class="headerlink" href="#eucalyptus" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>Riak</li>
-<li>Eucalyptus setup</li>
-</ul>
+<div class="section" id="id1">
+<h3>Starting<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Start primary head components</li>
+</ol>
+<div class="highlight-shell"><div class="highlight"><pre><span class="c"># execute the following commands as root on first host</span>
+rm -rf /var/lib/eucalyptus/db/
+euca_conf --initialize
+service eucalyptus-cloud start
+<span class="c"># wait until CLC is up (check /var/log/eucalyptus/cloud-output.log)</span>
+service eucalyptus-cc start
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li>Start secondary head components</li>
+</ol>
+<div class="highlight-shell"><div class="highlight"><pre><span class="c"># execute the following command as root on second host</span>
+rm -rf /var/lib/eucalyptus/db/
+service eucalyptus-cloud start
+<span class="c"># wait until CLC is up (check /var/log/eucalyptus/cloud-output.log)</span>
+service eucalyptus-cc start
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li>Register the secondary head</li>
+</ol>
+<div class="highlight-shell"><div class="highlight"><pre><span class="c"># execute the following commands as root on first host</span>
+<span class="c"># &lt;public_ip&gt; and &lt;hostname&gt; refer to the secondary head</span>
+euca_conf --register-cloud -P eucalyptus -H &lt;public_ip&gt; -C &lt;hostname&gt;-clc
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li>Register the Eucalyptus APIs</li>
+</ol>
+<div class="highlight-shell"><div class="highlight"><pre><span class="c"># on both the primary and the secondary</span>
+euca_conf --register-service -T user-api -H &lt;public_ip&gt; -N &lt;host&gt;-api
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="development">
 <h2>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h2>
