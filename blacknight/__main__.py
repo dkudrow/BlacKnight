@@ -2,11 +2,6 @@ import os
 import sys
 
 
-if hasattr(sys, 'real_prefix'):
-    print 'VIRTUALENV'
-else:
-    print 'NORMAL PYTHON'
-
 if __package__ == '':
     path = os.path.dirname(os.path.dirname(__file__))
     print 'setting path to ', path
