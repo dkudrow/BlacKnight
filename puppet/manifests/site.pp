@@ -46,7 +46,9 @@ node 'php.cs.ucsb.edu' {
   $IPADDR = '10.50.10.39'
   $HOSTNAME = 'php.cs.ucsb.edu'
 
-  include $all
+  include riak
+  include eucalyptus
+  include blacknight
 }
 
 node 'oz.cs.ucsb.edu' {

@@ -2,26 +2,44 @@
 
 class blacknight {
 
-  # Note: we will use cloudera's ZooKeeper rpm for simplicity
-  package { 'python-pip', 'cloudera-cdh4' :
-    ensure 'present'
+  # We are using a PyPy virtualenv to run BlacKnight because there is no
+  # reliable Python 2.7 package for CentOS 6...
+  class { 'python' :
+    version    => 'pypy',
+    virtualenv => true
   }
 
-  package { 'bkacknight' :
-    provider => 'pip',
-    ensure   => 'present',
-    source   => '../../../../'
-    require  => Package[ 'python-pip' ]
+  python::virtualenv { '/opt/blacknight' :
+    ensure       => 'present',
+    version      => 'pypy',
+    owner        => 'root',
+    group        => 'root',
+  }
+
+  python::pip { 'blacknight' :
+    pkgname       => 'blacknight',
+    ensure        => 'latest',
+    virtualenv    => '/opt/blacknight',
+    url           => 'git+https://github.com/dkudrow/BlacKnight.git',
+    owner         => 'root',
+    install_args  => ['--force-reinstall'],
+   }
+
+  yumrepo { 'cloudera-cdh5' :
+    descr    => 'Cloudera\'s Distribution for Hadoop, Version 5',
+    baseurl  => 'http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/5/',
+    gpgkey   => 'http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/RPM-GPG-KEY-cloudera',
+    gpgcheck => 1
   }
 
   package { 'zookeeper-server':
     ensure  => 'present',
-    require => Package[ 'cloudera-cdh4' ]
+    require => Yumrepo[ 'cloudera-cdh5' ]
   }
 
-  service {'zookeeper-server' :
-    ensure  => 'running',
-    require => Package[ 'zookeeper-server' ]
-  }
+  #service { 'zookeeper-server' :
+    #ensure  => 'running',
+    #require => Package[ 'zookeeper-server' ]
+  #}
 
 }

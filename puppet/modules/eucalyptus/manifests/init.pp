@@ -17,7 +17,7 @@ class eucalyptus {
   }
 
   exec { '/usr/sbin/setenforce 0' :
-    onlyif => '/usr/sbin/test `/usr/sbin/getenforce` == Enabled'
+    onlyif => '/usr/bin/test `/usr/sbin/getenforce` == Enabled'
   }
 
   service { 'eucalyptus-cloud' :
@@ -98,8 +98,8 @@ class eucalyptus {
             'eucalyptus-walrus' ]
 
   package { $pkgs :
-    ensure  => 'present'
-    require => Package[ 'eucalyptus-release', 'eucal2ools-release', 'epel-release' ]
+    ensure  => 'present',
+    require => Package[ 'eucalyptus-release', 'euca2ools-release', 'epel-release' ]
   }
 
 }

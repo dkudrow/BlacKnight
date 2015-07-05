@@ -21,7 +21,7 @@ Puppet is a configuration management tool for bootstrapping deployments from a u
 
         yum install puppet
         puppet module install computology-packagecloud
-
+        puppet module install stankevich-python
 
 
 Configuration of the installation is handled entirely within ``puppet/manifests/site.pp``. Deployment-wide configuration is managed using global variables which are inherited by all hosts. Each host in the deployment is declared in a *node* block. This block contains host-specific information (e.g. hostname, &c.) and several *include* directives. The includes inform puppet of which modules should be applied to the host in question. Any module in ``puppet/modules/`` can be included.
