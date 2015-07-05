@@ -42,8 +42,8 @@ class riak {
 
     # Stanchion 2.0 hasn't made it to packagecloud yet...
     #package { 'stanchion' :
-    #ensure  => $STANCHION_VERSION,
-    #require => Packagecloud::Repo['basho/riak-cs']
+    #  ensure  => $STANCHION_VERSION,
+    #  require => Packagecloud::Repo['basho/riak-cs']
     #}
 
     # ...so in the meantime install from the rpm.
