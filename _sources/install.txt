@@ -21,7 +21,7 @@ Puppet is a configuration management tool for bootstrapping deployments from a u
 
         yum install puppet
         puppet module install computology-packagecloud
-
+        puppet module install stankevich-python
 
 
 Configuration of the installation is handled entirely within ``puppet/manifests/site.pp``. Deployment-wide configuration is managed using global variables which are inherited by all hosts. Each host in the deployment is declared in a *node* block. This block contains host-specific information (e.g. hostname, &c.) and several *include* directives. The includes inform puppet of which modules should be applied to the host in question. Any module in ``puppet/modules/`` can be included.
@@ -63,27 +63,99 @@ Configuration of the installation is handled entirely within ``puppet/manifests/
 BlacKnight
 ----------
 
-Installing BlacKnight via Puppet is straightforward and requires no manual configuration. BlacKnight itself is distributed as a Python package that can be installed with pip. For convenience, we use the ZooKeeper RPM packaged by Cloudera.
-
-.. tip::
-
-    In ``site.pp``, add the line
+#. In ``site.pp``, add the following line to each host on which BlacKnight should be installed.
 
     .. code-block:: ruby
 
         include blacknight
 
-    to each node on which BlacKnight should be installed. Apply the manifest by running the following commands as root.
+#. Apply the manifest by running the following commands as root on each host.
 
     .. code-block:: shell
 
-        # execute the following commands as root.
         cd puppet/
         ./run_puppet
 
+.. warning::
+
+    Puppet occasionally has trouble creating virtualenvs with pypy. If you see an error along the lines of ``virtualenv-pypy: command not found``, you will have to create the virtualenv yourself with
+
+    .. code-block:: shell
+
+        virtualenv -p pypy /opt/blacknight
 
 RiakCS
 ------
+
+#. Set the following global configuration variables in ``site.pp``.
+
+    * **$STANCHION_HOST**: IP address of the host that will run Stanchion (can be any host)
+    * **$RIAK_ADMIN_KEY**: admin-key
+    * **$RIAK_ADMIN_SECRET**: admin-secret
+
+#. In ``site.pp``, add the following line to the Stanchion node's definition.
+
+
+    .. code-block:: ruby
+
+        include riak
+
+#. Apply the manifest by running the following commands as root on the Stanchion host.
+
+    .. code-block:: shell
+
+        cd puppet/
+        ./run_puppet
+
+#. Start RiakCS by running the following commands as root on the Stanchion host.
+
+    .. code-block:: shell
+
+        riak start
+        stanchion start
+        riak-cs start
+
+#. Manually edit the RiakCS configuration file ``/etc/riak-cs/riak-cs.conf`` by changing
+
+    .. code-block:: properties
+
+        anonymous_user_creation = off
+
+    to
+
+    .. code-block:: properties
+
+        anonymous_user_creation = on
+
+#. Restart Riak by by running
+
+    .. code-block:: shell
+
+        riak-cs restart
+
+#. Create an admin user by running the following command. Use the value of ``$RIAKCS_PORT`` in ``site.pp`` as the port in the URL. The choice of name and email for the admin user are not terribly important.
+
+    .. code-block:: shell
+
+        curl -XPOST http://localhost:9090/riak-cs/user \
+            -H 'Content-Type: application/json' \
+            -d '{"email":"admin@admin.com", "name":"admin"}'
+
+#. RiakCS should respond with the key and secret of the admin user. Copy these into ``$RIAK_ADMIN_KEY`` and ``$RIAK_ADMIN_SECRET`` respectively in ``site.pp``.
+
+#. Repeat steps 2 and 3 on the remaining hosts.
+
+#. Restart Riak on the Stanchion host as per step 6.
+
+#. On the remaining nodes start Riak with the following commands. The nodename of stanchion node is
+
+    .. code-block:: shell
+
+    riak start
+    riak-cs start
+    riak-admin cluster join riak@<hostname_of_stanchion_node>
+    riak-admin plan
+    riak-admin commit
 
 .. warning::
 
