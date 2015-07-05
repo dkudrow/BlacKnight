@@ -1,0 +1,360 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>blacknight.specification &mdash; BlacKnight 0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="BlacKnight 0.1 documentation" href="../index.html"/>
+        <link rel="up" title="Reference" href="../reference.html"/>
+        <link rel="next" title="blacknight.action" href="action.html"/>
+        <link rel="prev" title="blacknight.client" href="client.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="../index.html" class="icon icon-home"> BlacKnight
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">System Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../architecture.html#cloud-software-appliances">Cloud Software Appliances</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture.html#abstractions">Abstractions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../architecture.html#roles">Roles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../architecture.html#appliance-state">Appliance State</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../architecture.html#diff">Diff</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture.html#implementation">Implementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture.html#developing-appliances">Developing Appliances</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#puppet">Puppet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#blacknight">BlacKnight</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#riakcs">RiakCS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../install.html#starting">Starting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#eucalyptus">Eucalyptus</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../install.html#id1">Starting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#development">Development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#external-documentation">External Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../reference.html">Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="client.html"><code class="docutils literal"><span class="pre">blacknight.client</span></code></a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href=""><code class="docutils literal"><span class="pre">blacknight.specification</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="action.html"><code class="docutils literal"><span class="pre">blacknight.action</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="eucalyptus.html"><code class="docutils literal"><span class="pre">blacknight.eucalyptus</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">BlacKnight</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../reference.html">Reference</a> &raquo;</li>
+      
+    <li><code class="docutils literal"><span class="pre">blacknight.specification</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/reference/specification.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="module-blacknight.specification">
+<span id="blacknight-specification"></span><h1><a class="reference internal" href="#module-blacknight.specification" title="blacknight.specification"><code class="xref py py-mod docutils literal"><span class="pre">blacknight.specification</span></code></a><a class="headerlink" href="#module-blacknight.specification" title="Permalink to this headline">¶</a></h1>
+<p>Appliance Specification</p>
+<dl class="class">
+<dt id="blacknight.specification.Role">
+<em class="property">class </em><code class="descclassname">blacknight.specification.</code><code class="descname">Role</code><span class="sig-paren">(</span><em>name</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/blacknight/specification.html#Role"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blacknight.specification.Role" title="Permalink to this definition">¶</a></dt>
+<dd><p>A convenience class for managing roles in an appliance.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="blacknight.specification.Specification">
+<em class="property">class </em><code class="descclassname">blacknight.specification.</code><code class="descname">Specification</code><span class="sig-paren">(</span><em>yaml_spec</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/blacknight/specification.html#Specification"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blacknight.specification.Specification" title="Permalink to this definition">¶</a></dt>
+<dd><p>A specification that describes the optimal configuration of an appliance.</p>
+<p>The internal representation of the specification takes the form of a
+directed graph. Vertexes in this graph represent service roles. Edges
+represent the dependencies between roles. The specification is loaded from a
+YAML file that defines the different service roles. The format is as
+follows:</p>
+<div class="highlight-python"><div class="highlight"><pre>--- # spec.yaml
+role_name:
+    min_rep: &lt;int&gt;       # min instances of role for functional appliance
+    max_rep: &lt;int&gt;       # max useful instances of role
+    start_hook: &lt;string&gt;  # command to start service (abs. path)
+    start_args: &lt;list&gt;    # arguments to start hook
+    stop_hook: &lt;string&gt;   # command to stop service (abs. path)
+    stop_args: &lt;list&gt;     # arguments to stop hook
+    deps:                 # dependencies on other roles
+        &lt;string&gt;: &lt;int&gt;   # dependency: max co-tenancy
+...
+</pre></div>
+</div>
+<dl class="method">
+<dt id="blacknight.specification.Specification.abort">
+<code class="descname">abort</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/blacknight/specification.html#Specification.abort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blacknight.specification.Specification.abort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abort the most recent transaction.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="blacknight.specification.Specification.add_role_attempt">
+<code class="descname">add_role_attempt</code><span class="sig-paren">(</span><em>root</em>, <em>transaction</em>, <em>unused_hosts</em>, <em>count=1</em>, <em>take_host=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/blacknight/specification.html#Specification.add_role_attempt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blacknight.specification.Specification.add_role_attempt" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>root</strong> &#8211; </li>
+<li><strong>transaction</strong> &#8211; </li>
+<li><strong>unused_hosts</strong> &#8211; </li>
+<li><strong>count</strong> &#8211; </li>
+<li><strong>take_host</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="blacknight.specification.Specification.commit">
+<code class="descname">commit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/blacknight/specification.html#Specification.commit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blacknight.specification.Specification.commit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Commit the most recent transaction to the dependency graph.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="blacknight.specification.Specification.dfs_iter">
+<code class="descname">dfs_iter</code><span class="sig-paren">(</span><em>root</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/blacknight/specification.html#Specification.dfs_iter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blacknight.specification.Specification.dfs_iter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Depth first search starting at root.</p>
+<p>WRITEME</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>root</strong> (<em>string</em>) &#8211; root of DFS</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">next edge in dependency graph</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tuple of strings</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="blacknight.specification.Specification.diff">
+<code class="descname">diff</code><span class="sig-paren">(</span><em>services</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/blacknight/specification.html#Specification.diff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blacknight.specification.Specification.diff" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>services</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="blacknight.specification.Specification.swap_roles_on_host">
+<code class="descname">swap_roles_on_host</code><span class="sig-paren">(</span><em>stop</em>, <em>start</em>, <em>count</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/blacknight/specification.html#Specification.swap_roles_on_host"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blacknight.specification.Specification.swap_roles_on_host" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exchange roles on a host and return the resultant <cite>Action</cite>.</p>
+<p>WRITEME</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>stop</strong> (<em>string</em>) &#8211; role to stop</li>
+<li><strong>start</strong> (<em>string</em>) &#8211; role to start</li>
+<li><strong>count</strong> (<em>int</em>) &#8211; instances for role to exchange</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">corresponding <cite>Action</cite> object</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><cite>Action</cite></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="blacknight.specification.Specification.update_new_weights">
+<code class="descname">update_new_weights</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/blacknight/specification.html#Specification.update_new_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blacknight.specification.Specification.update_new_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the weights of a node&#8217;s outgoing edges</p>
+<p>WRITEME</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> (<em>string</em>) &#8211; node to update</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="action.html" class="btn btn-neutral float-right" title="blacknight.action" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="client.html" class="btn btn-neutral" title="blacknight.client" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Daniel Kudrow.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
