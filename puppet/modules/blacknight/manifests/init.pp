@@ -10,10 +10,11 @@ class blacknight {
   }
 
   python::virtualenv { '/opt/blacknight' :
-    ensure       => 'present',
-    version      => 'pypy',
-    owner        => 'root',
-    group        => 'root',
+    ensure     => 'present',
+    version    => 'pypy',
+    owner      => 'root',
+    group      => 'root',
+    virtualenv => 'virtualenv -p pypy'
   }
 
   python::pip { 'blacknight' :

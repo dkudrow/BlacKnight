@@ -58,7 +58,9 @@ node 'oz.cs.ucsb.edu' {
   $IPADDR = '10.50.10.51'
   $HOSTNAME = 'oz.cs.ucsb.edu'
 
-  include $all
+  include riak
+  include eucalyptus
+  include blacknight
 }
 
 node 'objc.cs.ucsb.edu' {
@@ -68,7 +70,9 @@ node 'objc.cs.ucsb.edu' {
   $IPADDR = '10.50.10.50'
   $HOSTNAME = 'objc.cs.ucsb.edu'
 
-  include $all
+  include riak
+  include eucalyptus
+  include blacknight
 }
 
 node 'scala.cs.ucsb.edu' {
@@ -78,5 +82,7 @@ node 'scala.cs.ucsb.edu' {
   $IPADDR = '10.50.10.25'
   $HOSTNAME = 'scala.cs.ucsb.edu'
 
-  include $all
+  include riak
+  include eucalyptus
+  include blacknight
 }
