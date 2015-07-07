@@ -220,6 +220,23 @@ Eucalyptus
         euca-modify-property -p objectstorage.s3provider.s3accesskey=<riakcs_admin_key>
         euca-modify-property -p objectstorage.s3provider.s3secretkey=<riakcs_admin_secret>
 
+#. Distribute keys across all hosts.
+
+    a. Generate an ssh key on each host.
+
+        .. code-block:: shell
+
+            [ -e /root/.ssh/id_rsa ] || ssh-keygen -t rsa -N '' -f /root/.ssh/id_rsa
+
+    b. Add every host's key to each other's list of authorized hosts.
+
+        .. code-block:: shell
+
+            for host in hosts; do
+                # You will get very good at typing your password...
+                cat $(ssh host 'cat /root/.ssh/id_rsa') >> /root/.ssh/authorized_hosts
+            done
+
 Development
 -----------
 
@@ -240,3 +257,5 @@ External Documentation
 .. _RiakCS: http://docs.basho.com/riakcs/latest/
 .. _ZooKeeper: https://zookeeper.apache.org/doc/r3.5.0-alpha/
 .. _Kazoo: https://kazoo.readthedocs.org/en/latest/
+
+TODO: Distribute keys for eucalyptus!

@@ -31,11 +31,11 @@ class blacknight {
    }
 
   class { 'zookeeper' :
-    repo => 'cloudera',
-    packages => [ 'zookeeper', 'zookeeper-server' ],
+    repo                 => 'cloudera',
+    packages             => [ 'zookeeper', 'zookeeper-server' ],
     service_name         => 'zookeeper-server',
     initialize_datastore => true,
-    servers => $ZK_SERVERS
+    servers              => $ZK_SERVERS
   }
 
 }
