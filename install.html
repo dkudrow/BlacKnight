@@ -139,30 +139,26 @@
             
   <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<p>This section describes the installation of BlacKnight as well as that of a test environment based on Eucalyptus. A Puppet manifest is provided in the <code class="docutils literal"><span class="pre">puppet/</span></code> directory to make this process marginally less painful. This manifest is not perfect - installation requires some supervision and, in certain cases, multiple passes. To ensure that all necessary components are installed run Puppet repeatedly until no messages are printed. All development was done on CentOS 6.6 (final) and determining whether BlacKnight will run in another environment is left as an exercise for the reader.</p>
+<p>This section describes the installation of BlacKnight as well as that of a test environment based on Eucalyptus. A Puppet manifest is provided in the <code class="docutils literal"><span class="pre">puppet/</span></code> directory to make this process marginally less painful. This manifest is not perfect - installation requires some supervision and, in certain cases, multiple passes. To ensure that all necessary components are installed run Puppet repeatedly until no messages are printed. Familiarity with puppet is not necessary (you can simply follow the instructions below) but will be helpful for trouble-shooting and required for contributing.</p>
+<p>All development was done on CentOS 6.6 (final) and determining whether BlacKnight will run in another environment is left as an exercise for the (motivated) reader.</p>
 <div class="section" id="puppet">
 <h2>Puppet<a class="headerlink" href="#puppet" title="Permalink to this headline">¶</a></h2>
-<p>Puppet is a configuration management tool for bootstrapping deployments from a user-specified manifest. Familiarity with puppet is not necessary (you can simply follow the instructions below) but will be helpful for trouble-shooting and required for contributing. It must be present on all hosts in order to be used for the installation.</p>
-<div class="admonition tip">
-<p class="first admonition-title">Tip</p>
-<p>Run the following commands as root on each host to install Puppet:</p>
-<div class="last highlight-shell"><div class="highlight"><pre>yum install rubygems
+<ol class="arabic">
+<li><p class="first">Install Puppet on all hosts.</p>
+<blockquote>
+<div><div class="highlight-shell"><div class="highlight"><pre>yum install rubygems
 gem install puppet -v <span class="s1">&#39;3.8.1&#39;</span>
 puppet module install computology-packagecloud
 puppet module install stankevich-python
 puppet module install deric-zookeeper
 </pre></div>
 </div>
-</div>
-<p>Configuration of the installation is handled entirely within <code class="docutils literal"><span class="pre">puppet/manifests/site.pp</span></code>. Deployment-wide configuration is managed using global variables which are inherited by all hosts. Each host in the deployment is declared in a <em>node</em> block. This block contains host-specific information (e.g. hostname, &amp;c.) and several <em>include</em> directives. The includes inform puppet of which modules should be applied to the host in question. Any module in <code class="docutils literal"><span class="pre">puppet/modules/</span></code> can be included.</p>
-<div class="admonition tip">
-<p class="first admonition-title">Tip</p>
-<p>Open <code class="docutils literal"><span class="pre">puppet/manifests/site.pp</span></code> and using the template below as a guide</p>
-<blockquote>
-<div><ol class="arabic simple">
-<li>define a <em>node</em> for each host in the appliance using the template below as a guide.</li>
-</ol>
 </div></blockquote>
+</li>
+</ol>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Configuration of the installation is handled entirely within <code class="docutils literal"><span class="pre">puppet/manifests/site.pp</span></code>. Deployment-wide configuration is managed using global variables which are inherited by all hosts. Each host is declared in a <em>node</em> block; this block contains host-specific information (e.g. IP address, &amp;c.) and several <em>include</em> directives that indicate which modules should be applied to the host. Use the code sample below to adapt <code class="docutils literal"><span class="pre">site.pp</span></code> to your deployment.</p>
 <div class="last highlight-ruby"><div class="highlight"><pre><span class="c1"># puppet/manifests/site.pp</span>
 
 <span class="c1"># Global configuration variables</span>
@@ -194,11 +190,11 @@ puppet module install deric-zookeeper
 <div class="section" id="blacknight">
 <h2>BlacKnight<a class="headerlink" href="#blacknight" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
-<li><p class="first">In <code class="docutils literal"><span class="pre">site.pp</span></code>, add the following line to each host on which BlacKnight should be installed.</p>
+<li><p class="first">Set the following global configuration variables in <code class="docutils literal"><span class="pre">site.pp</span></code>.</p>
 <blockquote>
-<div><div class="highlight-ruby"><div class="highlight"><pre><span class="kp">include</span> <span class="n">blacknight</span>
-</pre></div>
-</div>
+<div><ul class="simple">
+<li><strong>$ZK_SERVERS</strong>: list of all hosts in the appliance</li>
+</ul>
 </div></blockquote>
 </li>
 <li><p class="first">Apply the manifest by running the following commands as root on each host.</p>
@@ -280,16 +276,15 @@ riak-cs start
 </li>
 <li><p class="first">Restart Riak on the Stanchion host as per step 6.</p>
 </li>
-<li><p class="first">On the remaining nodes start Riak with the following commands. The nodename of stanchion node is</p>
+<li><p class="first">On the remaining nodes start Riak with the following commands. The nodename of the stanchion node can be found in <code class="docutils literal"><span class="pre">/etc/riak/riak.conf</span></code>.</p>
 <blockquote>
-<div><div class="highlight-shell"><div class="highlight"><pre>
+<div><div class="highlight-shell"><div class="highlight"><pre>riak start
+riak-cs start
+riak-admin cluster join riak@&lt;nodename_of_stanchion_node&gt;
+riak-admin plan
+riak-admin commit
 </pre></div>
 </div>
-<p>riak start
-riak-cs start
-riak-admin cluster join riak&#64;&lt;hostname_of_stanchion_node&gt;
-riak-admin plan
-riak-admin commit</p>
 </div></blockquote>
 </li>
 </ol>
@@ -402,7 +397,7 @@ euca-modify-property -p objectstorage.s3provider.s3secretkey<span class="o">=</s
 </div>
 <div class="section" id="development">
 <h2>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h2>
-<p>BlacKnight comes equipped with a series of utilities for simulated execution as testing on a full scale appliance can be unwieldy. The <strong>zkconf</strong> tool is extremely useful for quickly deploying temporary ZooKeeper ensembles; it can be found at FIXME and the instructions are straightforward. The <code class="xref py py-mod docutils literal"><span class="pre">util</span></code> contains various commands for communicating with a local ZooKeeper server to simulate services. The provided specification (<code class="docutils literal"><span class="pre">test/spec.yaml</span></code>) simply points hooks at blacknight-util to start and stop simulated services.</p>
+<p>BlacKnight comes equipped with a series of utilities for simulated execution as testing on a full scale appliance can be unwieldy. The <strong>zkconf</strong> tool is extremely useful for quickly deploying temporary ZooKeeper ensembles locally; it can be found at <a class="reference external" href="https://github.com/phunt/zkconf">https://github.com/phunt/zkconf</a> and the instructions for its use are straightforward. The <code class="xref py py-mod docutils literal"><span class="pre">util</span></code> contains various commands for communicating with the ZooKeeper server to simulate events and services. The provided specification (<code class="docutils literal"><span class="pre">test/spec.yaml</span></code>) simply points hooks at blacknight-util to start and stop simulated services.</p>
 </div>
 <div class="section" id="external-documentation">
 <h2>External Documentation<a class="headerlink" href="#external-documentation" title="Permalink to this headline">¶</a></h2>
@@ -413,7 +408,6 @@ euca-modify-property -p objectstorage.s3provider.s3secretkey<span class="o">=</s
 <li><a class="reference external" href="https://zookeeper.apache.org/doc/r3.5.0-alpha/">ZooKeeper</a></li>
 <li><a class="reference external" href="https://kazoo.readthedocs.org/en/latest/">Kazoo</a></li>
 </ul>
-<p>TODO: Distribute keys for eucalyptus!</p>
 </div>
 </div>
 
