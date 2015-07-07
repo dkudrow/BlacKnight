@@ -37,6 +37,10 @@ $RIAK_ADMIN_SECRET = 'poijG0ZVojshvgLrkR1CzLmqcHDdekjhoTT5uQ=='
 
 # ZooKeeper
 $ZK_SERVERS = [ '128.111.55.39', '128.111.55.51', '128.111.55.50', '128.111.55.25' ]
+$ZK_IDS = { '128.111.55.39' => 1,
+                '128.111.55.51' => 2,
+                '128.111.55.50' => 3,
+                '128.111.55.25' => 4 }
 
 # Physical nodes
 node 'php.cs.ucsb.edu' {

@@ -58,6 +58,7 @@ BlacKnight
 #. Set the following global configuration variables in ``site.pp``.
 
     * **$ZK_SERVERS**: list of all hosts in the appliance
+    * **$ZK_IDS**: hash of hosts in appliance to their positions in the array above
 
 #. Apply the manifest by running the following commands as root on each host.
 

@@ -28,14 +28,15 @@ class blacknight {
     url           => 'git+https://github.com/dkudrow/BlacKnight.git',
     owner         => 'root',
     install_args  => ['--force-reinstall'],
-   }
+  }
 
   class { 'zookeeper' :
     repo                 => 'cloudera',
     packages             => [ 'zookeeper', 'zookeeper-server' ],
     service_name         => 'zookeeper-server',
     initialize_datastore => true,
-    client_ip            => "$PUBLIC_IP",
+    client_ip            => '127.0.0.1',
+    id                   => $ZK_IDS[$PUBLIC_IP],
     servers              => $ZK_SERVERS
   }
 
