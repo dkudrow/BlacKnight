@@ -17,8 +17,6 @@ Puppet is a configuration management tool for bootstrapping deployments from a u
 
         yum install rubygems
         gem install puppet -v '3.8.1'
-        gem install facter
-
         puppet module install computology-packagecloud
         puppet module install stankevich-python
         puppet module install deric-zookeeper
@@ -178,6 +176,10 @@ Eucalyptus
 
         cd puppet/
         ./run_puppet
+
+.. tip::
+
+    If this is the first time you are configuring this machine you should restart it to bring up the bridge interface.
 
 #. Choose one host to be the initial primary head and start the head node components on this host.
 
