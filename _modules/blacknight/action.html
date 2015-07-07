@@ -86,14 +86,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../install.html#puppet">Puppet</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../install.html#blacknight">BlacKnight</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../install.html#riakcs">RiakCS</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../install.html#starting">Starting</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../../install.html#eucalyptus">Eucalyptus</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../install.html#id1">Starting</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="../../install.html#riakcs">RiakCS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../install.html#eucalyptus">Eucalyptus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../install.html#development">Development</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../install.html#external-documentation">External Documentation</a></li>
 </ul>
@@ -189,13 +183,22 @@
         <span class="k">if</span> <span class="s">&#39;h&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
             <span class="n">cmd</span> <span class="o">+=</span> <span class="s">&#39; -h {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">)</span>
             <span class="n">args</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&#39;h&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s">&#39;host&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">+=</span> <span class="s">&#39; --host {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">)</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&#39;host&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s">&#39;i&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
             <span class="n">cmd</span> <span class="o">+=</span> <span class="s">&#39; -i {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">services</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">role</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">())</span>
             <span class="n">args</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&#39;i&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s">&#39;instance&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">+=</span> <span class="s">&#39; --instance {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">services</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">role</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">())</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&#39;instance&#39;</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
-            <span class="n">cmd</span> <span class="o">+=</span> <span class="s">&#39; -{} {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">args_dict</span><span class="p">[</span><span class="n">arg</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">cmd</span> <span class="o">+=</span> <span class="s">&#39; -{} {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">args_dict</span><span class="p">[</span><span class="n">arg</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">cmd</span> <span class="o">+=</span> <span class="s">&#39; --{} {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">args_dict</span><span class="p">[</span><span class="n">arg</span><span class="p">])</span>
 
         <span class="k">print</span> <span class="n">cmd</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
         <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
