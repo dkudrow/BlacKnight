@@ -1,36 +1,28 @@
 Installation
 ============
 
-This section describes the installation of BlacKnight as well as that of a test environment based on Eucalyptus. A Puppet manifest is provided in the ``puppet/`` directory to make this process marginally less painful. This manifest is not perfect - installation requires some supervision and, in certain cases, multiple passes. To ensure that all necessary components are installed run Puppet repeatedly until no messages are printed. All development was done on CentOS 6.6 (final) and determining whether BlacKnight will run in another environment is left as an exercise for the reader.
+This section describes the installation of BlacKnight as well as that of a test environment based on Eucalyptus. A Puppet manifest is provided in the ``puppet/`` directory to make this process marginally less painful. This manifest is not perfect - installation requires some supervision and, in certain cases, multiple passes. To ensure that all necessary components are installed run Puppet repeatedly until no messages are printed. Familiarity with puppet is not necessary (you can simply follow the instructions below) but will be helpful for trouble-shooting and required for contributing.
+
+All development was done on CentOS 6.6 (final) and determining whether BlacKnight will run in another environment is left as an exercise for the (motivated) reader.
 
 
 Puppet
 ------
 
-Puppet is a configuration management tool for bootstrapping deployments from a user-specified manifest. Familiarity with puppet is not necessary (you can simply follow the instructions below) but will be helpful for trouble-shooting and required for contributing. It must be present on all hosts in order to be used for the installation.
-
-.. tip::
-
-    Run the following commands as root on each host to install Puppet:
+#. Install Puppet on all hosts.
 
     .. code-block:: shell
 
         yum install rubygems
         gem install puppet -v '3.8.1'
-        gem install facter
-
         puppet module install computology-packagecloud
         puppet module install stankevich-python
         puppet module install deric-zookeeper
 
 
-Configuration of the installation is handled entirely within ``puppet/manifests/site.pp``. Deployment-wide configuration is managed using global variables which are inherited by all hosts. Each host in the deployment is declared in a *node* block. This block contains host-specific information (e.g. hostname, &c.) and several *include* directives. The includes inform puppet of which modules should be applied to the host in question. Any module in ``puppet/modules/`` can be included.
+.. note::
 
-.. tip::
-
-    Open ``puppet/manifests/site.pp`` and using the template below as a guide
-
-        1. define a *node* for each host in the appliance using the template below as a guide.
+    Configuration of the installation is handled entirely within ``puppet/manifests/site.pp``. Deployment-wide configuration is managed using global variables which are inherited by all hosts. Each host is declared in a *node* block; this block contains host-specific information (e.g. IP address, &c.) and several *include* directives that indicate which modules should be applied to the host. Use the code sample below to adapt ``site.pp`` to your deployment.
 
     .. code-block:: ruby
 
@@ -63,11 +55,9 @@ Configuration of the installation is handled entirely within ``puppet/manifests/
 BlacKnight
 ----------
 
-#. In ``site.pp``, add the following line to each host on which BlacKnight should be installed.
+#. Set the following global configuration variables in ``site.pp``.
 
-    .. code-block:: ruby
-
-        include blacknight
+    * **$ZK_SERVERS**: list of all hosts in the appliance
 
 #. Apply the manifest by running the following commands as root on each host.
 
@@ -140,15 +130,15 @@ RiakCS
 
 #. Restart Riak on the Stanchion host as per step 6.
 
-#. On the remaining nodes start Riak with the following commands. The nodename of stanchion node is
+#. On the remaining nodes start Riak with the following commands. The nodename of the stanchion node can be found in ``/etc/riak/riak.conf``.
 
     .. code-block:: shell
 
-    riak start
-    riak-cs start
-    riak-admin cluster join riak@<hostname_of_stanchion_node>
-    riak-admin plan
-    riak-admin commit
+        riak start
+        riak-cs start
+        riak-admin cluster join riak@<nodename_of_stanchion_node>
+        riak-admin plan
+        riak-admin commit
 
 .. warning::
 
@@ -178,6 +168,10 @@ Eucalyptus
 
         cd puppet/
         ./run_puppet
+
+.. tip::
+
+    If this is the first time you are configuring this machine you should restart it to bring up the bridge interface.
 
 #. Choose one host to be the initial primary head and start the head node components on this host.
 
@@ -240,7 +234,7 @@ Eucalyptus
 Development
 -----------
 
-BlacKnight comes equipped with a series of utilities for simulated execution as testing on a full scale appliance can be unwieldy. The **zkconf** tool is extremely useful for quickly deploying temporary ZooKeeper ensembles; it can be found at FIXME and the instructions are straightforward. The :mod:`util` contains various commands for communicating with a local ZooKeeper server to simulate services. The provided specification (``test/spec.yaml``) simply points hooks at blacknight-util to start and stop simulated services.
+BlacKnight comes equipped with a series of utilities for simulated execution as testing on a full scale appliance can be unwieldy. The **zkconf** tool is extremely useful for quickly deploying temporary ZooKeeper ensembles locally; it can be found at https://github.com/phunt/zkconf and the instructions for its use are straightforward. The :mod:`util` contains various commands for communicating with the ZooKeeper server to simulate events and services. The provided specification (``test/spec.yaml``) simply points hooks at blacknight-util to start and stop simulated services.
 
 
 External Documentation
@@ -257,5 +251,3 @@ External Documentation
 .. _RiakCS: http://docs.basho.com/riakcs/latest/
 .. _ZooKeeper: https://zookeeper.apache.org/doc/r3.5.0-alpha/
 .. _Kazoo: https://kazoo.readthedocs.org/en/latest/
-
-TODO: Distribute keys for eucalyptus!
