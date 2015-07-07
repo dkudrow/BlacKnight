@@ -1,0 +1,49 @@
+secondary_head:
+  min_representation: 0
+  max_representation: 1
+  start_hook: ~/PycharmProjects/BlacKnight/test/sim/hooks/start_secondary
+  start_args: [h]
+  stop_hook: ~/PycharmProjects/BlacKnight/test/sim/hooks/hooks/stop_secondary
+  stop_args: [h]
+  dependencies:
+
+node_controller:
+  min_representation: 1
+  max_representation: /home/dkudrow
+  start_hook: ~/PycharmProjects/BlacKnight/test/sim/hooks/start_nc
+  start_args: [h]
+  stop_hook: ~/PycharmProjects/BlacKnight/test/sim/hooks/stop_nc
+  stop_args: [h]
+  dependencies:
+
+app:
+  min_representation: 3
+  max_representation: /home/dkudrow
+  start_hook: ~/PycharmProjects/BlacKnight/test/sim/hooks/start_app
+  start_args:
+  stop_hook: ~/PycharmProjects/BlacKnight/test/sim/hooks/stop_app
+  stop_args: [i]
+  dependencies:
+    node_controller: 2
+    db: 10
+    hadoop: 10
+
+db:
+  min_representation: 0
+  max_representation: /home/dkudrow
+  start_hook: ~/PycharmProjects/BlacKnight/test/sim/hooks/start_db
+  start_args:
+  stop_hook: ~/PycharmProjects/BlacKnight/test/sim/hooks/stop_db
+  stop_args: [i]
+  dependencies:
+    node_controller: 2
+
+hadoop:
+  min_representation: 0
+  max_representation: /home/dkudrow
+  start_hook: ~/PycharmProjects/BlacKnight/test/sim/hooks/start_hadoop
+  start_args:
+  stop_hook: ~/PycharmProjects/BlacKnight/test/sim/hooks/stop_hadoop
+  stop_args: [i]
+  dependencies:
+    node_controller: 2

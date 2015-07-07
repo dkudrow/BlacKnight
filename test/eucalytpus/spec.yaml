@@ -1,0 +1,49 @@
+secondary_head:
+  min_representation: 0
+  max_representation: 1
+  start_hook: /opt/BlacKnight/test/sim/start_secondary.py
+  start_args: [h]
+  stop_hook: /opt/BlacKnight/test/sim/stop_secondary.py
+  stop_args: [h]
+  dependencies:
+
+node_controller:
+  min_representation: 1
+  max_representation: /home/dkudrow
+  start_hook: /opt/BlacKnight/test/sim/start_nc.py
+  start_args: [h]
+  stop_hook: /opt/BlacKnight/test/sim/stop_nc.py
+  stop_args: [h]
+  dependencies:
+
+app:
+  min_representation: 3
+  max_representation: /home/dkudrow
+  start_hook: /opt/BlacKnight/test/sim/start_app.py
+  start_args:
+  stop_hook: /opt/BlacKnight/test/sim/stop_app.py
+  stop_args: [i]
+  dependencies:
+    node_controller: 2
+    db: 10
+    hadoop: 10
+
+db:
+  min_representation: 0
+  max_representation: /home/dkudrow
+  start_hook: /opt/BlacKnight/test/sim/start_db.py
+  start_args:
+  stop_hook: /opt/BlacKnight/test/sim/stop_db.py
+  stop_args: [i]
+  dependencies:
+    node_controller: 2
+
+hadoop:
+  min_representation: 0
+  max_representation: /home/dkudrow
+  start_hook: /opt/BlacKnight/test/sim/start_hadoop.py
+  start_args:
+  stop_hook: /opt/BlacKnight/test/sim/stop_hadoop.py
+  stop_args: [i]
+  dependencies:
+    node_controller: 2

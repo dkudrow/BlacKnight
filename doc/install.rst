@@ -93,13 +93,6 @@ RiakCS
     * **$RIAK_ADMIN_KEY**: admin-key
     * **$RIAK_ADMIN_SECRET**: admin-secret
 
-#. In ``site.pp``, add the following line to the Stanchion node's definition.
-
-
-    .. code-block:: ruby
-
-        include riak
-
 #. Apply the manifest by running the following commands as root on the Stanchion host.
 
     .. code-block:: shell
@@ -143,7 +136,7 @@ RiakCS
 
 #. RiakCS should respond with the key and secret of the admin user. Copy these into ``$RIAK_ADMIN_KEY`` and ``$RIAK_ADMIN_SECRET`` respectively in ``site.pp``.
 
-#. Repeat steps 2 and 3 on the remaining hosts.
+#. Repeat step 2 on the remaining hosts.
 
 #. Restart Riak on the Stanchion host as per step 6.
 
@@ -168,69 +161,64 @@ RiakCS
     the version string (*2.0.1* above) must match the installed verson of RiakCS or Riak will not start!
 
 
-Starting
-^^^^^^^^
-
-.. code-block:: shell
-
-    # execute the following commands as root on the first host
-    riak start
-    stanchion start
-    riak-cs start
-
-.. code-block:: shell
-
-    # execute the following commands as root on the remaining hosts
-    riak start
-    riak-cs start
-    riak-admin cluster join <nodename_of_first_node>
-    riak-admin plan
-    riak-admin comit
-
-
 Eucalyptus
 ----------
 
+#. Set the following global configuration variables in ``site.pp``. (These all mirror variables in *eucalyptus.conf*)
 
-Starting
-^^^^^^^^
+    * **$VNET_DNS**: IP address of local DNS server (if applicable)
+    * **$VNET_NETMASK**: subnet mask for bridged network
+    * **$VNET_PRIVINTERFACE**: name interface to bridged network
+    * **$VNET_PUBLICIPS**: available public IP addresses
+    * **$VNET_SUBNET**: subnet of bridged network
 
-1. Start primary head components
+#. Apply the manifest by running the following commands as root on all hosts.
 
-.. code-block:: shell
+    .. code-block:: shell
 
-    # execute the following commands as root on first host
-    rm -rf /var/lib/eucalyptus/db/
-    euca_conf --initialize
-    service eucalyptus-cloud start
-    # wait until CLC is up (check /var/log/eucalyptus/cloud-output.log)
-    service eucalyptus-cc start
+        cd puppet/
+        ./run_puppet
 
-2. Start secondary head components
+#. Choose one host to be the initial primary head and start the head node components on this host.
 
-.. code-block:: shell
+    .. code-block:: shell
 
-    # execute the following command as root on second host
-    rm -rf /var/lib/eucalyptus/db/
-    service eucalyptus-cloud start
-    # wait until CLC is up (check /var/log/eucalyptus/cloud-output.log)
-    service eucalyptus-cc start
+        # on the primary
+        rm -rf /var/lib/eucalyptus/db/
+        euca_conf --initialize
+        service eucalyptus-cloud start
+        # wait until CLC is up (check /var/log/eucalyptus/cloud-output.log)
+        service eucalyptus-cc start
 
-3. Register the secondary head
+#. Register components on the primary head.
 
-.. code-block:: shell
+    .. code-block:: shell
 
-    # execute the following commands as root on first host
-    # <public_ip> and <hostname> refer to the secondary head
-    euca_conf --register-cloud -P eucalyptus -H <public_ip> -C <hostname>-clc
+        # on the primary
+        euca_conf --register-service -T user-api -H <primary_ip> -N <primary_hostname>-api
+        euca_conf --register-cluster -P <partition> -H <primary_ip> -C <primary_hostname>-cc
+        euca_conf --register-sc -P <partition> -H <primary_ip> -C <primary_hostname>-sc
 
-4. Register the Eucalyptus APIs
+#. Generate admin user credentials.
 
-.. code-block:: shell
+    .. code-block:: shell
 
-    # on both the primary and the secondary
-    euca_conf --register-service -T user-api -H <public_ip> -N <host>-api
+        euca_conf --get-credentials admin.zip
+        unzip admin.zip -d /root/cred/
+        source /root/cred/eucarc
 
+#. Configure primary head. Any host can be used as the RiakCS endpoint.
+
+    .. code-block:: shell
+
+        # block storage
+        euca-modify-property -p <partition>.storage.blockstoragemanager=overlay
+
+        # object storage
+        euca-modify-property -p objectstorage.providerclient=riakcs
+        euca-modify-property -p objectstorage.s3provider.s3endpoint=<riakcs_ip>:9090
+        euca-modify-property -p objectstorage.s3provider.s3accesskey=<riakcs_admin_key>
+        euca-modify-property -p objectstorage.s3provider.s3secretkey=<riakcs_admin_secret>
 
 Development
 -----------

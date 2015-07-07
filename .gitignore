@@ -1,6 +1,9 @@
 # ZooKeeper test deployment
 zkconf/
 
+# Virtualenv
+.venv/
+
 # Python
 *.pyc
 
@@ -11,7 +14,7 @@ zkconf/
 sphinx-output/
 doc/_build/
 
-# Distribution package
+# Setuptools
 dist/
 blacknight.egg-info/
 

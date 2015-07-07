@@ -9,11 +9,15 @@ class blacknight {
     virtualenv => true
   }
 
-  python::virtualenv { '/opt/blacknight' :
+  python::virtualenv { '/opt/BlacKnight/venv' :
     ensure     => 'present',
     version    => 'pypy',
     owner      => 'root',
     group      => 'root',
+
+    # Setting virtualenv directly is a bit of a hack - the class is supposed to
+    # infer the correct virtualenv command from the version attribute but this
+    # appears to be broken
     virtualenv => 'virtualenv -p pypy'
   }
 
