@@ -35,8 +35,8 @@ $STANCHION_HOST = '128.111.55.39'
 $RIAK_ADMIN_KEY = 'GE-NBCXO9KMHB5FX6_LE'
 $RIAK_ADMIN_SECRET = 'poijG0ZVojshvgLrkR1CzLmqcHDdekjhoTT5uQ=='
 
-# Define a full installation
-$all = ['riak', 'network', 'repo', 'packages', 'config']
+# ZooKeeper
+$ZK_SERVERS = [ 'php.cs.ucsb.edu', 'oz.cs.ucsb.edu', 'objc.cs.ucsb.edu', 'scala.cs.ucsb.edu' ]
 
 # Physical nodes
 node 'php.cs.ucsb.edu' {

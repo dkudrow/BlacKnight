@@ -30,21 +30,8 @@ class blacknight {
     install_args  => ['--force-reinstall'],
    }
 
-  yumrepo { 'cloudera-cdh5' :
-    descr    => 'Cloudera\'s Distribution for Hadoop, Version 5',
-    baseurl  => 'http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/5/',
-    gpgkey   => 'http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/RPM-GPG-KEY-cloudera',
-    gpgcheck => 1
+  class { 'zookeeper' :
+    servers = $ZK_SERVERS
   }
-
-  package { 'zookeeper-server':
-    ensure  => 'present',
-    require => Yumrepo[ 'cloudera-cdh5' ]
-  }
-
-  #service { 'zookeeper-server' :
-    #ensure  => 'running',
-    #require => Package[ 'zookeeper-server' ]
-  #}
 
 }

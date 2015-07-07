@@ -44,13 +44,22 @@ class Action(object):
         if 'h' in args:
             cmd += ' -h {}'.format(self.host)
             args.remove('h')
+        elif 'host' in args:
+            cmd += ' --host {}'.format(self.host)
+            args.remove('host')
 
         if 'i' in args:
             cmd += ' -i {}'.format(services[self.role.name].pop())
             args.remove('i')
+        elif 'instance' in args:
+            cmd += ' --instance {}'.format(services[self.role.name].pop())
+            args.remove('instance')
 
         for arg in args:
-            cmd += ' -{} {}'.format(arg, args_dict[arg])
+            if len(arg) == 1:
+                cmd += ' -{} {}'.format(arg, args_dict[arg])
+            elif len(arg) > 1:
+                cmd += ' --{} {}'.format(arg, args_dict[arg])
 
         print cmd.split()
         subprocess.call(cmd.split())
