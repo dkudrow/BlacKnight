@@ -3,10 +3,6 @@ Installation
 
 This section describes the installation of BlacKnight as well as that of a test environment based on Eucalyptus. A Puppet manifest is provided in the ``puppet/`` directory to make this process marginally less painful. This manifest is not perfect - installation requires some supervision and, in certain cases, multiple passes. To ensure that all necessary components are installed run Puppet repeatedly until no messages are printed. All development was done on CentOS 6.6 (final) and determining whether BlacKnight will run in another environment is left as an exercise for the reader.
 
-.. tip::
-
-    The installation steps will be contained inside of *tip* boxes like this one. To get through the installation with minimal reading, just jump from one tip box to the next.
-
 
 Puppet
 ------
@@ -19,9 +15,13 @@ Puppet is a configuration management tool for bootstrapping deployments from a u
 
     .. code-block:: shell
 
-        yum install puppet
+        yum install rubygems
+        gem install puppet -v '3.8.1'
+        gem install facter
+
         puppet module install computology-packagecloud
         puppet module install stankevich-python
+        puppet module install deric-zookeeper
 
 
 Configuration of the installation is handled entirely within ``puppet/manifests/site.pp``. Deployment-wide configuration is managed using global variables which are inherited by all hosts. Each host in the deployment is declared in a *node* block. This block contains host-specific information (e.g. hostname, &c.) and several *include* directives. The includes inform puppet of which modules should be applied to the host in question. Any module in ``puppet/modules/`` can be included.

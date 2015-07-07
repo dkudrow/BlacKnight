@@ -24,14 +24,18 @@ class blacknight {
   python::pip { 'blacknight' :
     pkgname       => 'blacknight',
     ensure        => 'latest',
-    virtualenv    => '/opt/blacknight',
+    virtualenv    => '/opt/BlacKnight/venv',
     url           => 'git+https://github.com/dkudrow/BlacKnight.git',
     owner         => 'root',
     install_args  => ['--force-reinstall'],
    }
 
   class { 'zookeeper' :
-    servers = $ZK_SERVERS
+    repo => 'cloudera',
+    packages => [ 'zookeeper', 'zookeeper-server' ],
+    service_name         => 'zookeeper-server',
+    initialize_datastore => true,
+    servers => $ZK_SERVERS
   }
 
 }
