@@ -33,6 +33,7 @@ class Eucalyptus(object):
         """
         self.logger = logging.getLogger('blacknight.eucalyptus')
         self.hostname = socket.gethostname()
+        self.ip = socket.gethostbyname(self.hostname)
         self.local_zk = 'localhost' + ':' + str(port)
         self.status = Eucalyptus.NONE
         self.interval = interval
@@ -87,11 +88,19 @@ class Eucalyptus(object):
 
         :return: status (NONE, PRIMARY or SECONDARY)
         """
-        # TODO: doesn't do anything yet
-        output = subprocess.check_output('euca-describe-services')
-        if output == 'primary':
+        primary = secondary = None
+
+        lines = subprocess.check_output('euca-describe-clouds').split('\n')
+
+        for line in lines:
+            if line[4] == 'ENABLED':
+                primary = line[3]
+            else:
+                secondary = line[3]
+
+        if self.ip == primary:
             return Eucalyptus.PRIMARY
-        elif output == 'secondary':
+        elif self.ip == secondary:
             return Eucalyptus.SECONDARY
         else:
             return Eucalyptus.NONE

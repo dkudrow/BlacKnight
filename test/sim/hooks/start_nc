@@ -13,6 +13,7 @@ while getopts ":h:" opt; do
     esac
 done
 
-source test/hooks/config.sh
+source test/sim/hooks/config.sh
 
+echo $HOST
 python -m blacknight util start_service_on_host node_controller $HOST

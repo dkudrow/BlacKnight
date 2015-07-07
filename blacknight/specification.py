@@ -137,19 +137,18 @@ class Specification(object):
                 cur_weight = inst_count[node] / ratio
                 self.dep_graph.add_edge(*edge, cur_weight=cur_weight, new_weight=cur_weight)
 
-        # Attempt to satisfy min_rep for all top-level roles
-        # TODO: this should be for all roles (not just top-level)
-        for root in self.roots:
-            deficit = int(self.roles[root].min_rep - self.roles[root].cur_rep)
+        # Attempt to satisfy min_rep for all roles
+        for name, role in self.roles.iteritems():
+            deficit = int(role.min_rep - role.cur_rep)
             if deficit > 0:
-                self.logger.debug('\'{}\' has deficit of {}'.format(root, deficit))
+                self.logger.debug('\'{}\' has deficit of {}'.format(name, deficit))
                 transaction = []
-                if self.add_role_attempt(root, transaction, unused_hosts, count=deficit):
+                if self.add_role_attempt(name, transaction, unused_hosts, count=deficit):
                     transaction.reverse()
                     committed_transactions += transaction
                     self.commit()
                 else:
-                    self.logger.error('Aborting - could not overcome deficit of {} for \'{}\''.format(deficit, root))
+                    self.logger.error('Aborting - could not overcome deficit of {} for \'{}\''.format(deficit, name))
                     return []
 
         # Fill roles until we're out of room

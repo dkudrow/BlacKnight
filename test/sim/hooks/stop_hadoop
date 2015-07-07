@@ -13,6 +13,6 @@ while getopts ":i:" opt; do
     esac
 done
 
-source test/hooks/config.sh
+source test/sim/hooks/config.sh
 
 python -m blacknight util stop_service hadoop $INSTANCE

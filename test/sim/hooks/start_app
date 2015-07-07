@@ -3,6 +3,6 @@
 # Simluate start app
 #
 
-source test/hooks/config.sh
+source test/sim/hooks/config.sh
 
 python -m blacknight util start_service app

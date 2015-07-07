@@ -9,11 +9,13 @@ if __name__ == '__main__':
     params = parse(opts)
     host_ip = gethostbyname(params.host)
 
-    # start node controller
-    cmd = 'service eucalyptus-nc stop'
-    run_remote(params.host, cmd)
+    # stop node controller
+    cmds = ['euca-migrate-instances --source={}'.format(host_ip),
+            'sleep 60',
+            'service eucalyptus-nc stop']
+    run_remote(params.host, '\n'.join(cmds))
 
-    # register node controller
+    # deregister node controller
     cmd = 'euca_conf --deregister-nodes {}'.format(host_ip)
     run_remote(params.primary, cmd)
     if 'secdonary' in params:

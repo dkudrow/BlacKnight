@@ -61,6 +61,5 @@ class Action(object):
             elif len(arg) > 1:
                 cmd += ' --{} {}'.format(arg, args_dict[arg])
 
-        print cmd.split()
         subprocess.call(cmd.split())
         # print cmd
