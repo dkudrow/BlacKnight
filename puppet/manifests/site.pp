@@ -36,7 +36,7 @@ $RIAK_ADMIN_KEY = 'GE-NBCXO9KMHB5FX6_LE'
 $RIAK_ADMIN_SECRET = 'poijG0ZVojshvgLrkR1CzLmqcHDdekjhoTT5uQ=='
 
 # ZooKeeper
-$ZK_SERVERS = [ 'php.cs.ucsb.edu', 'oz.cs.ucsb.edu', 'objc.cs.ucsb.edu', 'scala.cs.ucsb.edu' ]
+$ZK_SERVERS = [ '128.111.55.39', '128.111.55.51', '128.111.55.50', '128.111.55.25' ]
 
 # Physical nodes
 node 'php.cs.ucsb.edu' {

@@ -35,6 +35,7 @@ class blacknight {
     packages             => [ 'zookeeper', 'zookeeper-server' ],
     service_name         => 'zookeeper-server',
     initialize_datastore => true,
+    client_ip            => "$PUBLIC_IP",
     servers              => $ZK_SERVERS
   }
 
